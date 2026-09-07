@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>지뢰찾기 - 금융본부 미니 게임대회</title>
+<style>
+  :root{
+    --navy:#0B1F3A;
+    --ocean:#123A63;
+    --blue:#1B5FA8;
+    --sky:#4F9DDE;
+    --ice:#BFE2F7;
+    --paper:#EAF4FC;
+    --accent:#2FBF9E;
+    --danger:#E0567A;
+    --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    --font-num: "Segoe UI", "Consolas", "Malgun Gothic", monospace;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{
+    margin:0; padding:0; height:100%;
+    background: radial-gradient(circle at 20% 0%, #163A63 0%, var(--navy) 55%, #071426 100%);
+    font-family: var(--font-ui);
+    color: var(--paper);
+    overflow:auto;
+    user-select:none;
+  }
+  #app{
+    display:flex; flex-direction:column; align-items:center;
+    min-height:100vh; padding: 18px; gap:14px;
+  }
+  .titlebar{ text-align:center; }
+  .titlebar h1{
+    font-size: clamp(22px, 4vw, 30px);
+    margin:0 0 4px; font-weight:700; letter-spacing:-0.02em; color:#fff;
+  }
+  .titlebar .sub{ font-size:13px; color: var(--ice); opacity:0.75; }
+
+  /* 브랜드 헤더 */
+  .brand-bar{
+    width:100%;
+    max-width: 640px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02));
+    border:1px solid rgba(255,255,255,0.16);
+    border-radius:14px;
+    padding:10px 16px;
+    flex-wrap:wrap;
+  }
+  .brand-left{ display:flex; align-items:center; gap:10px; }
+  .brand-logo{ width:34px; height:34px; flex-shrink:0; }
+  .brand-logo svg{ width:100%; height:100%; display:block; }
+  .brand-text{ display:flex; flex-direction:column; line-height:1.2; }
+  .brand-name{ font-size:14px; font-weight:800; color:#fff; letter-spacing:-0.01em; }
+  .brand-dept{
+    display:inline-block;
+    margin-top:3px;
+    font-size:11px;
+    font-weight:800;
+    color: var(--navy);
+    background: var(--sky);
+    padding:2px 9px;
+    border-radius:999px;
+    width: fit-content;
+    letter-spacing:-0.01em;
+  }
+  .event-tag{
+    font-size:12px;
+    font-weight:700;
+    color: var(--ice);
+    background: rgba(255,255,255,0.07);
+    border:1px solid rgba(255,255,255,0.18);
+    padding:6px 14px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+
+  .player-tag{
+    font-size: 12px;
+    background: rgba(47, 191, 158, 0.15);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    display:inline-block;
+    margin-top:6px;
+  }
+
+  .panel{
+    display:flex; align-items:center; gap:14px;
+    background: var(--ocean);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 10px 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+  .counter{
+    font-family: var(--font-num); font-weight:800; font-size:22px;
+    background: #061424;
+    color: var(--danger);
+    border-radius:8px;
+    padding: 4px 10px;
+    min-width:64px; text-align:center;
+    border:1px solid rgba(255,255,255,0.1);
+  }
+  .facebtn{
+    font-size:24px;
+    width:44px; height:44px;
+    border-radius:10px;
+    background: var(--blue);
+    border:1px solid rgba(255,255,255,0.2);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  .facebtn:active{ transform: scale(0.95); }
+  .counter.timer{ color: var(--sky); }
+
+  #board-wrap{
+    background: linear-gradient(180deg, #0E2A4A, #0A2036);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 10px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
+    width: min(94vw, 560px);
+    box-sizing: border-box;
+  }
+  #board{
+    display:grid;
+    gap: 3px;
+    width:100%;
+  }
+  .cell{
+    width:100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 6px;
+    background: linear-gradient(160deg, #2170B8, #164E8C);
+    border: 1px solid rgba(255,255,255,0.18);
+    display:flex; align-items:center; justify-content:center;
+    font-family: var(--font-num);
+    font-weight:800;
+    font-size: clamp(10px, 3.2vw, 16px);
+    cursor:pointer;
+    position:relative;
+    transition: transform 0.05s ease;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+  .cell::after{
+    content:"";
+    position:absolute; top:2px; left:4px; right:4px; height:32%;
+    border-radius: 5px 5px 40% 40%;
+    background: rgba(255,255,255,0.18);
+    pointer-events:none;
+  }
+  .cell:active{ transform: scale(0.94); }
+  .cell.revealed{
+    background: #0F2E4F;
+    border-color: rgba(255,255,255,0.08);
+    cursor:default;
+  }
+  .cell.revealed::after{ display:none; }
+  .cell.mine{
+    background: linear-gradient(160deg, var(--danger), #a83a58);
+  }
+  .cell.mine.exploded{
+    background: linear-gradient(160deg, #ff6b8f, var(--danger));
+  }
+  .cell.flag{
+    background: linear-gradient(160deg, #F2B84B, #C98A1D);
+  }
+  .n1{ color:#7FC4FF; }
+  .n2{ color:#8CF0C0; }
+  .n3{ color:#FF9E9E; }
+  .n4{ color:#C6A6FF; }
+  .n5{ color:#FFD48A; }
+  .n6{ color:#7FEAE0; }
+  .n7{ color:#F0F0F0; }
+  .n8{ color:#C4C4C4; }
+
+  svg.icon{ width:60%; height:60%; }
+
+  .controls{ display:flex; gap:10px; }
+  button.main{
+    font-family: var(--font-ui); font-size:14px; font-weight:600;
+    background: var(--blue); color:#fff; border:none;
+    padding: 10px 20px; border-radius: 10px; cursor:pointer;
+  }
+  button.main:hover{ background: var(--sky); }
+  button.ghost{
+    background: transparent; border:1px solid rgba(255,255,255,0.25);
+    color: var(--ice); font-family: var(--font-ui); font-size:14px; font-weight:600;
+    padding: 10px 20px; border-radius: 10px; cursor:pointer;
+  }
+  button.ghost:hover{ background: rgba(255,255,255,0.08); }
+
+  .hint{ font-size:12px; color:var(--ice); opacity:0.6; text-align:center; max-width:420px; }
+
+  #overlay, #ruleOverlay, #authOverlay{
+    position:fixed; inset:0;
+    background: rgba(4,12,24,0.85);
+    display:none; align-items:center; justify-content:center; z-index:100;
+    padding:20px;
+  }
+  #overlay.show, #ruleOverlay.show, #authOverlay.show{ display:flex; }
+  .modal{
+    background: linear-gradient(180deg, #123A63, #0B1F3A);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 18px;
+    padding: 30px 36px;
+    text-align:center;
+    min-width: 260px;
+    max-width: 420px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  .modal h2{ margin:0 0 8px; font-size:22px; }
+  .modal .bigtime{ font-size:36px; font-weight:800; color: var(--accent); margin: 10px 0; font-family: var(--font-num);}
+  .modal p{ margin:0 0 18px; color: var(--ice); font-size:14px; }
+  .modal ol{ text-align:left; color:var(--ice); font-size:14px; line-height:1.8; padding-left:20px; margin:0 0 18px; }
+
+  .auth-input{
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    font-size: 16px;
+    font-family: var(--font-num);
+    text-align: center;
+    margin-bottom: 16px;
+    outline: none;
+  }
+  .auth-input:focus{
+    border-color: var(--sky);
+    background: rgba(255,255,255,0.12);
+  }
+  .auth-input.error{ border-color: var(--danger); }
+  select.auth-input{
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23BFE2F7' stroke-width='2'%3e%3cpath d='M6 9l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px;
+    text-align: left;
+    padding-right: 38px;
+    cursor: pointer;
+  }
+  select.auth-input option{ background: #123A63; color:#fff; }
+  .auth-error{
+    color: var(--danger);
+    font-size: 12px;
+    margin: -10px 0 14px;
+    height: 14px;
+    display: block;
+  }
+</style>
+</head>
+<body>
+
+<!-- 사번 입력 최초 진입 모달 -->
+<div id="authOverlay" class="show">
+  <div class="modal">
+    <h2>💣 지뢰찾기 시작</h2>
+    <p>사내 랭킹 집계 및 참여 기록 확인을 위해<br>팀과 사번을 입력해 주세요.</p>
+    <select id="teamSelect" class="auth-input">
+      <option value="" disabled selected>팀 선택</option>
+      <option value="증권개발팀">증권개발팀</option>
+      <option value="증권채널팀">증권채널팀</option>
+      <option value="카드개발팀">카드개발팀</option>
+      <option value="라이프개발팀">라이프개발팀</option>
+    </select>
+    <input type="text" id="sabunInput" class="auth-input" placeholder="사번 입력" maxlength="10">
+    <span class="auth-error" id="authError"></span>
+    <button class="main" id="authStartBtn" style="width: 100%;">도전 시작</button>
+  </div>
+</div>
+
+<div id="app">
+  <div class="brand-bar">
+    <div class="brand-left">
+      <div class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#4F9DDE"/>
+              <stop offset="1" stop-color="#123A63"/>
+            </linearGradient>
+          </defs>
+          <rect x="1" y="1" width="38" height="38" rx="10" fill="url(#logoGrad)" stroke="rgba(255,255,255,0.25)"/>
+          <text x="20" y="27" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="18" fill="#fff">SDS</text>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">신한DS</span>
+        <span class="brand-dept">금융본부</span>
+      </div>
+    </div>
+    <div class="event-tag">🏆 금융본부 미니게임대회</div>
+  </div>
+
+  <div class="titlebar">
+    <h1>💣 지뢰찾기</h1>
+    <div class="sub">지뢰를 피해서 모든 칸을 열어보세요</div>
+    <div><span id="playerBadge" class="player-tag" style="display:none;"></span></div>
+  </div>
+
+  <div class="panel">
+    <div class="counter" id="mineCount">24</div>
+    <div class="facebtn" id="faceBtn">🙂</div>
+    <div class="counter timer" id="timeCount">000</div>
+  </div>
+
+  <div id="board-wrap">
+    <div id="board"></div>
+  </div>
+
+  <div class="controls">
+    <button class="main" id="restartBtn">다시 시작</button>
+    <button class="ghost" id="ruleBtn">규칙 보기</button>
+  </div>
+  <div class="hint">왼쪽 클릭으로 칸을 열고, 오른쪽 클릭(또는 길게 누르기)으로 깃발을 꽂아 지뢰를 표시하세요. 숫자는 주변 8칸에 있는 지뢰 개수예요.</div>
+</div>
+
+<div id="overlay">
+  <div class="modal">
+    <h2 id="modalTitle">게임 오버</h2>
+    <div class="bigtime" id="modalTime">00초</div>
+    <p id="modalDesc">다시 도전해보세요!</p>
+    <button class="main" id="modalRestart">다시 시작</button>
+  </div>
+</div>
+
+<div id="ruleOverlay">
+  <div class="modal">
+    <h2>게임 규칙</h2>
+    <ol>
+      <li>왼쪽 클릭(또는 탭)으로 칸을 열어요.</li>
+      <li>오른쪽 클릭(또는 길게 누르기)으로 지뢰로 의심되는 칸에 깃발을 꽂아요.</li>
+      <li>숫자는 주변 8칸 안에 있는 지뢰 개수를 알려줘요.</li>
+      <li>지뢰가 없는 모든 칸을 열면 승리!</li>
+    </ol>
+    <button class="main" id="ruleCloseBtn">확인</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  // [설정] 최신 Google Apps Script 웹 앱 URL 및 식별자
+  var GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyY6mM4y9ltyZhDn7fMCctYajEBye1sxZpQrQ-FcabhllionztMTlJEJMCKCDy_ZxCOMg/exec";
+  var GAME_NAME = "지뢰찾기";
+
+  var rows = 12, cols = 12, mineCount = 24;
+  var curLevel = 'medium (12x12, 지뢰 24개)';
+  var grid;
+  var firstClick, gameOver, gameWon, timerId, elapsed;
+  var currentSabun = "";
+  var currentTeam = "";
+
+  var boardEl = document.getElementById('board');
+  var mineCountEl = document.getElementById('mineCount');
+  var timeCountEl = document.getElementById('timeCount');
+  var faceBtn = document.getElementById('faceBtn');
+  var overlay = document.getElementById('overlay');
+  var modalTitle = document.getElementById('modalTitle');
+  var modalTime = document.getElementById('modalTime');
+  var modalDesc = document.getElementById('modalDesc');
+
+  var authOverlay = document.getElementById('authOverlay');
+  var teamSelect = document.getElementById('teamSelect');
+  var sabunInput = document.getElementById('sabunInput');
+  var authStartBtn = document.getElementById('authStartBtn');
+  var playerBadge = document.getElementById('playerBadge');
+  var authError = document.getElementById('authError');
+
+  // 스프레드시트 비동기 전송 함수
+  function logEvent(eventType, extraData){
+    if(!GOOGLE_WEBHOOK_URL) return;
+    var payload = Object.assign({
+      game: GAME_NAME,
+      team: currentTeam,
+      sabun: currentSabun,
+      event: eventType,
+      level: curLevel
+    }, extraData || {});
+
+    fetch(GOOGLE_WEBHOOK_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }).catch(function(err){
+      console.warn("로깅 실패:", err);
+    });
+  }
+
+  var MINE_SVG = '<svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="6" fill="#0B1F3A"/><g stroke="#0B1F3A" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="1" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="23" y2="12"/><line x1="4" y1="4" x2="7" y2="7"/><line x1="17" y1="17" x2="20" y2="20"/><line x1="4" y1="20" x2="7" y2="17"/><line x1="17" y1="7" x2="20" y2="4"/></g><circle cx="9.5" cy="9.5" r="1.4" fill="#fff" opacity="0.8"/></svg>';
+  var FLAG_SVG = '<svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="6" y1="3" x2="6" y2="21" stroke="#0B1F3A" stroke-width="2" stroke-linecap="round"/><path d="M6 4 L19 8 L6 13 Z" fill="#0B1F3A"/></svg>';
+
+  function inBounds(r,c){ return r>=0 && r<rows && c>=0 && c<cols; }
+
+  function neighbors(r,c){
+    var res = [];
+    for(var dr=-1; dr<=1; dr++){
+      for(var dc=-1; dc<=1; dc++){
+        if(dr===0 && dc===0) continue;
+        if(inBounds(r+dr, c+dc)) res.push([r+dr, c+dc]);
+      }
+    }
+    return res;
+  }
+
+  function buildEmptyGrid(){
+    grid = [];
+    for(var r=0;r<rows;r++){
+      var row = [];
+      for(var c=0;c<cols;c++){
+        row.push({mine:false, revealed:false, flagged:false, adj:0});
+      }
+      grid.push(row);
+    }
+  }
+
+  function placeMines(safeR, safeC){
+    var placed = 0;
+    var forbidden = {};
+    neighbors(safeR, safeC).concat([[safeR,safeC]]).forEach(function(p){ forbidden[p[0]+'_'+p[1]] = true; });
+    while(placed < mineCount){
+      var r = Math.floor(Math.random()*rows);
+      var c = Math.floor(Math.random()*cols);
+      if(forbidden[r+'_'+c]) continue;
+      if(grid[r][c].mine) continue;
+      grid[r][c].mine = true;
+      placed++;
+    }
+    for(var r2=0;r2<rows;r2++){
+      for(var c2=0;c2<cols;c2++){
+        if(grid[r2][c2].mine) continue;
+        var cnt = 0;
+        neighbors(r2,c2).forEach(function(p){ if(grid[p[0]][p[1]].mine) cnt++; });
+        grid[r2][c2].adj = cnt;
+      }
+    }
+  }
+
+  function render(){
+    boardEl.style.gridTemplateColumns = 'repeat('+cols+', 1fr)';
+    boardEl.innerHTML = '';
+    for(var r=0;r<rows;r++){
+      for(var c=0;c<cols;c++){
+        var cell = grid[r][c];
+        var div = document.createElement('div');
+        div.className = 'cell';
+        div.dataset.r = r; div.dataset.c = c;
+        updateCellEl(div, cell);
+        boardEl.appendChild(div);
+      }
+    }
+  }
+
+  function updateCellEl(div, cell){
+    div.className = 'cell';
+    if(cell.revealed){
+      div.classList.add('revealed');
+      if(cell.mine){
+        div.classList.add('mine');
+        if(cell.exploded) div.classList.add('exploded');
+        div.innerHTML = MINE_SVG;
+      } else if(cell.adj > 0){
+        div.textContent = cell.adj;
+        div.classList.add('n'+cell.adj);
+      }
+    } else if(cell.flagged){
+      div.classList.add('flag');
+      div.innerHTML = FLAG_SVG;
+    }
+  }
+
+  function refreshAllCells(){
+    var els = boardEl.children;
+    var i=0;
+    for(var r=0;r<rows;r++){
+      for(var c=0;c<cols;c++){
+        updateCellEl(els[i], grid[r][c]);
+        i++;
+      }
+    }
+  }
+
+  function revealCell(r,c){
+    var cell = grid[r][c];
+    if(cell.revealed || cell.flagged) return;
+    cell.revealed = true;
+    if(cell.mine) return;
+    if(cell.adj === 0){
+      neighbors(r,c).forEach(function(p){
+        if(!grid[p[0]][p[1]].revealed) revealCell(p[0], p[1]);
+      });
+    }
+  }
+
+  function countFlags(){
+    var n=0;
+    for(var r=0;r<rows;r++) for(var c=0;c<cols;c++) if(grid[r][c].flagged) n++;
+    return n;
+  }
+
+  function checkWin(){
+    for(var r=0;r<rows;r++){
+      for(var c=0;c<cols;c++){
+        var cell = grid[r][c];
+        if(!cell.mine && !cell.revealed) return false;
+      }
+    }
+    return true;
+  }
+
+  function revealAllMines(explodedR, explodedC){
+    for(var r=0;r<rows;r++){
+      for(var c=0;c<cols;c++){
+        var cell = grid[r][c];
+        if(cell.mine){
+          cell.revealed = true;
+          if(r===explodedR && c===explodedC) cell.exploded = true;
+        }
+      }
+    }
+  }
+
+  function onLeftClick(r,c){
+    if(gameOver || gameWon) return;
+    var cell = grid[r][c];
+    if(cell.flagged) return;
+
+    if(firstClick){
+      firstClick = false;
+      placeMines(r,c);
+      startTimer();
+    }
+
+    if(cell.mine){
+      cell.revealed = true;
+      gameOver = true;
+      clearInterval(timerId);
+      revealAllMines(r,c);
+      refreshAllCells();
+      faceBtn.textContent = '😵';
+      showEnd(false);
+
+      // 패배 시 로그 전송
+      logEvent("종료", {
+        score: "-",
+        detail: "지뢰 폭발 (패배, 진행: " + elapsed + "초)"
+      });
+      return;
+    }
+
+    revealCell(r,c);
+    refreshAllCells();
+
+    if(checkWin()){
+      gameWon = true;
+      clearInterval(timerId);
+      faceBtn.textContent = '😎';
+      showEnd(true);
+
+      // 승리 시 클리어 시간을 점수(score)로 기록 전송
+      logEvent("종료", {
+        score: elapsed,
+        detail: "클리어 성공 (" + elapsed + "초 소요)"
+      });
+    }
+  }
+
+  function onRightClick(r,c){
+    if(gameOver || gameWon) return;
+    var cell = grid[r][c];
+    if(cell.revealed) return;
+    cell.flagged = !cell.flagged;
+    refreshAllCells();
+    updateMineCounter();
+  }
+
+  function updateMineCounter(){
+    var remaining = mineCount - countFlags();
+    mineCountEl.textContent = String(remaining).padStart(3,'0').slice(-3);
+  }
+
+  function startTimer(){
+    elapsed = 0;
+    timeCountEl.textContent = '000';
+    timerId = setInterval(function(){
+      elapsed++;
+      if(elapsed > 999) elapsed = 999;
+      timeCountEl.textContent = String(elapsed).padStart(3,'0');
+    }, 1000);
+  }
+
+  function showEnd(won){
+    modalTitle.textContent = won ? '클리어! 🎉' : '펑! 지뢰를 밟았어요';
+    modalTime.textContent = elapsed + '초';
+    modalDesc.textContent = won ? '모든 안전한 칸을 다 열었어요!' : '다시 도전해보세요!';
+    overlay.classList.add('show');
+  }
+
+  var pressTimer = null, longPressed = false, touchStartPos = null;
+  var touchActive = false, touchActiveClearTimer = null;
+  var MOVE_CANCEL_THRESHOLD = 12;
+
+  function attachEvents(){
+    boardEl.addEventListener('click', function(e){
+      var t = e.target.closest('.cell');
+      if(!t || longPressed){ longPressed=false; return; }
+      onLeftClick(parseInt(t.dataset.r), parseInt(t.dataset.c));
+    });
+    boardEl.addEventListener('contextmenu', function(e){
+      e.preventDefault();
+      if(touchActive) return;
+      var t = e.target.closest('.cell');
+      if(!t) return;
+      onRightClick(parseInt(t.dataset.r), parseInt(t.dataset.c));
+    });
+    boardEl.addEventListener('touchstart', function(e){
+      var t = e.target.closest('.cell');
+      if(!t) return;
+      longPressed = false;
+      touchActive = true;
+      clearTimeout(touchActiveClearTimer);
+      var touch = e.touches[0];
+      touchStartPos = { x: touch.clientX, y: touch.clientY };
+      clearTimeout(pressTimer);
+      pressTimer = setTimeout(function(){
+        longPressed = true;
+        onRightClick(parseInt(t.dataset.r), parseInt(t.dataset.c));
+        if(navigator.vibrate) navigator.vibrate(15);
+      }, 420);
+    }, {passive:true});
+    boardEl.addEventListener('touchmove', function(e){
+      if(!touchStartPos) return;
+      var touch = e.touches[0];
+      var dx = touch.clientX - touchStartPos.x;
+      var dy = touch.clientY - touchStartPos.y;
+      if(Math.sqrt(dx*dx + dy*dy) > MOVE_CANCEL_THRESHOLD){
+        clearTimeout(pressTimer);
+        touchStartPos = null;
+      }
+    }, {passive:true});
+    boardEl.addEventListener('touchend', function(e){
+      clearTimeout(pressTimer);
+      touchStartPos = null;
+      clearTimeout(touchActiveClearTimer);
+      touchActiveClearTimer = setTimeout(function(){ touchActive = false; }, 400);
+    });
+    boardEl.addEventListener('touchcancel', function(e){
+      clearTimeout(pressTimer);
+      touchStartPos = null;
+      clearTimeout(touchActiveClearTimer);
+      touchActiveClearTimer = setTimeout(function(){ touchActive = false; }, 400);
+    });
+  }
+
+  function startGame(){
+    overlay.classList.remove('show');
+    firstClick = true; gameOver = false; gameWon = false;
+    clearInterval(timerId);
+    elapsed = 0;
+    timeCountEl.textContent = '000';
+    faceBtn.textContent = '🙂';
+    buildEmptyGrid();
+    render();
+    updateMineCounter();
+
+    // 시작 로그 전송
+    logEvent("시작", { score: 0 });
+  }
+
+  function handleAuth(){
+    var teamVal = teamSelect.value;
+    var val = sabunInput.value.trim();
+
+    if(!teamVal){
+      authError.textContent = "팀을 선택해 주세요.";
+      teamSelect.classList.add('error');
+      teamSelect.focus();
+      return;
+    }
+    if(!val){
+      authError.textContent = "사번을 입력해 주세요.";
+      teamSelect.classList.remove('error');
+      sabunInput.classList.add('error');
+      sabunInput.focus();
+      return;
+    }
+    authError.textContent = "";
+    teamSelect.classList.remove('error');
+    sabunInput.classList.remove('error');
+    currentTeam = teamVal;
+    currentSabun = val;
+    playerBadge.textContent = "플레이어: " + currentTeam + " · " + currentSabun;
+    playerBadge.style.display = "inline-block";
+    authOverlay.classList.remove('show');
+    startGame();
+  }
+
+  authStartBtn.addEventListener('click', handleAuth);
+  sabunInput.addEventListener('keydown', function(e){
+    if(e.key === 'Enter') handleAuth();
+  });
+  teamSelect.addEventListener('change', function(){
+    teamSelect.classList.remove('error');
+    authError.textContent = "";
+  });
+
+  document.getElementById('restartBtn').addEventListener('click', startGame);
+  document.getElementById('modalRestart').addEventListener('click', startGame);
+  faceBtn.addEventListener('click', startGame);
+  var ruleOverlay = document.getElementById('ruleOverlay');
+  document.getElementById('ruleBtn').addEventListener('click', function(){
+    ruleOverlay.classList.add('show');
+  });
+  document.getElementById('ruleCloseBtn').addEventListener('click', function(){
+    ruleOverlay.classList.remove('show');
+  });
+  ruleOverlay.addEventListener('click', function(e){
+    if(e.target === ruleOverlay) ruleOverlay.classList.remove('show');
+  });
+
+  attachEvents();
+  sabunInput.focus();
+})();
+</script>
+</body>
+</html>

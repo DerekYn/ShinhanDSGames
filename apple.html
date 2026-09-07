@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>사과게임 - 금융본부 미니 게임대회</title>
+<style>
+  :root{
+    --navy:#0B1F3A;
+    --ocean:#123A63;
+    --blue:#1B5FA8;
+    --sky:#4F9DDE;
+    --ice:#BFE2F7;
+    --paper:#EAF4FC;
+    --accent:#2FBF9E;
+    --danger:#E0567A;
+    --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    --font-num: "Segoe UI", "Consolas", "Malgun Gothic", monospace;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{
+    margin:0; padding:0; min-height:100%;
+    background: radial-gradient(circle at 20% 0%, #163A63 0%, var(--navy) 55%, #071426 100%);
+    font-family: var(--font-ui);
+    color: var(--paper);
+    user-select:none;
+  }
+  #app{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    min-height:100vh; padding: 18px; gap:12px;
+  }
+  .titlebar{
+    display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; justify-content:center;
+  }
+  .titlebar h1{
+    font-size: clamp(22px, 4vw, 30px);
+    margin:0; font-weight:700; letter-spacing:-0.02em; color:#fff;
+  }
+  .titlebar .sub{
+    font-size:13px; color: var(--ice); opacity:0.75;
+  }
+
+  /* 브랜드 헤더 */
+  .brand-bar{
+    width:100%;
+    max-width: 640px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02));
+    border:1px solid rgba(255,255,255,0.16);
+    border-radius:14px;
+    padding:10px 16px;
+    flex-wrap:wrap;
+  }
+  .brand-left{ display:flex; align-items:center; gap:10px; }
+  .brand-logo{ width:34px; height:34px; flex-shrink:0; }
+  .brand-logo svg{ width:100%; height:100%; display:block; }
+  .brand-text{ display:flex; flex-direction:column; line-height:1.2; }
+  .brand-name{ font-size:14px; font-weight:800; color:#fff; letter-spacing:-0.01em; }
+  .brand-dept{
+    display:inline-block;
+    margin-top:3px;
+    font-size:11px;
+    font-weight:800;
+    color: var(--navy);
+    background: var(--sky);
+    padding:2px 9px;
+    border-radius:999px;
+    width: fit-content;
+    letter-spacing:-0.01em;
+  }
+  .event-tag{
+    font-size:12px;
+    font-weight:700;
+    color: var(--ice);
+    background: rgba(255,255,255,0.07);
+    border:1px solid rgba(255,255,255,0.18);
+    padding:6px 14px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .player-tag{
+    font-size: 12px;
+    background: rgba(47, 191, 158, 0.15);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+
+  .hud{
+    display:flex; gap:10px; flex-wrap:wrap; justify-content:center;
+  }
+  .stat{
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 8px 16px;
+    min-width: 92px;
+    text-align:center;
+  }
+  .stat .label{ font-size:11px; color:var(--ice); opacity:0.7; margin-bottom:2px;}
+  .stat .value{ font-size:20px; font-weight:700; font-family: var(--font-num); font-variant-numeric: tabular-nums;}
+  .stat.time .value{ color: var(--sky); }
+  .stat.time.low .value{ color: var(--danger); }
+  .stat.score .value{ color: var(--accent); }
+
+  #board-wrap{
+    position:relative;
+    background: linear-gradient(180deg, #0E2A4A, #0A2036);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 18px;
+    padding: 10px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
+    touch-action:none;
+    width: min(94vw, 640px);
+    box-sizing: border-box;
+  }
+  #board{
+    display:grid;
+    gap: 3px;
+    position:relative;
+    width:100%;
+  }
+  .cell{
+    display:flex; align-items:center; justify-content:center;
+    border-radius: 8px;
+    background: linear-gradient(160deg, #2170B8, #164E8C);
+    border: 1px solid rgba(255,255,255,0.15);
+    color:#fff;
+    font-family: var(--font-num);
+    font-weight:700;
+    font-size: clamp(10px, 3vw, 16px);
+    position:relative;
+    transition: transform 0.08s ease, background 0.15s ease, opacity 0.25s ease;
+    width:100%;
+    aspect-ratio: 1 / 1;
+  }
+  .cell::after{
+    content:"";
+    position:absolute; top:3px; left:5px; right:5px; height:35%;
+    border-radius: 6px 6px 40% 40%;
+    background: rgba(255,255,255,0.18);
+    pointer-events:none;
+  }
+  .cell.selected{
+    background: linear-gradient(160deg, var(--sky), var(--blue));
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.5) inset;
+    transform: scale(0.94);
+  }
+  .cell.gone{
+    opacity:0;
+    transform: scale(0.4) rotate(15deg);
+    pointer-events:none;
+  }
+  .cell.pop{
+    animation: pop 0.3s ease;
+  }
+  @keyframes pop{
+    0%{ transform: scale(1); }
+    40%{ transform: scale(1.25); background: linear-gradient(160deg, var(--accent), #1E9C81); }
+    100%{ transform: scale(0.4); }
+  }
+  #selRect{
+    position:absolute;
+    border: 2px solid var(--sky);
+    background: rgba(79,157,222,0.18);
+    border-radius:6px;
+    pointer-events:none;
+    display:none;
+  }
+  .sumTag{
+    position:absolute;
+    top:-26px; left:0;
+    background: var(--navy);
+    border:1px solid var(--sky);
+    color:#fff;
+    font-size:12px;
+    font-family: var(--font-num);
+    font-weight:700;
+    padding:2px 8px;
+    border-radius:8px;
+    white-space:nowrap;
+  }
+  .sumTag.ok{ background: var(--accent); border-color: var(--accent); color:#04241c;}
+
+  .controls{ display:flex; gap:10px; }
+  button{
+    font-family: var(--font-ui);
+    font-size:14px; font-weight:600;
+    background: var(--blue);
+    color:#fff;
+    border:none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor:pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  button:hover{ background: var(--sky); }
+  button:active{ transform: scale(0.97); }
+  button.ghost{
+    background: transparent;
+    border:1px solid rgba(255,255,255,0.25);
+    color: var(--ice);
+  }
+  button.ghost:hover{ background: rgba(255,255,255,0.08); }
+
+  #overlay, #ruleOverlay, #authOverlay{
+    position:fixed; inset:0;
+    background: rgba(4,12,24,0.85);
+    display:none;
+    align-items:center; justify-content:center;
+    z-index:100;
+    padding:20px;
+  }
+  #overlay.show, #ruleOverlay.show, #authOverlay.show{ display:flex; }
+  .modal{
+    background: linear-gradient(180deg, #123A63, #0B1F3A);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 18px;
+    padding: 30px 36px;
+    text-align:center;
+    min-width: 260px;
+    max-width: 420px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  .modal h2{ margin:0 0 8px; font-size:22px; }
+  .modal .bigscore{ font-size:42px; font-weight:800; color: var(--accent); margin: 10px 0; font-family: var(--font-num);}
+  .modal p{ margin:0 0 18px; color: var(--ice); font-size:14px; line-height:1.6; }
+  .modal ol{ text-align:left; color:var(--ice); font-size:14px; line-height:1.8; padding-left:20px; margin:0 0 18px; }
+
+  .auth-input{
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    font-size: 16px;
+    font-family: var(--font-num);
+    text-align: center;
+    margin-bottom: 16px;
+    outline: none;
+  }
+  .auth-input:focus{
+    border-color: var(--sky);
+    background: rgba(255,255,255,0.12);
+  }
+  .auth-input.error{ border-color: var(--danger); }
+  select.auth-input{
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23BFE2F7' stroke-width='2'%3e%3cpath d='M6 9l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px;
+    text-align: left;
+    padding-right: 38px;
+    cursor: pointer;
+  }
+  select.auth-input option{ background: #123A63; color:#fff; }
+  .auth-error{
+    color: var(--danger);
+    font-size: 12px;
+    margin: -10px 0 14px;
+    height: 14px;
+    display: block;
+  }
+
+  .hint{ font-size:12px; color:var(--ice); opacity:0.6; text-align:center; }
+</style>
+</head>
+<body>
+
+<!-- 사번/팀 입력 최초 진입 모달 -->
+<div id="authOverlay" class="show">
+  <div class="modal">
+    <h2>🍎 사과게임 시작</h2>
+    <p>사내 랭킹 집계 및 참여 기록 확인을 위해<br>팀과 사번을 입력해 주세요.</p>
+    <select id="teamSelect" class="auth-input">
+      <option value="" disabled selected>팀 선택</option>
+      <option value="증권개발팀">증권개발팀</option>
+      <option value="증권채널팀">증권채널팀</option>
+      <option value="카드개발팀">카드개발팀</option>
+      <option value="라이프개발팀">라이프개발팀</option>
+    </select>
+    <input type="text" id="sabunInput" class="auth-input" placeholder="사번 입력" maxlength="10">
+    <span class="auth-error" id="authError"></span>
+    <button id="authStartBtn" style="width: 100%;">도전 시작</button>
+  </div>
+</div>
+
+<div id="app">
+  <div class="brand-bar">
+    <div class="brand-left">
+      <div class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#4F9DDE"/>
+              <stop offset="1" stop-color="#123A63"/>
+            </linearGradient>
+          </defs>
+          <rect x="1" y="1" width="38" height="38" rx="10" fill="url(#logoGrad)" stroke="rgba(255,255,255,0.25)"/>
+          <text x="20" y="27" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="18" fill="#fff">SDS</text>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">신한DS</span>
+        <span class="brand-dept">금융본부</span>
+      </div>
+    </div>
+    <div class="event-tag">🏆 금융본부 미니게임대회</div>
+  </div>
+
+  <div class="titlebar">
+    <h1>🍎 사과게임</h1>
+    <span class="sub">드래그해서 합이 10이 되는 사과를 없애보세요</span>
+    <span id="playerBadge" class="player-tag" style="display:none;"></span>
+  </div>
+
+  <div class="hud">
+    <div class="stat time" id="timeStat">
+      <div class="label">남은 시간</div>
+      <div class="value" id="timeVal">01:50</div>
+    </div>
+    <div class="stat score">
+      <div class="label">점수</div>
+      <div class="value" id="scoreVal">0</div>
+    </div>
+    <div class="stat">
+      <div class="label">남은 사과</div>
+      <div class="value" id="leftVal">0</div>
+    </div>
+  </div>
+
+  <div id="board-wrap">
+    <div id="board"></div>
+    <div id="selRect"><span class="sumTag" id="sumTag"></span></div>
+  </div>
+
+  <div class="controls">
+    <button id="restartBtn">다시 시작</button>
+    <button class="ghost" id="ruleBtn">규칙 보기</button>
+  </div>
+  <div class="hint">마우스를 드래그해서 사각형을 만들고, 안에 있는 숫자 합이 10이면 자동으로 사라져요.</div>
+</div>
+
+<div id="overlay">
+  <div class="modal">
+    <h2 id="modalTitle">시간 종료!</h2>
+    <div class="bigscore" id="modalScore">0</div>
+    <p id="modalDesc">획득한 사과 개수입니다.</p>
+    <button id="modalRestart">다시 도전하기</button>
+  </div>
+</div>
+
+<div id="ruleOverlay">
+  <div class="modal">
+    <h2>게임 규칙</h2>
+    <ol>
+      <li>보드 위에서 마우스(또는 손가락)를 드래그하면 사각형 범위가 만들어져요.</li>
+      <li>사각형 안에 있는 사과 숫자의 합이 10이 되면 그 사과들이 자동으로 사라져요.</li>
+      <li>제한시간 안에 최대한 많은 사과를 없애보세요!</li>
+    </ol>
+    <button id="ruleCloseBtn">확인</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  // [설정] 최신 배포된 Google Apps Script 웹 앱 URL 및 식별자
+  var GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyY6mM4y9ltyZhDn7fMCctYajEBye1sxZpQrQ-FcabhllionztMTlJEJMCKCDy_ZxCOMg/exec";
+  var GAME_NAME = "사과게임";
+
+  var COLS = 12, ROWS = 9, GAME_TIME = 110;
+  var curLevel = 'medium (12x9)';
+  var board, cells, boardEl, selRect, sumTag;
+  var timeLeft, score, timerId, gameActive;
+  var dragging = false, startCell = null, curSel = [];
+  var currentSabun = "";
+  var currentTeam = "";
+
+  var app = document.getElementById('app');
+  boardEl = document.getElementById('board');
+  selRect = document.getElementById('selRect');
+  sumTag = document.getElementById('sumTag');
+  var boardWrap = document.getElementById('board-wrap');
+  var timeVal = document.getElementById('timeVal');
+  var timeStat = document.getElementById('timeStat');
+  var scoreVal = document.getElementById('scoreVal');
+  var leftVal = document.getElementById('leftVal');
+  var overlay = document.getElementById('overlay');
+  var modalTitle = document.getElementById('modalTitle');
+  var modalScore = document.getElementById('modalScore');
+  var modalDesc = document.getElementById('modalDesc');
+  var ruleOverlay = document.getElementById('ruleOverlay');
+
+  var authOverlay = document.getElementById('authOverlay');
+  var teamSelect = document.getElementById('teamSelect');
+  var sabunInput = document.getElementById('sabunInput');
+  var authStartBtn = document.getElementById('authStartBtn');
+  var playerBadge = document.getElementById('playerBadge');
+  var authError = document.getElementById('authError');
+
+  // 스프레드시트 비동기 전송 함수
+  function logEvent(eventType, extraData){
+    if(!GOOGLE_WEBHOOK_URL) return;
+    var payload = Object.assign({
+      game: GAME_NAME,
+      team: currentTeam,
+      sabun: currentSabun,
+      event: eventType,
+      level: curLevel
+    }, extraData || {});
+
+    fetch(GOOGLE_WEBHOOK_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }).catch(function(err){
+      console.warn("로깅 실패:", err);
+    });
+  }
+
+  function fmtTime(s){
+    var m = Math.floor(s/60), ss = s%60;
+    return (m<10?'0':'')+m+':'+(ss<10?'0':'')+ss;
+  }
+
+  function buildBoard(){
+    boardEl.style.gridTemplateColumns = 'repeat('+COLS+', 1fr)';
+    boardEl.innerHTML = '';
+    board = [];
+    cells = [];
+    for(var r=0;r<ROWS;r++){
+      board.push([]);
+      cells.push([]);
+      for(var c=0;c<COLS;c++){
+        var n = 1 + Math.floor(Math.random()*9);
+        board[r].push(n);
+        var div = document.createElement('div');
+        div.className = 'cell';
+        div.textContent = n;
+        div.dataset.r = r;
+        div.dataset.c = c;
+        boardEl.appendChild(div);
+        cells[r].push(div);
+      }
+    }
+  }
+
+  function remainingCount(){
+    var cnt=0;
+    for(var r=0;r<ROWS;r++) for(var c=0;c<COLS;c++) if(board[r][c]>0) cnt++;
+    return cnt;
+  }
+
+  function hasValidMove(){
+    var pre = [];
+    for(var r=0;r<=ROWS;r++){ pre.push(new Array(COLS+1).fill(0)); }
+    for(var r=1;r<=ROWS;r++){
+      for(var c=1;c<=COLS;c++){
+        var v = board[r-1][c-1] > 0 ? board[r-1][c-1] : 0;
+        pre[r][c] = v + pre[r-1][c] + pre[r][c-1] - pre[r-1][c-1];
+      }
+    }
+    function rectSum(r1,c1,r2,c2){
+      return pre[r2+1][c2+1] - pre[r1][c2+1] - pre[r2+1][c1] + pre[r1][c1];
+    }
+    for(var r1=0;r1<ROWS;r1++){
+      for(var r2=r1;r2<ROWS;r2++){
+        for(var c1=0;c1<COLS;c1++){
+          for(var c2=c1;c2<COLS;c2++){
+            if(rectSum(r1,c1,r2,c2) === 10) return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  function updateHud(){
+    timeVal.textContent = fmtTime(timeLeft);
+    timeStat.classList.toggle('low', timeLeft<=20);
+    scoreVal.textContent = score;
+    leftVal.textContent = remainingCount();
+  }
+
+  function getRectFromPoints(x1,y1,x2,y2){
+    return {
+      left: Math.min(x1,x2), right: Math.max(x1,x2),
+      top: Math.min(y1,y2), bottom: Math.max(y1,y2)
+    };
+  }
+
+  function cellsInRect(rect){
+    var res = [];
+    var wrapRect = boardEl.getBoundingClientRect();
+    for(var r=0;r<ROWS;r++){
+      for(var c=0;c<COLS;c++){
+        if(board[r][c] <= 0) continue;
+        var el = cells[r][c];
+        var cr = el.getBoundingClientRect();
+        var cLeft = cr.left - wrapRect.left;
+        var cTop = cr.top - wrapRect.top;
+        var cRight = cLeft + cr.width;
+        var cBottom = cTop + cr.height;
+        var overlaps = !(cRight < rect.left || cLeft > rect.right || cBottom < rect.top || cTop > rect.bottom);
+        if(overlaps){
+          res.push({r:r,c:c, el:el, val: board[r][c]});
+        }
+      }
+    }
+    return res;
+  }
+
+  function clearSelectionVisual(){
+    curSel.forEach(function(item){ item.el.classList.remove('selected'); });
+  }
+
+  function getPointerPos(e){
+    var t = (e.touches && e.touches[0]) ? e.touches[0] : e;
+    var wrapRect = boardEl.getBoundingClientRect();
+    return { x: t.clientX - wrapRect.left, y: t.clientY - wrapRect.top };
+  }
+
+  function onDown(e){
+    if(!gameActive) return;
+    e.preventDefault();
+    dragging = true;
+    var p = getPointerPos(e);
+    startCell = p;
+    selRect.style.display = 'block';
+    updateDrag(p);
+  }
+
+  function onMove(e){
+    if(!dragging) return;
+    e.preventDefault();
+    var p = getPointerPos(e);
+    updateDrag(p);
+  }
+
+  function updateDrag(p){
+    var rect = getRectFromPoints(startCell.x, startCell.y, p.x, p.y);
+    selRect.style.left = rect.left+'px';
+    selRect.style.top = rect.top+'px';
+    selRect.style.width = (rect.right-rect.left)+'px';
+    selRect.style.height = (rect.bottom-rect.top)+'px';
+
+    clearSelectionVisual();
+    curSel = cellsInRect(rect);
+    var sum = curSel.reduce(function(a,b){return a+b.val;},0);
+    curSel.forEach(function(item){ item.el.classList.add('selected'); });
+
+    if(curSel.length > 0){
+      sumTag.textContent = sum;
+      sumTag.classList.toggle('ok', sum===10);
+    } else {
+      sumTag.textContent = '';
+    }
+  }
+
+  function onUp(e){
+    if(!dragging) return;
+    dragging = false;
+    selRect.style.display = 'none';
+
+    var sum = curSel.reduce(function(a,b){return a+b.val;},0);
+    var madeMove = curSel.length > 0 && sum === 10;
+    if(madeMove){
+      curSel.forEach(function(item){
+        item.el.classList.add('pop');
+        board[item.r][item.c] = -1;
+        setTimeout((function(el){ return function(){ el.classList.add('gone'); }; })(item.el), 150);
+      });
+      score += curSel.length;
+    }
+    clearSelectionVisual();
+    curSel = [];
+    sumTag.textContent = '';
+    updateHud();
+
+    if(remainingCount() === 0 && gameActive){
+      endGame('cleared');
+      return;
+    }
+    if(madeMove && gameActive && !hasValidMove()){
+      endGame('nomoves');
+    }
+  }
+
+  function startTimer(){
+    clearInterval(timerId);
+    timerId = setInterval(function(){
+      timeLeft--;
+      updateHud();
+      if(timeLeft <= 0){
+        endGame('timeout');
+      }
+    }, 1000);
+  }
+
+  function endGame(reason){
+    gameActive = false;
+    clearInterval(timerId);
+
+    // 상세 내용 구성
+    var detailText = reason === 'cleared' ? '보드 올클리어' : (reason === 'nomoves' ? '가능한 조합 없음' : '시간 종료');
+
+    // 구글 시트로 종료 로그 전송
+    logEvent("종료", {
+      score: score,
+      detail: detailText + ` (사과 ${score}개 획득)`
+    });
+
+    if(reason === 'cleared'){
+      modalTitle.textContent = '보드 클리어! 🎉';
+      modalDesc.textContent = '모든 사과를 없앴어요! 대단해요.';
+    } else if(reason === 'nomoves'){
+      modalTitle.textContent = '더 이상 조합이 없어요!';
+      modalDesc.textContent = '합이 10이 되는 조합을 더 만들 수 없어서 게임을 종료했어요.';
+    } else {
+      modalTitle.textContent = '시간 종료!';
+      modalDesc.textContent = '획득한 사과 개수입니다.';
+    }
+    modalScore.textContent = score;
+    overlay.classList.add('show');
+  }
+
+  function startGame(){
+    overlay.classList.remove('show');
+    score = 0; timeLeft = GAME_TIME; gameActive = true;
+    buildBoard();
+    var attempts = 0;
+    while(!hasValidMove() && attempts < 20){
+      buildBoard();
+      attempts++;
+    }
+    updateHud();
+    startTimer();
+
+    // 시작 로그 전송
+    logEvent("시작", { score: 0 });
+  }
+
+  function handleAuth(){
+    var teamVal = teamSelect.value;
+    var val = sabunInput.value.trim();
+
+    if(!teamVal){
+      authError.textContent = "팀을 선택해 주세요.";
+      teamSelect.classList.add('error');
+      teamSelect.focus();
+      return;
+    }
+    if(!val){
+      authError.textContent = "사번을 입력해 주세요.";
+      teamSelect.classList.remove('error');
+      sabunInput.classList.add('error');
+      sabunInput.focus();
+      return;
+    }
+    authError.textContent = "";
+    teamSelect.classList.remove('error');
+    sabunInput.classList.remove('error');
+    currentTeam = teamVal;
+    currentSabun = val;
+    playerBadge.textContent = "플레이어: " + currentTeam + " · " + currentSabun;
+    playerBadge.style.display = "inline-block";
+    authOverlay.classList.remove('show');
+    startGame();
+  }
+
+  authStartBtn.addEventListener('click', handleAuth);
+  sabunInput.addEventListener('keydown', function(e){
+    if(e.key === 'Enter') handleAuth();
+  });
+  teamSelect.addEventListener('change', function(){
+    teamSelect.classList.remove('error');
+    authError.textContent = "";
+  });
+
+  boardWrap.addEventListener('mousedown', onDown);
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+  boardWrap.addEventListener('touchstart', onDown, {passive:false});
+  window.addEventListener('touchmove', onMove, {passive:false});
+  window.addEventListener('touchend', onUp);
+
+  document.getElementById('restartBtn').addEventListener('click', startGame);
+  document.getElementById('modalRestart').addEventListener('click', startGame);
+  document.getElementById('ruleBtn').addEventListener('click', function(){
+    ruleOverlay.classList.add('show');
+  });
+  document.getElementById('ruleCloseBtn').addEventListener('click', function(){
+    ruleOverlay.classList.remove('show');
+  });
+  ruleOverlay.addEventListener('click', function(e){
+    if(e.target === ruleOverlay) ruleOverlay.classList.remove('show');
+  });
+
+  sabunInput.focus();
+})();
+</script>
+</body>
+</html>
