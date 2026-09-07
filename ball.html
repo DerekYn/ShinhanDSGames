@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>🦖 Shinhan bouncy ball</title>
+  <title>🦖 Shinhan bouncy ball - 금융본부 미니 게임대회</title>
   <style>
     html, body {
       height: 100%;
@@ -11,7 +11,7 @@
       background:#111;
       color:#ddd;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      overflow: hidden;           /* 스크롤 제거 */
+      overflow: hidden;
       touch-action: none;
       overscroll-behavior: contain;
     }
@@ -30,9 +30,20 @@
       font-size: 20px;
       font-weight: bold;
       color: #fff;
-      margin-bottom: 6px;
+      margin-bottom: 2px;
       text-align: center;
       user-select: none;
+    }
+    .user-badge {
+      font-size: 12px;
+      font-weight: bold;
+      color: #60a5fa;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      padding: 3px 10px;
+      border-radius: 12px;
+      margin-bottom: 4px;
+      display: none;
     }
     canvas {
       image-rendering: pixelated;
@@ -48,21 +59,62 @@
     .controls button { font-size:20px; padding:14px 18px; border-radius:12px; background:#222; color:#eee; border:1px solid #555; cursor:pointer; min-width:64px; }
     .controls button:active { transform: translateY(1px); }
     .overlay { position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-      background:rgba(0,0,0,.5); backdrop-filter: blur(2px); z-index:10; }
+      background:rgba(0,0,0,.65); backdrop-filter: blur(4px); z-index:100; }
     .overlay.hidden { display:none; }
-    .modal { min-width: min(90vw, 440px); max-width: 92vw; background:#1c1c1c;
-      border:1px solid #444; border-radius:12px; padding:16px 18px; box-shadow:0 8px 30px rgba(0,0,0,.5); }
-    .modal h2 { margin:0 0 8px; font-size:20px; }
-    .modal .body { white-space:pre-line; line-height:1.45; margin-bottom:12px; }
-    .actions { display:flex; gap:10px; justify-content:flex-end; }
-    .actions button { padding:8px 12px; border-radius:10px; border:1px solid #555; background:#2a2a2a; color:#eee; cursor:pointer; }
+    .modal { min-width: min(90vw, 420px); max-width: 92vw; background:#1c1c1c;
+      border:1px solid #444; border-radius:14px; padding:24px 20px; box-shadow:0 8px 30px rgba(0,0,0,.7); }
+    .modal h2 { margin:0 0 8px; font-size:20px; color:#fff; text-align:center; }
+    .modal .body { white-space:pre-line; line-height:1.5; margin-bottom:14px; text-align:center; color:#ccc; }
+    .actions { display:flex; gap:10px; justify-content:center; }
+    .actions button { padding:10px 16px; border-radius:10px; border:1px solid #555; background:#2a2a2a; color:#eee; cursor:pointer; font-weight:bold; }
     .actions .primary { background:#3b82f6; border-color:#2a6adf; color:#fff; }
     .actions button:active { transform:translateY(1px); }
+
+    /* 참가자 등록 폼 스타일 */
+    .form-group { text-align: left; margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 12px; font-weight: bold; color: #aaa; margin-bottom: 5px; }
+    .form-input {
+      width: 100%; padding: 11px; border-radius: 8px; border: 1px solid #444;
+      background: #2a2a2a; color: #fff; font-size: 14px; box-sizing: border-box; outline: none;
+    }
+    .form-input:focus { border-color: #3b82f6; background: #333; }
   </style>
 </head>
 <body>
+
+<!-- 참가자 등록 모달 (최초 진입 시 표시) -->
+<div id="authOverlay" class="overlay">
+  <div class="modal">
+    <h2>🦖 공튀기기 대회 참가</h2>
+    <div class="body">
+      금융본부 미니게임대회 기록 집계를 위해<br>소속 팀과 사번을 입력해 주세요.
+    </div>
+
+    <div class="form-group">
+      <label>소속 팀 선택</label>
+      <select id="teamSelect" class="form-input">
+        <option value="">소속 팀을 선택하세요</option>
+        <option value="증권개발팀">증권개발팀</option>
+        <option value="증권채널팀">증권채널팀</option>
+        <option value="카드개발팀">카드개발팀</option>
+        <option value="라이프개발팀">라이프개발팀</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>사번 입력</label>
+      <input type="text" id="sabunInput" class="form-input" placeholder="사번 6~8자리 입력" maxlength="10">
+    </div>
+
+    <div class="actions" style="margin-top: 18px;">
+      <button type="button" class="primary" style="width: 100%;" onclick="handleAuthStart()">대회 참가 및 시작</button>
+    </div>
+  </div>
+</div>
+
 <div class="wrap">
-  <div class="title" id="pageTitle"> 🦖 Shinhan bouncy ball </div>
+  <div class="title" id="pageTitle">🦖 Shinhan bouncy ball</div>
+  <div id="userBadge" class="user-badge"></div>
   <canvas id="game" width="640" height="480"></canvas>
   <div class="hud">
     방향만 조작 → <kbd>◀</kbd>/<kbd>▶</kbd> (또는 <kbd>A</kbd>/<kbd>D</kbd>) · 일시정지 <kbd>P</kbd>
@@ -86,6 +138,32 @@
 </div>
 
 <script>
+// [설정] 배포된 구글 스프레드시트 웹 앱 URL 및 식별자
+const GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyY6mM4y9ltyZhDn7fMCctYajEBye1sxZpQrQ-FcabhllionztMTlJEJMCKCDy_ZxCOMg/exec";
+const GAME_NAME = "공튀기기";
+
+let userTeam = "";
+let userSabun = "";
+
+// 스프레드시트 비동기 전송 함수
+function sendLog(eventType, extraData = {}) {
+  if (!GOOGLE_WEBHOOK_URL) return;
+  const payload = Object.assign({
+    game: GAME_NAME,
+    team: userTeam,
+    sabun: userSabun,
+    event: eventType,
+    level: "전체"
+  }, extraData);
+
+  fetch(GOOGLE_WEBHOOK_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  }).catch(err => console.warn("로그 전송 실패:", err));
+}
+
 /* =======================
    스테이지 정의 (고정)
 ======================= */
@@ -184,18 +262,15 @@ const level5_base = [
   const W = canvas.width, H = canvas.height;
   const TILE = 16, COLS = Math.floor(W/TILE), ROWS = Math.floor(H/TILE);
 
-  // 물리 상수
-  const GRAVITY = 1200;     // px/s^2
-  const BOUNCE_VY = -420;   // 기본 점프 속도(위 음수)
-  const H_SPEED = 70;       // 좌우 이동 속도
-  const ARROW_SPEED = 300;  // 화살표 활주 속도
+  const GRAVITY = 1200;
+  const BOUNCE_VY = -420;
+  const H_SPEED = 70;
+  const ARROW_SPEED = 300;
 
-  // 입력
   const keys = new Set();
   window.addEventListener('keydown', (e)=>{ keys.add(e.key.toLowerCase()); if(e.key==='p'||e.key==='P') paused = !paused; });
   window.addEventListener('keyup',   (e)=>{ keys.delete(e.key.toLowerCase()); });
 
-  // 온스크린 버튼 + 캔버스 좌/우 터치
   const btnLeft  = document.getElementById('btnLeft');
   const btnRight = document.getElementById('btnRight');
   const btnPause = document.getElementById('btnPause');
@@ -230,10 +305,8 @@ const level5_base = [
     }, {passive:false});
   });
 
-  // 타일 타입
   const T = { EMPTY:0, RED:1, WHITE:2, GOAL:3, JUMPER:4, BOMB:5, ARROW_LEFT:6, ARROW_RIGHT:7 };
 
-  // 업스케일 + S 스폰 추출(20x15 → 40x30)
   function upscaleWithSpawn(baseLines, scale=2){
     let spawn = null;
     const out = [];
@@ -260,7 +333,6 @@ const level5_base = [
   const up4 = upscaleWithSpawn(level4_base, 2);
   const up5 = upscaleWithSpawn(level5_base, 2);
 
-  // 파서: 문자 → 타일
   function parseLevel(lines){
     const grid = [];
     for(let r=0;r<ROWS;r++){
@@ -291,23 +363,19 @@ const level5_base = [
   let stage = 0;
   let grid = levels[stage].grid.map(row=>row.slice());
 
-  // 공
   const ball = { x:0, y:0, radius:3, vx:0, vy:0 };
 
-  // 상태
   let last = performance.now();
-  let paused = false;
+  let paused = true; // 최초 모달 확인 전까지 정지
   let messageTimer = 0;
   let messageText = '';
-  let arrowMode = false; // 화살표 수평 활주
-  let arrowDir = 0;      // -1/0/+1
+  let arrowMode = false;
+  let arrowDir = 0;
 
-  // 타이머/실패 기록 + 최종 모달 플래그
   let startTime = performance.now();
   let failCount = 0;
   let finalClearShown = false;
 
-  // 오버레이
   const overlay = document.getElementById('overlay');
   const ovTitle = document.getElementById('ovTitle');
   const ovBody  = document.getElementById('ovBody');
@@ -326,6 +394,7 @@ const level5_base = [
     overlay.classList.add('hidden');
     paused = false;
   }
+
   btnCloseOverlay.addEventListener('click', () => {
     if(finalClearShown){
       stage = 0;
@@ -337,6 +406,7 @@ const level5_base = [
     }
     hideOverlay();
   });
+
   btnRestartStage1.addEventListener('click', () => {
     stage = 0;
     grid = levels[stage].grid.map(row=>row.slice());
@@ -358,13 +428,12 @@ const level5_base = [
   function tileAt(px, py){
     const c = Math.floor(px / TILE);
     const r = Math.floor(py / TILE);
-    if(c < 0 || c >= COLS || r < 0) return T.RED;   // 좌/우/위는 벽
-    if(r >= ROWS) return T.EMPTY;                   // 아래 낭떠러지
+    if(c < 0 || c >= COLS || r < 0) return T.RED;
+    if(r >= ROWS) return T.EMPTY;
     return grid[r][c];
   }
   function setTile(c, r, val){ if(r>=0&&c>=0&&r<ROWS&&c<COLS) grid[r][c]=val; }
 
-  // 입력 처리
   function handleInput(){
     if(arrowMode){ ball.vx = arrowDir * ARROW_SPEED; return; }
     const left  = keys.has('arrowleft') || keys.has('a') || keys.has('touchleft');
@@ -374,9 +443,7 @@ const level5_base = [
     else                     ball.vx =  0;
   }
 
-  // 물리
   function physics(dt){
-    // 화살표 활주 모드
     if(arrowMode){
       ball.vy = 0;
       let newX = ball.x + ball.vx * dt;
@@ -389,7 +456,6 @@ const level5_base = [
         const tileC = Math.floor(probeX / TILE);
         if(signX>0) newX = tileC * TILE - ball.radius - 0.01; else newX = (tileC+1) * TILE + ball.radius + 0.01;
         ball.x = newX;
-        // 벽 충돌 시 활주 종료 -> 수직 튀김 시작
         arrowMode = false; arrowDir = 0; ball.vx = 0; ball.vy = BOUNCE_VY;
       } else {
         ball.x = newX;
@@ -398,10 +464,8 @@ const level5_base = [
       return;
     }
 
-    // 일반 모드
     ball.vy += GRAVITY * dt;
 
-    // X 이동 + RED 충돌
     let newX = ball.x + ball.vx * dt;
     const signX = Math.sign(ball.vx) || 1;
     const probeX = newX + signX * ball.radius;
@@ -415,7 +479,6 @@ const level5_base = [
     }
     ball.x = newX;
 
-    // Y 이동
     let newY = ball.y + ball.vy * dt;
     const signY = Math.sign(ball.vy) || 1;
     const probeY = newY + signY * ball.radius;
@@ -438,16 +501,14 @@ const level5_base = [
     }
 
     if(hitRedTop || hitWhite || hitJumper || hitBomb || arrow){
-      if(signY>0){ // 바닥 접촉
+      if(signY>0){
         const tileR = Math.floor(probeY / TILE);
         newY = tileR * TILE - ball.radius - 0.01;
         if(hitBomb){ gameOver(); return; }
-        // 화살표: 수평 활주 모드 전환
         if(arrow){ arrowMode = true; arrowDir = arrow; ball.vx = arrow * ARROW_SPEED; ball.vy = 0; ball.y = newY; return; }
-        // 점퍼/일반 튕김
         ball.vy = hitJumper ? BOUNCE_VY * 1.65 : BOUNCE_VY;
         if(hitWhite && whiteCR) setTile(whiteCR[0], whiteCR[1], T.EMPTY);
-      } else { // 천장 충돌
+      } else {
         const tileR = Math.floor(probeY / TILE);
         newY = (tileR+1) * TILE + ball.radius + 0.01;
         ball.vy *= -1;
@@ -456,10 +517,8 @@ const level5_base = [
 
     ball.y = newY;
 
-    // 낙사
     if(ball.y - ball.radius > H + 4){ gameOver(); return; }
 
-    // Goal
     const c = Math.floor(ball.x / TILE), r = Math.floor(ball.y / TILE);
     if(grid[r] && grid[r][c] === T.GOAL){ nextStage(); }
   }
@@ -474,9 +533,16 @@ const level5_base = [
   function nextStage(){
     if(stage === levels.length - 1){
       const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
+      
+      // 구글 스프레드시트로 최종 클리어 기록 전송 (스코어: 소요 초)
+      sendLog("종료", {
+        score: parseFloat(elapsed),
+        detail: `올클리어! (${elapsed}초 소요, 실패: ${failCount}회)`
+      });
+
       showOverlay({
         title:'축하합니다! 모든 스테이지 클리어 🎉',
-        html:`걸린 시간: <b>${elapsed}초</b><br>실패 횟수: <b>${failCount}</b>`,
+        html:`걸린 시간: <b>${elapsed}초</b><br>실패 횟수: <b>${failCount}회</b>`,
         showRestart1:true,
         isFinal:true
       });
@@ -487,10 +553,8 @@ const level5_base = [
     applySpawn();
     messageText = 'STAGE CLEAR';
     messageTimer = 1.2;
-    if(stage === 0){ startTime = performance.now(); failCount = 0; }
   }
 
-  // 렌더링
   function draw(){
     ctx.fillStyle = '#000';
     ctx.fillRect(0,0,W,H);
@@ -529,13 +593,11 @@ const level5_base = [
       }
     }
 
-    // 공
     ctx.fillStyle = '#fff';
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2);
     ctx.fill();
 
-    // 꼬리
     ctx.strokeStyle = 'rgba(255,255,255,0.6)';
     ctx.beginPath();
     ctx.moveTo(ball.x, ball.y);
@@ -564,6 +626,31 @@ const level5_base = [
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
+
+  // 최초 사번/팀 인증 핸들러
+  window.handleAuthStart = function(){
+    const team = document.getElementById("teamSelect").value;
+    const sabun = document.getElementById("sabunInput").value.trim();
+
+    if(!team){ alert("소속 팀을 선택해 주세요."); return; }
+    if(!sabun){ alert("사번을 입력해 주세요."); return; }
+
+    userTeam = team;
+    userSabun = sabun;
+
+    const userBadge = document.getElementById("userBadge");
+    userBadge.textContent = `[${userTeam}] 사번: ${userSabun}`;
+    userBadge.style.display = "inline-block";
+
+    document.getElementById("authOverlay").classList.add("hidden");
+
+    // 게임 시작 시각 초기화 및 시작 로그 전송
+    startTime = performance.now();
+    failCount = 0;
+    paused = false;
+
+    sendLog("시작", { score: 0 });
+  };
 })();
 </script>
 </body>
