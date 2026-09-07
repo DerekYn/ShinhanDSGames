@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>두더지 잡기 - 금융본부 미니 게임대회</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#87ceeb,#b8e986);
+    font-family:Arial,"Malgun Gothic",sans-serif;
+    user-select:none;
+    -webkit-user-select:none;
+    -webkit-tap-highlight-color:transparent;
+    overflow:hidden;
+    touch-action:manipulation;
+}
+
+.game{
+    width:500px;
+    max-width:95vw;
+    padding:25px;
+    background:#fff;
+    border-radius:20px;
+    text-align:center;
+    box-shadow:0 10px 30px #0003;
+}
+
+h1{
+    margin:0 0 6px;
+    color:#5a3d2b;
+}
+
+.user-badge{
+    display:inline-block;
+    font-size:13px;
+    font-weight:bold;
+    color:#6c5ce7;
+    background:#edeaff;
+    padding:4px 12px;
+    border-radius:12px;
+    margin-bottom:12px;
+}
+
+.stats{
+    display:flex;
+    justify-content:space-around;
+    margin-bottom:15px;
+}
+
+.stat{
+    font-weight:bold;
+}
+
+.time{
+    color:#e74c3c;
+}
+
+.score{
+    color:#2980b9;
+}
+
+.combo{
+    color:#e67e22;
+}
+
+.board{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.hole{
+    position:relative;
+    height:120px;
+    overflow:hidden;
+    border-radius:50%;
+    background:#5c4033;
+    box-shadow:inset 0 8px 12px #0006;
+    cursor:pointer;
+    touch-action:manipulation;
+}
+
+.hole:after{
+    content:"";
+    position:absolute;
+    left:10%;
+    right:10%;
+    bottom:5px;
+    height:20px;
+    background:#302018;
+    border-radius:50%;
+    z-index:4;
+    pointer-events:none;
+}
+
+/* 동물 그래픽 */
+.animal{
+    position:absolute;
+    width:80px;
+    height:90px;
+    left:50%;
+    bottom:-110px;
+    transform:translateX(-50%);
+    transition:.15s;
+    border-radius:45% 45% 40% 40%;
+    z-index:2;
+}
+
+.animal.active{
+    bottom:5px;
+}
+
+.eye{
+    position:absolute;
+    top:28px;
+    width:9px;
+    height:10px;
+    background:#222;
+    border-radius:50%;
+    z-index:4;
+}
+
+.eye.left{ left:21px; }
+.eye.right{ right:21px; }
+
+.nose{
+    position:absolute;
+    top:44px;
+    left:50%;
+    transform:translateX(-50%);
+    width:13px;
+    height:9px;
+    background:#222;
+    border-radius:50%;
+    z-index:4;
+}
+
+/* 두더지 */
+.mole{
+    background:#8b5a3c;
+    border:3px solid #65402d;
+    border-radius:45% 45% 35% 35%;
+}
+.mole .ear{ display:none; }
+.mole .eye{ top:29px; width:9px; height:9px; }
+.mole .nose{ top:45px; width:14px; height:10px; background:#e88d9d; }
+
+/* 토끼 */
+.rabbit{
+    background:#f1dddd;
+    border:3px solid #d2b5b5;
+    border-radius:45% 45% 35% 35%;
+}
+.rabbit .ear{
+    position:absolute;
+    width:16px;
+    height:30px;
+    top:-7px;
+    background:#f1dddd;
+    border:3px solid #d2b5b5;
+    border-radius:50%;
+    z-index:1;
+}
+.rabbit .ear.left{ left:12px; transform:rotate(-8deg); }
+.rabbit .ear.right{ right:12px; transform:rotate(8deg); }
+.rabbit .ear:after{
+    content:"";
+    position:absolute;
+    width:6px;
+    height:19px;
+    top:4px;
+    left:2px;
+    background:#e8a8b8;
+    border-radius:50%;
+}
+.rabbit .nose{ background:#d87f98; }
+.rabbit:after{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:52px;
+    transform:translateX(-50%);
+    width:20px;
+    height:13px;
+    background:linear-gradient(to right, white 0, white 8px, transparent 8px, transparent 12px, white 12px, white 20px);
+    border-radius:0 0 4px 4px;
+    z-index:3;
+}
+
+/* 호랑이 */
+.tiger{
+    background:#e9a13b;
+    border:3px solid #c47b22;
+    border-radius:45% 45% 35% 35%;
+}
+.tiger .ear{
+    position:absolute;
+    width:18px;
+    height:18px;
+    top:2px;
+    background:#e9a13b;
+    border:3px solid #c47b22;
+    border-radius:50%;
+    z-index:1;
+}
+.tiger .ear.left{ left:9px; }
+.tiger .ear.right{ right:9px; }
+.tiger .ear:after{
+    content:"";
+    position:absolute;
+    width:8px;
+    height:8px;
+    left:3px;
+    top:3px;
+    background:#f4c47a;
+    border-radius:50%;
+}
+.tiger:before{
+    content:"";
+    position:absolute;
+    left:12px;
+    top:25px;
+    width:9px;
+    height:14px;
+    border-left:3px solid #70451f;
+    border-radius:50%;
+    transform:rotate(-20deg);
+    box-shadow:47px 0 0 -1px #70451f;
+}
+.tiger:after{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:52px;
+    transform:translateX(-50%);
+    width:13px;
+    height:8px;
+    background:#8b5a3c;
+    border-radius:50%;
+    z-index:3;
+}
+.tiger .eye{ width:9px; height:9px; top:29px; background:#3d2a1c; }
+.tiger .nose{ top:44px; width:11px; height:8px; background:#8b5a3c; }
+
+/* 점수 애니메이션 */
+.pop{
+    position:absolute;
+    top:10px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:22px;
+    font-weight:bold;
+    color:#2ecc71;
+    animation:pop .6s forwards;
+    z-index:5;
+    pointer-events:none;
+}
+.pop.bad{ color:#e74c3c; }
+
+@keyframes pop{
+    to{ opacity:0; transform:translate(-50%,-40px); }
+}
+
+/* 버튼 및 폼 */
+button{
+    width:100%;
+    padding:14px;
+    border:0;
+    border-radius:10px;
+    background:#6c5ce7;
+    color:white;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.15s;
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+}
+button:hover{ background:#5849d6; transform:translateY(-1px); }
+button:active{ transform:scale(.98); }
+
+.input-box{
+    margin:15px 0;
+    text-align:left;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+.input-box label{
+    font-size:13px;
+    font-weight:bold;
+    color:#555;
+}
+.input-control{
+    width:100%;
+    padding:12px;
+    border:2px solid #ddd;
+    border-radius:10px;
+    font-size:15px;
+    font-family:inherit;
+    background:#fdfdfd;
+    outline:none;
+}
+.input-control:focus{
+    border-color:#6c5ce7;
+    background:#fff;
+}
+
+/* 모달 레이아웃 */
+.overlay{
+    position:fixed;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#87ceeb,#b8e986);
+    z-index:100;
+    padding:20px;
+}
+.modal{
+    width:420px;
+    max-width:92vw;
+    padding:28px 24px;
+    background:#fff;
+    border-radius:20px;
+    text-align:center;
+    box-shadow:0 15px 40px #0004;
+}
+.modal h2{
+    margin:0 0 12px;
+    color:#222;
+    font-size:26px;
+}
+.rules{
+    padding:14px 18px;
+    margin:10px 0 15px;
+    background:#f6f7f9;
+    border-radius:10px;
+    line-height:1.8;
+    text-align:left;
+    color:#333;
+    font-size:14px;
+}
+.result{
+    font-size:45px;
+    font-weight:bold;
+    color:#2980b9;
+    margin:15px;
+}
+.hidden{ display:none; }
+
+@media (max-width:600px){
+    body{ min-height:100dvh; padding:10px; }
+    .game{ width:100%; padding:18px; border-radius:16px; }
+    h1{ font-size:24px; }
+    .board{ gap:10px; margin-bottom:15px; }
+    .hole{ height:100px; }
+    .animal{ width:68px; height:78px; bottom:-95px; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- 시작 화면 (사번 및 팀 선택) -->
+<div class="overlay" id="start">
+    <div class="modal">
+        <h2>🐹 두더지 잡기</h2>
+        
+        <div class="rules">
+            ⏱ 게임 시간 : <b>20초</b> (총 3회 플레이 가능)<br>
+            🐹 두더지 : <b>+100점</b> (연속 성공 시 콤보 가산)<br>
+            🐰 토끼 : <b>-100점</b> / 🐯 호랑이 : <b>-150점</b>
+        </div>
+
+        <div class="input-box">
+            <div>
+                <label>소속 팀 선택</label>
+                <select id="teamSelect" class="input-control">
+                    <option value="">소속 팀을 선택하세요</option>
+                    <option value="증권개발팀">증권개발팀</option>
+                    <option value="증권채널팀">증권채널팀</option>
+                    <option value="카드개발팀">카드개발팀</option>
+                    <option value="라이프개발팀">라이프개발팀</option>
+                </select>
+            </div>
+            <div>
+                <label>사번 입력</label>
+                <input type="text" id="sabunInput" class="input-control" placeholder="사번 입력 (숫자)" maxlength="10">
+            </div>
+        </div>
+
+        <button onclick="handleInitialStart()">대회 참가 및 시작</button>
+    </div>
+</div>
+
+<!-- 게임 화면 -->
+<div class="game" id="gameScreen">
+    <h1>🐹 두더지 잡기</h1>
+    <div id="userBadge" class="user-badge" style="display:none;"></div>
+
+    <div class="stats">
+        <div class="stat time">⏱ <span id="time">20</span>초</div>
+        <div class="stat score">점수 <span id="score">0</span></div>
+        <div class="stat combo">콤보 <span id="combo">0</span></div>
+    </div>
+
+    <div class="board" id="board"></div>
+</div>
+
+<!-- 결과 화면 -->
+<div class="overlay hidden" id="result">
+    <div class="modal">
+        <h2>🎉 게임 종료!</h2>
+        <div class="result" id="finalScore">0</div>
+        <div>
+            잡은 두더지 : <b id="hits">0</b>마리<br>
+            최대 콤보 : <b id="maxCombo">0</b><br>
+            개인 최고 점수 : <b id="best">0</b>
+        </div>
+        <br>
+        <button id="retryButton" style="display:none">다시 하기</button>
+    </div>
+</div>
+
+<script>
+// 배포된 구글 스프레드시트 웹 앱 URL 및 식별자
+const GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyY6mM4y9ltyZhDn7fMCctYajEBye1sxZpQrQ-FcabhllionztMTlJEJMCKCDy_ZxCOMg/exec";
+const GAME_NAME = "두더지잡기";
+
+const GAME_TIME = 20;
+const BAD_PROB = .25;
+const MAX_GAME_COUNT = 3;
+
+let userTeam = "";
+let userSabun = "";
+let gameCount = 0;
+
+const board = document.getElementById("board");
+const timeEl = document.getElementById("time");
+const scoreEl = document.getElementById("score");
+const comboEl = document.getElementById("combo");
+const userBadge = document.getElementById("userBadge");
+
+let score = 0;
+let combo = 0;
+let maxCombo = 0;
+let hits = 0;
+let time = GAME_TIME;
+let current = -1;
+let running = false;
+let timer;
+let animalTimer;
+
+let best = Number(localStorage.getItem("whackAMoleBest_" + GAME_NAME)) || 0;
+document.getElementById("best").textContent = best;
+
+// 구글 시트 로그 비동기 전송
+function sendLog(eventType, extraData = {}) {
+    if (!GOOGLE_WEBHOOK_URL) return;
+    const payload = Object.assign({
+        game: GAME_NAME,
+        team: userTeam,
+        sabun: userSabun,
+        event: eventType,
+        level: `${gameCount}회차`
+    }, extraData);
+
+    fetch(GOOGLE_WEBHOOK_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    }).catch(err => console.warn("로그 전송 실패:", err));
+}
+
+// 9개 구멍 DOM 생성
+for (let i = 0; i < 9; i++) {
+    const hole = document.createElement("div");
+    hole.className = "hole";
+    ["mole", "rabbit", "tiger"].forEach(type => {
+        hole.innerHTML += `
+            <div class="animal ${type}">
+                <div class="ear left"></div>
+                <div class="ear right"></div>
+                <div class="eye left"></div>
+                <div class="eye right"></div>
+                <div class="nose"></div>
+            </div>
+        `;
+    });
+    hole.addEventListener("click", () => hit(i));
+    board.appendChild(hole);
+}
+const holes = document.querySelectorAll(".hole");
+
+// 팀 & 사번 유효성 체크 후 최초 시작
+function handleInitialStart() {
+    const team = document.getElementById("teamSelect").value;
+    const sabun = document.getElementById("sabunInput").value.trim();
+
+    if (!team) {
+        alert("소속 팀을 선택해 주세요.");
+        return;
+    }
+    if (!sabun) {
+        alert("사번을 입력해 주세요.");
+        return;
+    }
+
+    userTeam = team;
+    userSabun = sabun;
+
+    userBadge.textContent = `[${userTeam}] 사번: ${userSabun}`;
+    userBadge.style.display = "inline-block";
+
+    startGame();
+}
+
+// 단일 게임 라운드 시작
+function startGame() {
+    if (gameCount >= MAX_GAME_COUNT) return;
+
+    gameCount++;
+
+    clearInterval(timer);
+    clearTimeout(animalTimer);
+
+    score = 0;
+    combo = 0;
+    maxCombo = 0;
+    hits = 0;
+    time = GAME_TIME;
+    current = -1;
+    running = true;
+
+    timeEl.textContent = time;
+    scoreEl.textContent = score;
+    comboEl.textContent = combo;
+
+    document.getElementById("start").classList.add("hidden");
+    document.getElementById("result").classList.add("hidden");
+    document.getElementById("retryButton").style.display = "none";
+
+    hide();
+
+    // 시작 로그 전송
+    sendLog("시작", { score: 0 });
+
+    timer = setInterval(() => {
+        timeEl.textContent = --time;
+        if (time <= 0) {
+            endGame();
+        }
+    }, 1000);
+
+    next();
+}
+
+function hide() {
+    document.querySelectorAll(".animal").forEach(a => a.classList.remove("active"));
+}
+
+function next() {
+    if (!running) return;
+    hide();
+
+    let index;
+    do {
+        index = Math.floor(Math.random() * 9);
+    } while (index === current);
+
+    current = index;
+    const type = Math.random() < BAD_PROB
+        ? (Math.random() < .5 ? "rabbit" : "tiger")
+        : "mole";
+
+    const animal = holes[index].querySelector("." + type);
+    animal.classList.add("active");
+
+    const speed = 1100 - 400 * (1 - time / GAME_TIME);
+    clearTimeout(animalTimer);
+
+    animalTimer = setTimeout(() => {
+        animal.classList.remove("active");
+        next();
+    }, speed);
+}
+
+function hit(index) {
+    if (!running || index !== current) return;
+    const animal = holes[index].querySelector(".active");
+    if (!animal) return;
+
+    clearTimeout(animalTimer);
+    animal.classList.remove("active");
+
+    if (animal.classList.contains("mole")) {
+        hits++;
+        combo++;
+        maxCombo = Math.max(maxCombo, combo);
+        const point = 100 + (combo - 1) * 10;
+        score += point;
+        pop(holes[index], "+" + point);
+    } else if (animal.classList.contains("rabbit")) {
+        score -= 100;
+        combo = 0;
+        pop(holes[index], "-100", true);
+    } else if (animal.classList.contains("tiger")) {
+        score -= 150;
+        combo = 0;
+        pop(holes[index], "-150", true);
+    }
+
+    scoreEl.textContent = score;
+    comboEl.textContent = combo;
+    next();
+}
+
+function pop(hole, text, bad = false) {
+    const el = document.createElement("div");
+    el.className = "pop" + (bad ? " bad" : "");
+    el.textContent = text;
+    hole.appendChild(el);
+    setTimeout(() => el.remove(), 600);
+}
+
+function endGame() {
+    running = false;
+    clearInterval(timer);
+    clearTimeout(animalTimer);
+    hide();
+
+    if (score > best) {
+        best = score;
+        localStorage.setItem("whackAMoleBest_" + GAME_NAME, best);
+    }
+
+    document.getElementById("finalScore").textContent = score;
+    document.getElementById("hits").textContent = hits;
+    document.getElementById("maxCombo").textContent = maxCombo;
+    document.getElementById("best").textContent = best;
+
+    // 종료 로그 전송
+    sendLog("종료", {
+        score: score,
+        detail: `잡은수: ${hits}마리, 최대콤보: ${maxCombo}`
+    });
+
+    const retryButton = document.getElementById("retryButton");
+    if (gameCount < MAX_GAME_COUNT) {
+        const remaining = MAX_GAME_COUNT - gameCount;
+        retryButton.style.display = "block";
+        retryButton.textContent = `다시 하기 (${remaining}회 남음)`;
+        retryButton.onclick = startGame;
+    } else {
+        retryButton.style.display = "block";
+        retryButton.textContent = "최종 완료 (창 닫기)";
+        retryButton.onclick = () => window.close();
+    }
+
+    document.getElementById("result").classList.remove("hidden");
+}
+</script>
+</body>
+</html>
