@@ -61,34 +61,29 @@
   .brand-logo{ width:32px; height:32px; flex-shrink:0; }
   .brand-logo svg{ width:100%; height:100%; display:block; }
   .brand-text{ display:flex; flex-direction:column; line-height:1.2; }
-  .brand-name { 
-    font-size: 13px; 
-    font-weight: 800; 
-    color: #fff; 
-    letter-spacing: -0.02em; 
-  }
-  .brand-dept {
-    display: inline-block;
-    margin-top: 2px;
-    font-size: 10px;
-    font-weight: 800;
+  .brand-name{ font-size:13px; font-weight:800; color:#fff; letter-spacing:-0.02em; }
+  .brand-dept{
+    display:inline-block;
+    margin-top:2px;
+    font-size:10px;
+    font-weight:800;
     color: var(--navy);
     background: var(--sky);
-    padding: 2px 8px; /* 좌우 패딩을 살짝 넓혀 뱃지가 꽉 차 보이게 조정 */
-    border-radius: 999px;
+    padding:2px 8px;
+    border-radius:999px;
     width: fit-content;
-    letter-spacing: -0.01em;
+    letter-spacing:-0.01em;
   }
-  .event-tag {
-    font-size: 11px;
-    font-weight: 700;
+  .event-tag{
+    font-size:11px;
+    font-weight:700;
     color: var(--ice);
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 6px 12px; /* 태그 볼륨감 확대 */
-    border-radius: 999px;
-    white-space: nowrap;
-    letter-spacing: -0.01em;
+    background: rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.2);
+    padding:6px 12px;
+    border-radius:999px;
+    white-space:nowrap;
+    letter-spacing:-0.01em;
   }
 
   /* 게임 바로가기 네비게이션 바 */
@@ -143,8 +138,10 @@
     font-weight: 600;
     display:inline-block;
     margin-top:6px;
+    cursor:pointer;
   }
 
+  /* HUD 상태 패널 */
   .hud{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
   .stat{
     background: rgba(255,255,255,0.06);
@@ -160,6 +157,7 @@
   .stat.score .value{ color: var(--accent); }
   .stat.combo .value{ color: var(--sky); }
 
+  /* 게임 보드 영역 */
   #board-wrap{
     background: linear-gradient(180deg, #0E2A4A, #0A2036);
     border: 1px solid rgba(255,255,255,0.1);
@@ -173,71 +171,73 @@
     display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;
   }
   .hole{
-    position:relative; height:105px; overflow:hidden; border-radius:50%;
-    background:#071629; box-shadow:inset 0 10px 14px rgba(0,0,0,0.7);
+    position:relative; height:110px; overflow:hidden; border-radius:50%;
+    background:#6b4935;
+    box-shadow: inset 0 8px 12px rgba(35,20,12,.65), 0 3px 8px rgba(0,0,0,.35);
+    border:2px solid #8b654b;
     cursor:pointer; touch-action:manipulation;
   }
   .hole:after{
-    content:""; position:absolute; left:10%; right:10%; bottom:5px; height:18px;
-    background:#040d18; border-radius:50%; z-index:4; pointer-events:none;
+    content:""; position:absolute; left:10%; right:10%; bottom:5px; height:20px;
+    background:#38251b; border-radius:50%; z-index:4; pointer-events:none;
   }
 
   /* 동물 그래픽 */
   .animal{
-    position:absolute; width:74px; height:84px; left:50%; bottom:-105px;
+    position:absolute; width:76px; height:86px; left:50%; bottom:-110px;
     transform:translateX(-50%); transition:.15s; border-radius:45% 45% 40% 40%; z-index:2;
   }
-  .animal.active{ bottom:4px; }
-  .eye{ position:absolute; top:26px; width:8px; height:9px; background:#222; border-radius:50%; z-index:4; }
-  .eye.left{ left:19px; } .eye.right{ right:19px; }
-  .nose{ position:absolute; top:40px; left:50%; transform:translateX(-50%); width:12px; height:8px; background:#222; border-radius:50%; z-index:4; }
+  .animal.active{ bottom:5px; }
+  .eye{ position:absolute; top:28px; width:9px; height:10px; background:#222; border-radius:50%; z-index:4; }
+  .eye.left{ left:20px; } .eye.right{ right:20px; }
+  .nose{ position:absolute; top:43px; left:50%; transform:translateX(-50%); width:13px; height:9px; background:#222; border-radius:50%; z-index:4; }
 
   /* 두더지 */
   .mole{ background:#8b5a3c; border:3px solid #65402d; border-radius:45% 45% 35% 35%; }
   .mole .ear{ display:none; }
-  .mole .eye{ top:27px; width:8px; height:8px; }
-  .mole .nose{ top:42px; width:13px; height:9px; background:#e88d9d; }
+  .mole .eye{ top:28px; width:9px; height:9px; }
+  .mole .nose{ top:44px; width:14px; height:10px; background:#e88d9d; }
 
   /* 토끼 */
   .rabbit{ background:#f1dddd; border:3px solid #d2b5b5; border-radius:45% 45% 35% 35%; }
   .rabbit .ear{
-    position:absolute; width:15px; height:28px; top:-6px; background:#f1dddd;
+    position:absolute; width:16px; height:30px; top:-7px; background:#f1dddd;
     border:3px solid #d2b5b5; border-radius:50%; z-index:1;
   }
-  .rabbit .ear.left{ left:10px; transform:rotate(-8deg); }
-  .rabbit .ear.right{ right:10px; transform:rotate(8deg); }
-  .rabbit .ear:after{ content:""; position:absolute; width:6px; height:18px; top:3px; left:2px; background:#e8a8b8; border-radius:50%; }
+  .rabbit .ear.left{ left:11px; transform:rotate(-8deg); }
+  .rabbit .ear.right{ right:11px; transform:rotate(8deg); }
+  .rabbit .ear:after{ content:""; position:absolute; width:6px; height:19px; top:4px; left:2px; background:#e8a8b8; border-radius:50%; }
   .rabbit .nose{ background:#d87f98; }
   .rabbit:after{
-    content:""; position:absolute; left:50%; top:48px; transform:translateX(-50%);
-    width:18px; height:12px;
-    background:linear-gradient(to right, white 0, white 7px, transparent 7px, transparent 11px, white 11px, white 18px);
+    content:""; position:absolute; left:50%; top:51px; transform:translateX(-50%);
+    width:20px; height:13px;
+    background:linear-gradient(to right, white 0, white 8px, transparent 8px, transparent 12px, white 12px, white 20px);
     border-radius:0 0 4px 4px; z-index:3;
   }
 
   /* 호랑이 */
   .tiger{ background:#e9a13b; border:3px solid #c47b22; border-radius:45% 45% 35% 35%; }
   .tiger .ear{
-    position:absolute; width:16px; height:16px; top:2px; background:#e9a13b;
+    position:absolute; width:17px; height:17px; top:2px; background:#e9a13b;
     border:3px solid #c47b22; border-radius:50%; z-index:1;
   }
   .tiger .ear.left{ left:8px; } .tiger .ear.right{ right:8px; }
   .tiger .ear:after{ content:""; position:absolute; width:7px; height:7px; left:2px; top:2px; background:#f4c47a; border-radius:50%; }
   .tiger:before{
-    content:""; position:absolute; left:11px; top:23px; width:8px; height:13px;
-    border-left:3px solid #70451f; border-radius:50%; transform:rotate(-20deg); box-shadow:42px 0 0 -1px #70451f;
+    content:""; position:absolute; left:11px; top:24px; width:8px; height:14px;
+    border-left:3px solid #70451f; border-radius:50%; transform:rotate(-20deg); box-shadow:44px 0 0 -1px #70451f;
   }
   .tiger:after{
-    content:""; position:absolute; left:50%; top:48px; transform:translateX(-50%);
-    width:12px; height:7px; background:#8b5a3c; border-radius:50%; z-index:3;
+    content:""; position:absolute; left:50%; top:50px; transform:translateX(-50%);
+    width:13px; height:8px; background:#8b5a3c; border-radius:50%; z-index:3;
   }
-  .tiger .eye{ width:8px; height:8px; top:27px; background:#3d2a1c; }
-  .tiger .nose{ top:40px; width:10px; height:7px; background:#8b5a3c; }
+  .tiger .eye{ width:9px; height:9px; top:28px; background:#3d2a1c; }
+  .tiger .nose{ top:42px; width:11px; height:8px; background:#8b5a3c; }
 
   /* 팝업 점수 */
   .pop{
     position:absolute; top:8px; left:50%; transform:translateX(-50%);
-    font-size:20px; font-weight:800; font-family:var(--font-num); color:var(--accent);
+    font-size:22px; font-weight:800; font-family:var(--font-num); color:var(--accent);
     animation:pop .6s forwards; z-index:5; pointer-events:none;
   }
   .pop.bad{ color:var(--danger); }
@@ -262,6 +262,7 @@
 
   .hint{ font-size:12px; color:var(--ice); opacity:0.6; text-align:center; max-width:480px; }
 
+  /* 모달 레이아웃 */
   #overlay, #ruleOverlay, #authOverlay{
     position:fixed; inset:0;
     background: rgba(4,12,24,0.85);
@@ -300,6 +301,23 @@
   }
   select.auth-input option{ background: #123A63; color:#fff; }
   .auth-error{ color: var(--danger); font-size: 12px; margin: -10px 0 14px; height: 14px; display: block; }
+
+  /* 광고 팝업 레이아웃 */
+  .adPopup{
+    position:fixed; inset:0;
+    background:rgba(4,12,24,0.92);
+    display:none; justify-content:center; align-items:center;
+    z-index:9999; padding:20px;
+  }
+  .adBox{ text-align:center; max-width:90vw; }
+  .adBox img{
+    width:350px; max-width:90vw; border-radius:12px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.6);
+  }
+  #adCloseBtn{
+    width:auto; min-width:140px; margin-top:20px;
+  }
+  #adCloseBtn:disabled{ opacity:0.5; cursor:not-allowed; }
 </style>
 </head>
 <body>
@@ -340,7 +358,7 @@
             <text x="20" y="27" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="18" fill="#fff">SDS</text>
           </svg>
         </div>
-		<div class="brand-text">
+        <div class="brand-text">
           <span class="brand-name">신한DS 금융본부</span>
           <span class="brand-dept">3분기 리버스 멘토링</span>
         </div>
@@ -360,7 +378,7 @@
   <div class="titlebar">
     <h1>🐹 두더지 잡기</h1>
     <div class="sub">두더지를 잡고 콤보를 달성해보세요 (토끼/호랑이는 감점)</div>
-    <div><span id="playerBadge" class="player-tag" style="display:none;"></span></div>
+    <div><span id="playerBadge" class="player-tag" style="display:none;" title="클릭 시 팀/사번 변경"></span></div>
   </div>
 
   <div class="hud">
@@ -386,9 +404,10 @@
     <button class="main" id="restartBtn" style="display:none;">다시 시작</button>
     <button class="ghost" id="ruleBtn">규칙 보기</button>
   </div>
-  <div class="hint">두더지를 연속으로 잡으면 콤보 보너스가 주어집니다. 총 3회 도전 가능합니다.</div>
+  <div class="hint">두더지를 연속으로 잡으면 콤보 보너스가 주어집니다. 🐰/🐯를 조심하세요!</div>
 </div>
 
+<!-- 결과 화면 -->
 <div id="overlay">
   <div class="modal">
     <h2 id="modalTitle">게임 종료!</h2>
@@ -398,20 +417,30 @@
       최대 콤보: <b id="maxCombo" style="color:var(--accent);">0</b><br>
       내 최고 점수: <b id="best" style="color:#fff;">0</b>
     </p>
-    <button class="main" id="modalRestart">다시 하기</button>
+    <button class="main" id="retryButton">다시 하기</button>
   </div>
 </div>
 
+<!-- 규칙 모달 -->
 <div id="ruleOverlay">
   <div class="modal">
     <h2>게임 규칙</h2>
     <ol>
-      <li>⏱ 제한시간 : <b>20초</b> (총 3회 플레이 가능)</li>
-      <li>🐹 두더지 : <b>+100점</b> (연속 성공 시 콤보 가산)</li>
-      <li>🐰 토끼 : <b>-100점</b> / 🐯 호랑이 : <b>-150점</b> (콤보 초기화)</li>
-      <li>제한시간 안에 최고 득점을 노려보세요!</li>
+      <li>⏱ 제한시간 : <b>20초</b> 동안 진행됩니다.</li>
+      <li>🐹 두더지 : <b>+10점</b> (연속 성공 시 콤보 가산)</li>
+      <li>🐰 토끼 : <b>-30점</b> / 🐯 호랑이 : <b>-50점</b> (콤보 초기화)</li>
+      <li>동시에 최대 2마리까지 등장하니 신속하게 캐치하세요!</li>
     </ol>
     <button class="main" id="ruleCloseBtn">확인</button>
+  </div>
+</div>
+
+<!-- 광고 팝업 (다시하기 클릭 시 표시) -->
+<div class="adPopup" id="adPopup">
+  <div class="adBox">
+    <img src="test.jpg" alt="신한DS 10대 업무수칙">
+    <br>
+    <button class="main" id="adCloseBtn" disabled>닫기 (3)</button>
   </div>
 </div>
 
@@ -421,8 +450,9 @@
   var GAME_NAME = "두더지잡기";
 
   var GAME_TIME = 20;
-  var BAD_PROB = 0.25;
-  var MAX_GAME_COUNT = 3;
+  var MOLE_COUNT = 14;
+  var RABBIT_COUNT = 4;
+  var TIGER_COUNT = 4;
 
   var currentTeam = "";
   var currentSabun = "";
@@ -441,12 +471,15 @@
   var authError = document.getElementById("authError");
 
   var overlay = document.getElementById("overlay");
-  var modalRestart = document.getElementById("modalRestart");
+  var retryButton = document.getElementById("retryButton");
   var ruleOverlay = document.getElementById("ruleOverlay");
-  var restartBtn = document.getElementById("restartBtn");
+  var ruleBtn = document.getElementById("ruleBtn");
+  var ruleCloseBtn = document.getElementById("ruleCloseBtn");
 
   var score = 0, combo = 0, maxCombo = 0, hits = 0, time = GAME_TIME;
-  var current = -1, running = false, timer, animalTimer;
+  var running = false;
+  var spawnTimers = [];
+  var timer, animalTimer;
 
   var best = Number(localStorage.getItem("whackAMoleBest_" + GAME_NAME)) || 0;
   document.getElementById("best").textContent = best;
@@ -466,10 +499,11 @@
       mode: "no-cors",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
-    }).catch(function(err){ console.warn("로깅 실패:", err); });
+    }).catch(function(err){ console.warn("로그 실패:", err); });
   }
 
-  for(var i=0; i<9; i++){
+  // 9개 구멍 생성
+  for(var i = 0; i < 9; i++){
     (function(idx){
       var hole = document.createElement("div");
       hole.className = "hole";
@@ -489,23 +523,55 @@
     document.querySelectorAll(".animal").forEach(function(a){ a.classList.remove("active"); });
   }
 
-  function next(){
-    if(!running) return;
-    hide();
-    var index;
-    do{ index = Math.floor(Math.random() * 9); } while(index === current);
-    current = index;
+  function scheduleSpawns(){
+    spawnTimers.forEach(function(t){ clearTimeout(t); });
+    spawnTimers = [];
 
-    var type = Math.random() < BAD_PROB ? (Math.random() < 0.5 ? "rabbit" : "tiger") : "mole";
+    function randomTimes(count){
+      var arr = [];
+      for(var i = 0; i < count; i++){
+        arr.push(500 + Math.random() * 18500);
+      }
+      return arr.sort(function(a, b){ return a - b; });
+    }
+
+    randomTimes(MOLE_COUNT).forEach(function(t){
+      spawnTimers.push(setTimeout(function(){ spawnAnimal("mole"); }, t));
+    });
+    randomTimes(RABBIT_COUNT).forEach(function(t){
+      spawnTimers.push(setTimeout(function(){ spawnAnimal("rabbit"); }, t));
+    });
+    randomTimes(TIGER_COUNT).forEach(function(t){
+      spawnTimers.push(setTimeout(function(){ spawnAnimal("tiger"); }, t));
+    });
+  }
+
+  function spawnAnimal(type){
+    if(!running) return;
+
+    var activeCount = document.querySelectorAll(".animal.active").length;
+    if(activeCount >= 2){
+      setTimeout(function(){ if(running) spawnAnimal(type); }, 300);
+      return;
+    }
+
+    var availableHoles = [];
+    holes.forEach(function(hole, index){
+      if(!hole.querySelector(".animal.active")) availableHoles.push(index);
+    });
+
+    if(availableHoles.length === 0){
+      setTimeout(function(){ if(running) spawnAnimal(type); }, 300);
+      return;
+    }
+
+    var index = availableHoles[Math.floor(Math.random() * availableHoles.length)];
     var animal = holes[index].querySelector("." + type);
     animal.classList.add("active");
 
-    var speed = 1100 - 400 * (1 - time / GAME_TIME);
-    clearTimeout(animalTimer);
-    animalTimer = setTimeout(function(){
+    setTimeout(function(){
       animal.classList.remove("active");
-      next();
-    }, speed);
+    }, 900);
   }
 
   function pop(hole, text, bad){
@@ -517,7 +583,7 @@
   }
 
   function hit(index){
-    if(!running || index !== current) return;
+    if(!running) return;
     var animal = holes[index].querySelector(".active");
     if(!animal) return;
 
@@ -527,49 +593,59 @@
     if(animal.classList.contains("mole")){
       hits++; combo++;
       maxCombo = Math.max(maxCombo, combo);
-      var pt = 100 + (combo - 1) * 10;
+      var pt = 10 + (combo - 1) * 10;
       score += pt;
       pop(holes[index], "+" + pt, false);
     } else if(animal.classList.contains("rabbit")){
-      score -= 100; combo = 0;
-      pop(holes[index], "-100", true);
+      score -= 30; combo = 0;
+      pop(holes[index], "-30", true);
     } else if(animal.classList.contains("tiger")){
-      score -= 150; combo = 0;
-      pop(holes[index], "-150", true);
+      score -= 50; combo = 0;
+      pop(holes[index], "-50", true);
     }
     scoreEl.textContent = score;
     comboEl.textContent = combo;
-    next();
   }
 
   function startGame(){
-    if(gameCount >= MAX_GAME_COUNT) return;
     gameCount++;
     clearInterval(timer);
     clearTimeout(animalTimer);
+    spawnTimers.forEach(function(t){ clearTimeout(t); });
+
     score = 0; combo = 0; maxCombo = 0; hits = 0; time = GAME_TIME;
-    current = -1; running = true;
-    timeEl.textContent = time; scoreEl.textContent = score; comboEl.textContent = combo;
+    running = true;
+
+    timeEl.textContent = time;
+    scoreEl.textContent = score;
+    comboEl.textContent = combo;
+
     overlay.classList.remove("show");
     hide();
+
     sendLog("시작", { score: 0 });
+
     timer = setInterval(function(){
-      time--; timeEl.textContent = time;
-      if(time <= 0){ endGame(); }
+      time--;
+      timeEl.textContent = time;
+      if(time <= 0) endGame();
     }, 1000);
-    next();
+
+    scheduleSpawns();
   }
 
   function endGame(){
     running = false;
     clearInterval(timer);
     clearTimeout(animalTimer);
+    spawnTimers.forEach(function(t){ clearTimeout(t); });
     hide();
 
     if(score > best){
       best = score;
       localStorage.setItem("whackAMoleBest_" + GAME_NAME, best);
     }
+
     document.getElementById("finalScore").textContent = score;
     document.getElementById("hits").textContent = hits;
     document.getElementById("maxCombo").textContent = maxCombo;
@@ -577,18 +653,38 @@
 
     sendLog("종료", {
       score: score,
-      detail: "잡은수: " + hits + "마리, 최대콤보: " + maxCombo
+      detail: `잡은수: ${hits}마리, 최대콤보: ${maxCombo}`
     });
 
-    if(gameCount < MAX_GAME_COUNT){
-      var remaining = MAX_GAME_COUNT - gameCount;
-      modalRestart.textContent = "다시 하기 (" + remaining + "회 남음)";
-      modalRestart.onclick = startGame;
-    } else {
-      modalRestart.textContent = "최종 완료 (종료)";
-      modalRestart.onclick = function(){ overlay.classList.remove("show"); };
-    }
     overlay.classList.add("show");
+  }
+
+  function showAdPopup(){
+    var popup = document.getElementById("adPopup");
+    var closeBtn = document.getElementById("adCloseBtn");
+
+    popup.style.display = "flex";
+    closeBtn.disabled = true;
+
+    var count = 3;
+    closeBtn.textContent = "닫기 (" + count + ")";
+
+    var countdown = setInterval(function(){
+      count--;
+      if(count > 0){
+        closeBtn.textContent = "닫기 (" + count + ")";
+      } else {
+        clearInterval(countdown);
+        closeBtn.disabled = false;
+        closeBtn.textContent = "닫기";
+      }
+    }, 1000);
+
+    closeBtn.onclick = function(){
+      if(closeBtn.disabled) return;
+      popup.style.display = "none";
+      startGame();
+    };
   }
 
   function handleAuth(){
@@ -605,7 +701,6 @@
       sabunInput.focus(); return;
     }
 
-    // ★ 브라우저 영구 저장 (5개 게임 모두 공유됨)
     localStorage.setItem("sh_mini_team", teamVal);
     localStorage.setItem("sh_mini_sabun", val);
 
@@ -623,18 +718,15 @@
     teamSelect.classList.remove('error'); authError.textContent = "";
   });
 
-  restartBtn.addEventListener('click', startGame);
-  document.getElementById('ruleBtn').addEventListener('click', function(){
-    ruleOverlay.classList.add('show');
-  });
-  document.getElementById('ruleCloseBtn').addEventListener('click', function(){
-    ruleOverlay.classList.remove('show');
-  });
+  retryButton.addEventListener('click', showAdPopup);
+
+  ruleBtn.addEventListener('click', function(){ ruleOverlay.classList.add('show'); });
+  ruleCloseBtn.addEventListener('click', function(){ ruleOverlay.classList.remove('show'); });
   ruleOverlay.addEventListener('click', function(e){
     if(e.target === ruleOverlay) ruleOverlay.classList.remove('show');
   });
 
-  // ★ 기존 접속 기록 확인 (자동 로그인)
+  // 기존 저장된 로그인 기록 확인
   var savedTeam = localStorage.getItem("sh_mini_team");
   var savedSabun = localStorage.getItem("sh_mini_sabun");
 
@@ -643,16 +735,14 @@
     currentSabun = savedSabun;
     playerBadge.textContent = "플레이어: " + currentTeam + " · " + currentSabun;
     playerBadge.style.display = "inline-block";
-    authOverlay.classList.remove('show'); // 팝업 생략
-    startGame(); // 즉시 게임 시작
+    authOverlay.classList.remove('show');
+    startGame();
   } else {
     authOverlay.classList.add('show');
     sabunInput.focus();
   }
 
-  // (선택) 사번을 잘못 입력했을 때 배지를 누르면 다시 입력할 수 있는 기능
-  playerBadge.style.cursor = "pointer";
-  playerBadge.title = "클릭 시 팀/사번 변경";
+  // 배지 클릭 시 정보 초기화 및 재입력
   playerBadge.addEventListener("click", function(){
     if(confirm("등록된 팀/사번 정보를 변경하시겠습니까?")){
       localStorage.removeItem("sh_mini_team");
