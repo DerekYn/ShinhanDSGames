@@ -28,14 +28,8 @@
   }
   #app{
     display:flex; flex-direction:column; align-items:center;
-    min-height:100vh; padding: 18px; gap:14px;
+    min-height:100vh; min-height:100dvh; padding: 12px; gap:8px;
   }
-  .titlebar{ text-align:center; }
-  .titlebar h1{
-    font-size: clamp(22px, 4vw, 30px);
-    margin:0 0 4px; font-weight:700; letter-spacing:-0.02em; color:#fff;
-  }
-  .titlebar .sub{ font-size:13px; color: var(--ice); opacity:0.75; }
 
   /* 브랜드 헤더 */
   .brand-bar{
@@ -43,11 +37,11 @@
     max-width: 640px;
     display:flex;
     flex-direction:column;
-    gap:10px;
+    gap:6px;
     background: linear-gradient(135deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02));
     border:1px solid rgba(255,255,255,0.16);
     border-radius:16px;
-    padding:10px 14px;
+    padding:8px 12px;
     box-sizing:border-box;
   }
   .brand-top{
@@ -61,30 +55,50 @@
   .brand-logo{ width:32px; height:32px; flex-shrink:0; }
   .brand-logo svg{ width:100%; height:100%; display:block; }
   .brand-text{ display:flex; flex-direction:column; line-height:1.2; }
-  .brand-name{ font-size:13px; font-weight:800; color:#fff; letter-spacing:-0.02em; }
-  .brand-dept{
-    display:inline-block;
-    margin-top:2px;
-    font-size:10px;
-    font-weight:800;
+  .brand-name { 
+    font-size: 13px; 
+    font-weight: 800; 
+    color: #fff; 
+    letter-spacing: -0.02em; 
+  }
+  .brand-dept {
+    display: inline-block;
+    margin-top: 2px;
+    font-size: 10px;
+    font-weight: 800;
     color: var(--navy);
     background: var(--sky);
-    padding:2px 8px;
-    border-radius:999px;
+    padding: 2px 8px;
+    border-radius: 999px;
     width: fit-content;
-    letter-spacing:-0.01em;
+    letter-spacing: -0.01em;
   }
-  .event-tag{
-    font-size:11px;
-    font-weight:700;
+  .event-tag {
+    font-size: 11px;
+    font-weight: 700;
     color: var(--ice);
-    background: rgba(255,255,255,0.08);
-    border:1px solid rgba(255,255,255,0.2);
-    padding:6px 12px;
-    border-radius:999px;
-    white-space:nowrap;
-    letter-spacing:-0.01em;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 6px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+    letter-spacing: -0.01em;
   }
+
+  .nav-toggle{
+    width:26px; height:26px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    background: rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.18);
+    border-radius:8px;
+    color: var(--ice);
+    cursor:pointer;
+  }
+  .nav-toggle:hover{ background: rgba(255,255,255,0.16); }
+  .nav-toggle svg{ width:14px; height:14px; transition: transform 0.2s ease; display:block; }
+  .brand-bar.collapsed .nav-games{ display:none; }
+  .brand-bar.collapsed .nav-toggle svg{ transform: rotate(-90deg); }
+  .brand-right{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
 
   /* 게임 바로가기 네비게이션 바 */
   .nav-games{
@@ -105,7 +119,7 @@
     align-items:center;
     justify-content:center;
     gap:4px;
-    padding:6px 8px;
+    padding:5px 7px;
     border-radius:10px;
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.12);
@@ -128,41 +142,94 @@
     box-shadow: 0 0 10px rgba(79, 157, 222, 0.4);
   }
 
+  /* =========================================
+     [가로형 통합 대시보드 - 사과게임과 100% 동일 규격]
+     ========================================= */
+  .game-dash{
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 14px;
+    padding: 8px 12px;
+    box-sizing: border-box;
+    flex-wrap: nowrap; /* 절대 개행 방지 */
+  }
+  .dash-left{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    flex-shrink: 1;
+  }
+  .game-title{
+    font-size: clamp(15px, 2.5vw, 18px);
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
   .player-tag{
-    font-size: 12px;
+    font-size: 11px;
     background: rgba(47, 191, 158, 0.15);
     border: 1px solid var(--accent);
     color: var(--accent);
-    padding: 3px 10px;
+    padding: 2px 7px;
     border-radius: 20px;
     font-weight: 600;
-    display:inline-block;
-    margin-top:6px;
-    cursor:pointer;
+    white-space: nowrap;
+    cursor: pointer;
   }
-
-  /* HUD 상태 패널 */
-  .hud{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
-  .stat{
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 12px;
-    padding: 8px 16px;
-    min-width: 92px;
-    text-align:center;
+  .dash-stats{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
   }
-  .stat .label{ font-size:11px; color:var(--ice); opacity:0.7; margin-bottom:2px;}
-  .stat .value{ font-size:20px; font-weight:700; font-family: var(--font-num); font-variant-numeric: tabular-nums;}
-  .stat.time .value{ color: var(--danger); }
-  .stat.score .value{ color: var(--accent); }
-  .stat.combo .value{ color: var(--sky); }
+  .stat-card{
+    background: rgba(6, 20, 36, 0.75);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 9px;
+    padding: 3px 8px;
+    min-width: 52px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .stat-lbl{
+    font-size: 10px;
+    color: var(--ice);
+    opacity: 0.75;
+    line-height: 1.1;
+    margin-bottom: 2px;
+    white-space: nowrap;
+  }
+  .stat-val{
+    font-size: 15px;
+    font-weight: 800;
+    font-family: var(--font-num);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+  .stat-card.time .stat-val { color: var(--danger); }
+  .stat-card.score .stat-val { color: var(--accent); }
+  .stat-card.combo .stat-val { color: var(--sky); }
 
   /* 게임 보드 영역 */
   #board-wrap{
     background: linear-gradient(180deg, #0E2A4A, #0A2036);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 18px;
-    padding: 16px;
+    padding: 14px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
     width: min(94vw, 520px);
     box-sizing: border-box;
@@ -171,7 +238,7 @@
     display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;
   }
   .hole{
-    position:relative; height:110px; overflow:hidden; border-radius:50%;
+    position:relative; height:105px; overflow:hidden; border-radius:50%;
     background:#6b4935;
     box-shadow: inset 0 8px 12px rgba(35,20,12,.65), 0 3px 8px rgba(0,0,0,.35);
     border:2px solid #8b654b;
@@ -186,6 +253,7 @@
   .animal{
     position:absolute; width:76px; height:86px; left:50%; bottom:-110px;
     transform:translateX(-50%); transition:.15s; border-radius:45% 45% 40% 40%; z-index:2;
+    pointer-events:none;
   }
   .animal.active{ bottom:5px; }
   .eye{ position:absolute; top:28px; width:9px; height:10px; background:#222; border-radius:50%; z-index:4; }
@@ -243,7 +311,7 @@
   .pop.bad{ color:var(--danger); }
   @keyframes pop{ to{ opacity:0; transform:translate(-50%, -35px); } }
 
-  .controls{ display:flex; gap:10px; }
+  .controls{ display:flex; gap:10px; margin-top:2px; }
   button.main{
     font-family: var(--font-ui); font-size:14px; font-weight:600;
     background: var(--blue); color:#fff; border:none;
@@ -343,7 +411,7 @@
 
 <div id="app">
   <!-- 브랜드 바 (5종 게임 바로가기 탭 내장) -->
-  <div class="brand-bar">
+  <div class="brand-bar" id="brandBar">
     <div class="brand-top">
       <div class="brand-left">
         <div class="brand-logo" aria-hidden="true">
@@ -363,7 +431,12 @@
           <span class="brand-dept">3분기 리버스 멘토링</span>
         </div>
       </div>
-      <div class="event-tag">🏆 소통 미니게임대회</div>
+      <div class="brand-right">
+        <div class="event-tag">🏆 소통 미니게임대회</div>
+        <button class="nav-toggle" id="navToggle" aria-label="게임 목록 접기/펼치기" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+      </div>
     </div>
     
     <nav class="nav-games" aria-label="게임 종목 바로가기">
@@ -375,24 +448,41 @@
     </nav>
   </div>
 
-  <div class="titlebar">
-    <h1>🐹 두더지 잡기</h1>
-    <div class="sub">두더지를 잡고 콤보를 달성해보세요 (토끼/호랑이는 감점)</div>
-    <div><span id="playerBadge" class="player-tag" style="display:none;" title="클릭 시 팀/사번 변경"></span></div>
-  </div>
+  <script>
+  (function(){
+    var bar = document.getElementById('brandBar');
+    var toggle = document.getElementById('navToggle');
+    var KEY = 'sh_mini_navCollapsed';
+    if(!bar || !toggle) return;
+    var saved = localStorage.getItem(KEY);
+    if(saved === '1') bar.classList.add('collapsed');
+    toggle.addEventListener('click', function(){
+      var collapsed = bar.classList.toggle('collapsed');
+      localStorage.setItem(KEY, collapsed ? '1' : '0');
+    });
+  })();
+  </script>
 
-  <div class="hud">
-    <div class="stat time">
-      <div class="label">남은 시간</div>
-      <div class="value"><span id="time">20</span>초</div>
+  <!-- 가로형 통합 대시보드 (사과게임과 동일하게 개행 없이 1열 나란히 배치) -->
+  <div class="game-dash">
+    <div class="dash-left">
+      <h1 class="game-title">🐹 두더지 잡기</h1>
+      <span id="playerBadge" class="player-tag" style="display:none;" title="클릭 시 팀/사번 변경"></span>
     </div>
-    <div class="stat score">
-      <div class="label">점수</div>
-      <div class="value" id="score">0</div>
-    </div>
-    <div class="stat combo">
-      <div class="label">콤보</div>
-      <div class="value" id="combo">0</div>
+
+    <div class="dash-stats">
+      <div class="stat-card time">
+        <span class="stat-lbl">남은 시간</span>
+        <span class="stat-val"><span id="time">20</span>초</span>
+      </div>
+      <div class="stat-card score">
+        <span class="stat-lbl">점수</span>
+        <span class="stat-val" id="score">0</span>
+      </div>
+      <div class="stat-card combo">
+        <span class="stat-lbl">콤보</span>
+        <span class="stat-val" id="combo">0</span>
+      </div>
     </div>
   </div>
 
@@ -401,7 +491,7 @@
   </div>
 
   <div class="controls">
-    <button class="main" id="restartBtn" style="display:none;">다시 시작</button>
+    <button class="main" id="restartBtn">다시 시작</button>
     <button class="ghost" id="ruleBtn">규칙 보기</button>
   </div>
   <div class="hint">두더지를 연속으로 잡으면 콤보 보너스가 주어집니다. 🐰/🐯를 조심하세요!</div>
@@ -450,7 +540,7 @@
   var GAME_NAME = "두더지잡기";
 
   var GAME_TIME = 20;
-  var MOLE_COUNT = 14;
+  var MOLE_COUNT = 19;
   var RABBIT_COUNT = 4;
   var TIGER_COUNT = 4;
 
@@ -479,7 +569,7 @@
   var score = 0, combo = 0, maxCombo = 0, hits = 0, time = GAME_TIME;
   var running = false;
   var spawnTimers = [];
-  var timer, animalTimer;
+  var timer;
 
   var best = Number(localStorage.getItem("whackAMoleBest_" + GAME_NAME)) || 0;
   document.getElementById("best").textContent = best;
@@ -502,7 +592,7 @@
     }).catch(function(err){ console.warn("로그 실패:", err); });
   }
 
-  // 9개 구멍 생성
+  // 9개 구멍 생성 및 터치/클릭 즉시 반응 처리
   for(var i = 0; i < 9; i++){
     (function(idx){
       var hole = document.createElement("div");
@@ -513,14 +603,28 @@
           '<div class="eye left"></div><div class="eye right"></div>' +
           '<div class="nose"></div></div>';
       });
-      hole.addEventListener("click", function(){ hit(idx); });
+
+      var lastHit = 0;
+      function handleHit(e){
+        if(e) e.preventDefault();
+        var now = Date.now();
+        if(now - lastHit < 70) return;
+        lastHit = now;
+        hit(idx);
+      }
+
+      hole.addEventListener("pointerdown", handleHit);
+      hole.addEventListener("click", handleHit);
       board.appendChild(hole);
     })(i);
   }
   var holes = document.querySelectorAll(".hole");
 
   function hide(){
-    document.querySelectorAll(".animal").forEach(function(a){ a.classList.remove("active"); });
+    document.querySelectorAll(".animal").forEach(function(a){
+      if(a._hideTimer) clearTimeout(a._hideTimer);
+      a.classList.remove("active");
+    });
   }
 
   function scheduleSpawns(){
@@ -549,8 +653,8 @@
   function spawnAnimal(type){
     if(!running) return;
 
-    var activeCount = document.querySelectorAll(".animal.active").length;
-    if(activeCount >= 2){
+    var activeAnimals = document.querySelectorAll(".animal.active");
+    if(activeAnimals.length >= 2){
       setTimeout(function(){ if(running) spawnAnimal(type); }, 300);
       return;
     }
@@ -567,9 +671,11 @@
 
     var index = availableHoles[Math.floor(Math.random() * availableHoles.length)];
     var animal = holes[index].querySelector("." + type);
+    if(!animal) return;
     animal.classList.add("active");
 
-    setTimeout(function(){
+    if(animal._hideTimer) clearTimeout(animal._hideTimer);
+    animal._hideTimer = setTimeout(function(){
       animal.classList.remove("active");
     }, 900);
   }
@@ -584,10 +690,10 @@
 
   function hit(index){
     if(!running) return;
-    var animal = holes[index].querySelector(".active");
+    var animal = holes[index].querySelector(".animal.active");
     if(!animal) return;
 
-    clearTimeout(animalTimer);
+    if(animal._hideTimer) clearTimeout(animal._hideTimer);
     animal.classList.remove("active");
 
     if(animal.classList.contains("mole")){
@@ -610,7 +716,6 @@
   function startGame(){
     gameCount++;
     clearInterval(timer);
-    clearTimeout(animalTimer);
     spawnTimers.forEach(function(t){ clearTimeout(t); });
 
     score = 0; combo = 0; maxCombo = 0; hits = 0; time = GAME_TIME;
@@ -637,7 +742,6 @@
   function endGame(){
     running = false;
     clearInterval(timer);
-    clearTimeout(animalTimer);
     spawnTimers.forEach(function(t){ clearTimeout(t); });
     hide();
 
@@ -719,6 +823,7 @@
   });
 
   retryButton.addEventListener('click', showAdPopup);
+  document.getElementById('restartBtn').addEventListener('click', startGame);
 
   ruleBtn.addEventListener('click', function(){ ruleOverlay.classList.add('show'); });
   ruleCloseBtn.addEventListener('click', function(){ ruleOverlay.classList.remove('show'); });
@@ -742,7 +847,6 @@
     sabunInput.focus();
   }
 
-  // 배지 클릭 시 정보 초기화 및 재입력
   playerBadge.addEventListener("click", function(){
     if(confirm("등록된 팀/사번 정보를 변경하시겠습니까?")){
       localStorage.removeItem("sh_mini_team");
