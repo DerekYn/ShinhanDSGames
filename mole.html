@@ -142,9 +142,7 @@
     box-shadow: 0 0 10px rgba(79, 157, 222, 0.4);
   }
 
-  /* =========================================
-     [모바일 최적화 2단 대시보드 - 사과게임 표준]
-     ========================================= */
+  /* 가로형 2단 대시보드 (사과게임 표준과 100% 동일) */
   .game-dash{
     width: 100%;
     max-width: 640px;
@@ -369,7 +367,7 @@
   select.auth-input option{ background: #123A63; color:#fff; }
   .auth-error{ color: var(--danger); font-size: 12px; margin: -10px 0 14px; height: 14px; display: block; }
 
-  /* 광고 팝업 레이아웃 */
+  /* 10대 업무수칙 팝업 레이아웃 */
   .adPopup{
     position:fixed; inset:0;
     background:rgba(4,12,24,0.92);
@@ -381,10 +379,9 @@
     width:350px; max-width:90vw; border-radius:12px;
     box-shadow:0 15px 40px rgba(0,0,0,0.6);
   }
-  #adCloseBtn{
-    width:auto; min-width:140px; margin-top:20px;
+  #adRestartBtn{
+    width:auto; min-width:140px; margin-top:16px;
   }
-  #adCloseBtn:disabled{ opacity:0.5; cursor:not-allowed; }
 </style>
 </head>
 <body>
@@ -462,7 +459,7 @@
   })();
   </script>
 
-  <!-- 가로형 2단 대시보드 (사과게임과 동일하게 상단: 타이틀+배지 / 하단: 3개 카드 균등 분할) -->
+  <!-- 가로형 2단 대시보드 (사과게임 표준과 일치) -->
   <div class="game-dash">
     <div class="dash-left">
       <h1 class="game-title">🐹 두더지 잡기</h1>
@@ -524,12 +521,12 @@
   </div>
 </div>
 
-<!-- 광고 팝업 (다시하기 클릭 시 표시) -->
+<!-- 10대 업무수칙 팝업 (다시 시작 클릭 시 노출) -->
 <div class="adPopup" id="adPopup">
   <div class="adBox">
-    <img src="test.jpg" alt="신한DS 10대 업무수칙">
+    <img src="ds_10.png" alt="신한DS 10대 업무수칙">
     <br>
-    <button class="main" id="adCloseBtn" disabled>닫기 (3)</button>
+    <button class="main" id="adRestartBtn">재시작하기</button>
   </div>
 </div>
 
@@ -565,6 +562,9 @@
   var ruleBtn = document.getElementById("ruleBtn");
   var ruleCloseBtn = document.getElementById("ruleCloseBtn");
 
+  var adPopup = document.getElementById("adPopup");
+  var adRestartBtn = document.getElementById("adRestartBtn");
+
   var score = 0, combo = 0, maxCombo = 0, hits = 0, time = GAME_TIME;
   var running = false;
   var spawnTimers = [];
@@ -591,6 +591,7 @@
     }).catch(function(err){ console.warn("로그 실패:", err); });
   }
 
+  // 9개 구멍 생성 및 터치/클릭 즉시 반응 처리
   for(var i = 0; i < 9; i++){
     (function(idx){
       var hole = document.createElement("div");
@@ -724,6 +725,7 @@
     comboEl.textContent = combo;
 
     overlay.classList.remove("show");
+    adPopup.style.display = "none";
     hide();
 
     sendLog("시작", { score: 0 });
@@ -761,33 +763,15 @@
     overlay.classList.add("show");
   }
 
-  function showAdPopup(){
-    var popup = document.getElementById("adPopup");
-    var closeBtn = document.getElementById("adCloseBtn");
-
-    popup.style.display = "flex";
-    closeBtn.disabled = true;
-
-    var count = 3;
-    closeBtn.textContent = "닫기 (" + count + ")";
-
-    var countdown = setInterval(function(){
-      count--;
-      if(count > 0){
-        closeBtn.textContent = "닫기 (" + count + ")";
-      } else {
-        clearInterval(countdown);
-        closeBtn.disabled = false;
-        closeBtn.textContent = "닫기";
-      }
-    }, 1000);
-
-    closeBtn.onclick = function(){
-      if(closeBtn.disabled) return;
-      popup.style.display = "none";
-      startGame();
-    };
+  // 10대 업무수칙 팝업 표시 (타이머 일시 정지)
+  function showNoticePopup(){
+    running = false;
+    clearInterval(timer);
+    spawnTimers.forEach(function(t){ clearTimeout(t); });
+    adPopup.style.display = "flex";
   }
+
+  adRestartBtn.addEventListener("click", startGame);
 
   function handleAuth(){
     var teamVal = teamSelect.value;
@@ -820,8 +804,9 @@
     teamSelect.classList.remove('error'); authError.textContent = "";
   });
 
-  retryButton.addEventListener('click', showAdPopup);
-  document.getElementById('restartBtn').addEventListener('click', startGame);
+  // 하단 버튼 및 결과창 재시작 시 10대 업무수칙 팝업 노출
+  document.getElementById('restartBtn').addEventListener('click', showNoticePopup);
+  retryButton.addEventListener('click', showNoticePopup);
 
   ruleBtn.addEventListener('click', function(){ ruleOverlay.classList.add('show'); });
   ruleCloseBtn.addEventListener('click', function(){ ruleOverlay.classList.remove('show'); });

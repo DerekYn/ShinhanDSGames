@@ -143,29 +143,27 @@
     box-shadow: 0 0 10px rgba(79, 157, 222, 0.4);
   }
 
-  /* 가로형 통합 대시보드 */
+  /* 가로형 2단 대시보드 */
   .game-dash{
     width: 100%;
     max-width: 640px;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+    flex-direction: column;
+    gap: 8px;
     background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
     border: 1px solid rgba(255,255,255,0.14);
     border-radius: 14px;
-    padding: 8px 14px;
+    padding: 10px 12px;
     box-sizing: border-box;
-    flex-wrap: wrap;
   }
   .dash-left{
     display: flex;
     align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%;
   }
   .game-title{
-    font-size: clamp(16px, 2.5vw, 19px);
+    font-size: clamp(16px, 3.2vw, 19px);
     font-weight: 800;
     color: #fff;
     margin: 0;
@@ -180,29 +178,30 @@
     background: rgba(47, 191, 158, 0.15);
     border: 1px solid var(--accent);
     color: var(--accent);
-    padding: 3px 8px;
+    padding: 3px 9px;
     border-radius: 20px;
     font-weight: 600;
-    display: inline-block;
     white-space: nowrap;
     cursor: pointer;
   }
   .dash-stats{
     display: flex;
     align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
   }
   .stat-card{
+    flex: 1;
     background: rgba(6, 20, 36, 0.75);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 10px;
-    padding: 4px 12px;
-    min-width: 68px;
+    padding: 5px 6px;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-width: 0;
   }
   .stat-lbl{
     font-size: 10px;
@@ -221,26 +220,6 @@
   }
   .stat-card.time .stat-val { color: var(--sky); }
   .stat-card.stage .stat-val { color: var(--accent); }
-
-  @media (max-width: 480px){
-    .game-dash{
-      padding: 8px 10px;
-      gap: 8px;
-    }
-    .dash-left{
-      width: 100%;
-      justify-content: space-between;
-    }
-    .dash-stats{
-      width: 100%;
-      justify-content: space-between;
-    }
-    .stat-card{
-      flex: 1;
-      min-width: 0;
-      padding: 4px 6px;
-    }
-  }
 
   /* 보드 래퍼 */
   #board-wrap{
@@ -359,6 +338,22 @@
   }
   select.auth-input option{ background: #123A63; color:#fff; }
   .auth-error{ color: var(--danger); font-size: 12px; margin: -10px 0 14px; height: 14px; display: block; }
+
+  /* 10대 업무수칙 팝업 레이아웃 */
+  .adPopup{
+    position:fixed; inset:0;
+    background:rgba(4,12,24,0.92);
+    display:none; justify-content:center; align-items:center;
+    z-index:9999; padding:20px;
+  }
+  .adBox{ text-align:center; max-width:90vw; }
+  .adBox img{
+    width:350px; max-width:90vw; border-radius:12px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.6);
+  }
+  #adRestartBtn{
+    width:auto; min-width:140px; margin-top:16px;
+  }
 </style>
 </head>
 <body>
@@ -436,7 +431,7 @@
   })();
   </script>
 
-  <!-- 가로형 통합 대시보드 -->
+  <!-- 가로형 2단 대시보드 (사과게임 표준과 일치) -->
   <div class="game-dash">
     <div class="dash-left">
       <h1 class="game-title">⚽ 공튀기기</h1>
@@ -504,6 +499,15 @@
       <li>⏩ <b>부스터 화살표</b>: 닿는 순간 해당 방향으로 고속 질주합니다.</li>
     </ol>
     <button class="main" id="ruleCloseBtn">확인</button>
+  </div>
+</div>
+
+<!-- 10대 업무수칙 팝업 (다시 시작 클릭 시 노출) -->
+<div class="adPopup" id="adPopup">
+  <div class="adBox">
+    <img src="ds_10.png" alt="신한DS 10대 업무수칙">
+    <br>
+    <button class="main" id="adRestartBtn">재시작하기</button>
   </div>
 </div>
 
@@ -687,6 +691,9 @@
   var ruleCloseBtn = document.getElementById('ruleCloseBtn');
   var restartBtn = document.getElementById('restartBtn');
 
+  var adPopup = document.getElementById("adPopup");
+  var adRestartBtn = document.getElementById("adRestartBtn");
+
   var authOverlay = document.getElementById('authOverlay');
   var teamSelect = document.getElementById('teamSelect');
   var sabunInput = document.getElementById('sabunInput');
@@ -719,19 +726,30 @@
     startGameTimer();
   }
 
+  // 10대 업무수칙 팝업 표시 (타이머 일시 정지)
+  function showNoticePopup(){
+    paused = true;
+    adPopup.style.display = "flex";
+  }
+
+  adRestartBtn.addEventListener("click", function(){
+    adPopup.style.display = "none";
+    overlay.classList.remove('show');
+    resetToStage1();
+    paused = false;
+    sendLog("시작", { score: 0 });
+  });
+
   btnCloseOverlay.addEventListener('click', function(){
     if(finalClearShown){ resetToStage1(); }
     hideOverlay();
   });
-  btnRestartStage1.addEventListener('click', function(){
-    resetToStage1();
-    hideOverlay();
-  });
 
-  restartBtn.addEventListener('click', function(){
-    resetToStage1();
-    paused = false;
-    sendLog("시작", { score: 0 });
+  // 하단 버튼 및 결과창 재시작 시 10대 업무수칙 팝업 노출
+  restartBtn.addEventListener('click', showNoticePopup);
+  btnRestartStage1.addEventListener('click', function(){
+    hideOverlay();
+    showNoticePopup();
   });
 
   ruleBtn.addEventListener('click', function(){ ruleOverlay.classList.add('show'); });
@@ -855,9 +873,6 @@
     messageTimer = 1.2;
   }
 
-  /* ====================================================
-     [인게임 비주얼 렌더러] 정교한 깃발, 점퍼, 폭탄, 균열 블록
-     ==================================================== */
   function draw(){
     ctx.fillStyle = '#061424';
     ctx.fillRect(0,0,W,H);
@@ -868,14 +883,13 @@
         if(t===T.EMPTY) continue;
 
         if(t===T.GOAL){
-          // 🏁 [골 깃발]: 빛나는 청록 베이스 + 황금색 깃발
+          // 🏁 골 깃발
           ctx.fillStyle = '#062822';
           ctx.fillRect(x, y, TILE, TILE);
           ctx.strokeStyle = '#2FBF9E';
           ctx.lineWidth = 1;
           ctx.strokeRect(x+0.5, y+0.5, TILE-1, TILE-1);
 
-          // 깃대 (Pole)
           ctx.strokeStyle = '#e2e8f0';
           ctx.lineWidth = 1.5;
           ctx.beginPath();
@@ -883,7 +897,6 @@
           ctx.lineTo(x+4.5, y+13.5);
           ctx.stroke();
 
-          // 펄럭이는 골드 깃발
           ctx.fillStyle = '#fbbf24';
           ctx.beginPath();
           ctx.moveTo(x+4.5, y+3);
@@ -893,7 +906,7 @@
           ctx.fill();
 
         } else if(t===T.RED){
-          // 🧱 [벽돌/바닥]: 견고한 네이비 블루 블록
+          // 🧱 기본 벽돌
           ctx.fillStyle = '#163A63';
           ctx.fillRect(x, y, TILE, TILE);
           ctx.fillStyle = '#1B5FA8';
@@ -903,7 +916,7 @@
           ctx.strokeRect(x+0.5, y+0.5, TILE-1, TILE-1);
 
         } else if(t===T.WHITE){
-          // ⚪ [균열 블록]: 1회용 크랙 패턴
+          // ⚪ 균열 블록
           ctx.fillStyle = '#1e293b';
           ctx.fillRect(x, y, TILE, TILE);
           ctx.fillStyle = '#e2e8f0';
@@ -912,7 +925,6 @@
           ctx.lineWidth = 1;
           ctx.strokeRect(x+0.5, y+0.5, TILE-1, TILE-1);
 
-          // 깨진 금 (Crack lines)
           ctx.strokeStyle = '#64748b';
           ctx.lineWidth = 1;
           ctx.beginPath();
@@ -921,18 +933,16 @@
           ctx.stroke();
 
         } else if(t===T.JUMPER){
-          // 🟩 [점퍼 블록]: 네온 그린 트램펄린 + 상승 화살표(▲)
+          // 🟩 점퍼 패드(▲)
           ctx.fillStyle = '#022c22';
           ctx.fillRect(x, y, TILE, TILE);
           ctx.strokeStyle = '#34d399';
           ctx.lineWidth = 1;
           ctx.strokeRect(x+0.5, y+0.5, TILE-1, TILE-1);
 
-          // 상단 탄성 패드
           ctx.fillStyle = '#10b981';
           ctx.fillRect(x+2, y+2, TILE-4, 2.5);
 
-          // 슈퍼 점프 화살표(▲)
           ctx.fillStyle = '#a7f3d0';
           ctx.beginPath();
           ctx.moveTo(x+8, y+5.5);
@@ -946,14 +956,13 @@
           ctx.fill();
 
         } else if(t===T.BOMB){
-          // 💣 [폭탄 블록]: 경고 테두리 + 도화선 & 불꽃 폭탄
+          // 💣 도화선 폭탄
           ctx.fillStyle = '#1f070e';
           ctx.fillRect(x, y, TILE, TILE);
           ctx.strokeStyle = '#f43f5e';
           ctx.lineWidth = 1;
           ctx.strokeRect(x+0.5, y+0.5, TILE-1, TILE-1);
 
-          // 폭탄 구체
           ctx.fillStyle = '#0f172a';
           ctx.beginPath();
           ctx.arc(x+7.5, y+9.5, 4.5, 0, Math.PI*2);
@@ -962,13 +971,11 @@
           ctx.lineWidth = 0.8;
           ctx.stroke();
 
-          // 하이라이트 반사광
           ctx.fillStyle = '#94a3b8';
           ctx.beginPath();
           ctx.arc(x+6, y+8, 1, 0, Math.PI*2);
           ctx.fill();
 
-          // 도화선
           ctx.strokeStyle = '#ca8a04';
           ctx.lineWidth = 1;
           ctx.beginPath();
@@ -976,14 +983,13 @@
           ctx.quadraticCurveTo(x+10, y+4, x+11, y+2.5);
           ctx.stroke();
 
-          // 타오르는 불꽃 스파크
           ctx.fillStyle = '#ef4444';
           ctx.fillRect(x+10, y+1.5, 2.5, 2.5);
           ctx.fillStyle = '#fbbf24';
           ctx.fillRect(x+10.5, y+2, 1.5, 1.5);
 
         } else if(t===T.ARROW_LEFT || t===T.ARROW_RIGHT){
-          // ⏩ [부스터]: 듀얼 쉐브론 가속 트랙
+          // ⏩ 부스터 화살표
           ctx.fillStyle = '#451a03';
           ctx.fillRect(x, y, TILE, TILE);
           ctx.strokeStyle = '#f59e0b';
@@ -1004,13 +1010,11 @@
       }
     }
 
-    // 통통 튀는 공
     ctx.fillStyle = '#fff';
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2);
     ctx.fill();
 
-    // 공 모션 궤적 (Tail)
     ctx.strokeStyle = 'rgba(79,157,222,0.6)';
     ctx.beginPath();
     ctx.moveTo(ball.x, ball.y);
