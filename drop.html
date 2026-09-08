@@ -156,31 +156,28 @@
   }
 
   /* =========================================
-     [가로형 통합 대시보드 - 사과게임과 동일한 1열 배치]
+     [모바일 최적화 2단 대시보드 - 사과게임 표준]
      ========================================= */
   .game-dash {
     width: 100%;
     max-width: 640px;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
     gap: 8px;
     background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
     border: 1px solid rgba(255,255,255,0.14);
     border-radius: 14px;
-    padding: 8px 12px;
+    padding: 10px 12px;
     box-sizing: border-box;
-    flex-wrap: nowrap; /* 절대 개행 방지 */
   }
   .dash-left {
     display: flex;
     align-items: center;
-    gap: 6px;
-    min-width: 0;
-    flex-shrink: 1;
+    justify-content: space-between;
+    width: 100%;
   }
   .game-title {
-    font-size: clamp(15px, 2.5vw, 18px);
+    font-size: clamp(16px, 3.2vw, 19px);
     font-weight: 800;
     color: #fff;
     margin: 0;
@@ -195,7 +192,7 @@
     background: rgba(47, 191, 158, 0.15);
     border: 1px solid var(--accent);
     color: var(--accent);
-    padding: 2px 7px;
+    padding: 3px 9px;
     border-radius: 20px;
     font-weight: 600;
     white-space: nowrap;
@@ -204,19 +201,21 @@
   .dash-stats {
     display: flex;
     align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
   }
   .stat-card {
+    flex: 1;
     background: rgba(6, 20, 36, 0.75);
     border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 9px;
-    padding: 3px 8px;
-    min-width: 52px;
+    border-radius: 10px;
+    padding: 5px 6px;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-width: 0;
   }
   .stat-lbl {
     font-size: 10px;
@@ -227,7 +226,7 @@
     white-space: nowrap;
   }
   .stat-val {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 800;
     font-family: var(--font-num);
     font-variant-numeric: tabular-nums;
@@ -408,7 +407,7 @@
   })();
   </script>
 
-  <!-- 가로형 통합 대시보드 (사과게임과 동일하게 개행 없이 1열 나란히 배치) -->
+  <!-- 가로형 2단 대시보드 (사과게임 표준: 1단 타이틀+배지 / 2단 3개 카드 균등 분할) -->
   <div class="game-dash">
     <div class="dash-left">
       <h1 class="game-title"><span id="face">🧺</span> 낙하 캐치</h1>
