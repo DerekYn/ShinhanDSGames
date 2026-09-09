@@ -1,59 +1,70 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>실시간 순위 - 금융본부 미니 게임대회</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>실시간 랭킹 - 금융본부 미니 게임대회</title>
 <style>
-  :root{
-    --navy:#0B1F3A;
-    --ocean:#123A63;
-    --blue:#1B5FA8;
-    --sky:#4F9DDE;
-    --ice:#BFE2F7;
-    --paper:#EAF4FC;
-    --accent:#2FBF9E;
-    --danger:#E0567A;
-    --gold:#F59E0B;
-    --silver:#CBD5E1;
-    --bronze:#D97706;
+  :root {
+    --navy: #0B1F3A;
+    --ocean: #123A63;
+    --blue: #1B5FA8;
+    --sky: #4F9DDE;
+    --ice: #BFE2F7;
+    --paper: #EAF4FC;
+    --accent: #2FBF9E;
+    --danger: #E0567A;
+    --gold: #FFD700;
+    --silver: #E0E7FF;
+    --bronze: #F59E0B;
     --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
     --font-num: "Segoe UI", "Consolas", "Malgun Gothic", monospace;
   }
-  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
-  html,body{
-    margin:0; padding:0; height:100%;
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0; min-height: 100%;
     background: radial-gradient(circle at 20% 0%, #163A63 0%, var(--navy) 55%, #071426 100%);
     font-family: var(--font-ui);
     color: var(--paper);
-    overflow:auto;
-    user-select:none;
+    overflow-x: hidden;
+    user-select: none;
   }
-  #app{
-    display:flex; flex-direction:column; align-items:center;
-    min-height:100vh; min-height:100dvh; padding: 12px; gap:10px;
+  #app {
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; min-height: 100dvh; padding: 12px; gap: 10px;
+    width: 100%;
   }
 
   /* 브랜드 헤더 */
-  .brand-bar{
-    width:100%; max-width: 640px;
-    display:flex; flex-direction:column; gap:6px;
+  .brand-bar {
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
     background: linear-gradient(135deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02));
-    border:1px solid rgba(255,255,255,0.16);
-    border-radius:16px; padding:8px 12px; box-sizing:border-box;
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 16px;
+    padding: 8px 12px;
+    box-sizing: border-box;
   }
-  .brand-top{
-    display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%;
+  .brand-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
   }
-  .brand-left{ display:flex; align-items:center; gap:10px; }
-  .brand-logo{ width:32px; height:32px; flex-shrink:0; }
-  .brand-logo svg{ width:100%; height:100%; display:block; }
-  .brand-text{ display:flex; flex-direction:column; line-height:1.2; }
+  .brand-left { display: flex; align-items: center; gap: 10px; }
+  .brand-logo { width: 32px; height: 32px; flex-shrink: 0; }
+  .brand-logo svg { width: 100%; height: 100%; display: block; }
+  .brand-text { display: flex; flex-direction: column; line-height: 1.2; }
   .brand-name { font-size: 13px; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
   .brand-dept {
-    display: inline-block; margin-top: 2px; font-size: 10px; font-weight: 800;
-    color: var(--navy); background: var(--sky); padding: 2px 8px;
-    border-radius: 999px; width: fit-content; letter-spacing: -0.01em;
+    display: inline-block; margin-top: 2px;
+    font-size: 10px; font-weight: 800; color: var(--navy);
+    background: var(--sky); padding: 2px 8px; border-radius: 999px;
+    width: fit-content; letter-spacing: -0.01em;
   }
   .event-tag {
     font-size: 11px; font-weight: 700; color: var(--ice);
@@ -61,140 +72,220 @@
     padding: 6px 12px; border-radius: 999px; white-space: nowrap; letter-spacing: -0.01em;
   }
 
-  /* 네비게이션 바 */
-  .nav-games{
-    display:flex; align-items:center; justify-content:space-between; gap:6px;
-    width:100%; overflow-x:auto; padding-top:4px; border-top:1px solid rgba(255,255,255,0.08);
-  }
-  .nav-games::-webkit-scrollbar { display:none; }
-  .nav-item{
-    flex:1; min-width:54px; display:inline-flex; align-items:center; justify-content:center;
-    gap:4px; padding:5px 7px; border-radius:10px; background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.12); color: var(--ice); text-decoration: none;
-    font-size: 11px; font-weight: 700; transition: all 0.15s ease; white-space: nowrap;
-  }
-  .nav-item:hover{ background: rgba(255,255,255,0.15); color: #fff; }
-
-  /* 랭킹 메인 카드 컨테이너 */
-  .rank-container{
-    width:100%; max-width: 640px; display:flex; flex-direction:column; gap:10px;
-  }
-
-  /* 컨트롤 & 새로고침 바 */
-  .rank-header{
-    display:flex; align-items:center; justify-content:space-between;
-    background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
-    border: 1px solid rgba(255,255,255,0.14); border-radius: 14px;
-    padding: 10px 14px;
-  }
-  .sync-info{ display:flex; flex-direction:column; gap:2px; }
-  .sync-title{ font-size:15px; font-weight:800; color:#fff; display:flex; align-items:center; gap:6px; }
-  .sync-time{ font-size:11px; color:var(--ice); opacity:0.75; font-family:var(--font-num); }
-  .refresh-btn{
-    background: var(--blue); color:#fff; border:none; border-radius:8px;
-    padding:6px 12px; font-size:12px; font-weight:700; cursor:pointer;
-    display:flex; align-items:center; gap:4px; transition: background 0.15s ease;
-  }
-  .refresh-btn:active{ transform:scale(0.96); }
-
-  /* 종목 선택 탭 */
-  .tab-bar{
-    display:flex; gap:6px; overflow-x:auto; width:100%; padding-bottom:2px;
-  }
-  .tab-bar::-webkit-scrollbar{ display:none; }
-  .tab-btn{
-    flex:1; min-width:68px; padding:8px 6px; border-radius:10px;
-    background: rgba(6,20,36,0.6); border:1px solid rgba(255,255,255,0.12);
-    color: var(--ice); font-size:12px; font-weight:700; cursor:pointer;
-    white-space:nowrap; text-align:center; transition: all 0.15s ease;
-  }
-  .tab-btn.active{
-    background: var(--blue); border-color: var(--sky); color:#fff;
-    box-shadow: 0 0 10px rgba(79, 157, 222, 0.35);
-  }
-  .tab-btn.team-tab{
-    border-color: rgba(47, 191, 158, 0.4);
-  }
-  .tab-btn.team-tab.active{
-    background: #19725d; border-color: var(--accent);
-    box-shadow: 0 0 10px rgba(47, 191, 158, 0.4);
-  }
-
-  /* 포디움 (1~3위 시상대) */
-  .podium-wrap{
-    display:flex; align-items:flex-end; justify-content:center; gap:8px;
-    padding: 16px 8px 10px;
-    background: linear-gradient(180deg, rgba(14,42,74,0.7), rgba(10,32,54,0.7));
-    border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
-    min-height: 160px;
-  }
-  .podium-col{
-    flex:1; display:flex; flex-direction:column; align-items:center; text-align:center;
-  }
-  .podium-avatar{
-    font-size: 24px; margin-bottom: 4px; position:relative;
-  }
-  .podium-name{
-    font-size: 12px; font-weight: 800; color: #fff; max-width: 84px;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .podium-team{
-    font-size: 10px; color: var(--ice); opacity: 0.75; margin-bottom: 4px;
-  }
-  .podium-score{
-    font-size: 14px; font-weight: 800; font-family: var(--font-num);
-    color: var(--accent); margin-bottom: 6px;
-  }
-  .podium-step{
-    width: 100%; border-radius: 8px 8px 0 0;
+  .nav-toggle {
+    width: 26px; height: 26px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    font-weight: 900; font-family: var(--font-num); color: var(--navy);
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 8px; color: var(--ice); cursor: pointer;
   }
-  .step-1{ height: 60px; background: linear-gradient(180deg, #FBBF24, var(--gold)); font-size: 20px; }
-  .step-2{ height: 44px; background: linear-gradient(180deg, #E2E8F0, var(--silver)); font-size: 16px; }
-  .step-3{ height: 32px; background: linear-gradient(180deg, #F59E0B, var(--bronze)); font-size: 15px; color:#fff; }
+  .nav-toggle svg { width: 14px; height: 14px; transition: transform 0.2s ease; display: block; }
+  .brand-bar.collapsed .nav-games { display: none; }
+  .brand-bar.collapsed .nav-toggle svg { transform: rotate(-90deg); }
+  .brand-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 
-  /* 랭킹 리스트 (4~10위) */
-  .rank-list{
-    display:flex; flex-direction:column; gap:6px; width:100%;
+  /* 바로가기 네비게이션 */
+  .nav-games {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 5px; width: 100%; overflow-x: auto; padding-top: 4px;
+    border-top: 1px solid rgba(255,255,255,0.08);
   }
-  .rank-card{
-    display:flex; align-items:center; justify-content:space-between;
-    background: rgba(6, 20, 36, 0.7); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px; padding: 10px 14px; box-sizing:border-box;
+  .nav-games::-webkit-scrollbar { display: none; }
+  .nav-item {
+    flex: 1; min-width: 50px;
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 3px; padding: 5px 6px; border-radius: 10px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+    color: var(--ice); text-decoration: none; font-size: 11px; font-weight: 700;
+    transition: all 0.15s ease; white-space: nowrap;
   }
-  .rank-card-left{ display:flex; align-items:center; gap:12px; }
-  .rank-num{
-    font-size: 14px; font-weight: 800; font-family: var(--font-num);
-    width: 22px; text-align: center; color: var(--ice);
-  }
-  .rank-card-info{ display:flex; flex-direction:column; }
-  .rank-card-user{ font-size: 13px; font-weight: 700; color: #fff; }
-  .rank-card-team{ font-size: 11px; color: var(--ice); opacity: 0.7; }
-  .rank-card-score{
-    font-size: 15px; font-weight: 800; font-family: var(--font-num);
-    color: var(--sky);
+  .nav-item:hover { background: rgba(255,255,255,0.15); color: #fff; transform: translateY(-1px); }
+  .nav-item.active {
+    background: var(--blue); border-color: var(--sky); color: #fff;
+    box-shadow: 0 0 10px rgba(79, 157, 222, 0.4);
   }
 
-  /* 팀 대항전 순위 카드 */
-  .team-rank-card{
-    display:flex; align-items:center; justify-content:space-between;
-    background: rgba(18, 58, 99, 0.45); border: 1px solid rgba(79, 157, 222, 0.25);
-    border-radius: 12px; padding: 12px 16px;
+  /* 랭킹 대시보드 메인 카드 */
+  .rank-box {
+    width: 100%; max-width: 640px;
+    background: linear-gradient(180deg, rgba(18, 58, 99, 0.8), rgba(11, 31, 58, 0.95));
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 18px; padding: 14px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+    display: flex; flex-direction: column; gap: 12px;
   }
-  .team-rank-title{ font-size: 14px; font-weight: 800; color: #fff; }
-  .team-rank-points{ font-size: 16px; font-weight: 800; color: var(--accent); font-family: var(--font-num); }
 
-  .empty-box{
-    text-align:center; padding: 40px 10px; color:var(--ice); opacity:0.6; font-size:13px;
+  /* 상단 상태 및 새로고침 바 */
+  .rank-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);
   }
+  .live-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 700; color: var(--accent);
+    background: rgba(47, 191, 158, 0.12); border: 1px solid var(--accent);
+    padding: 3px 9px; border-radius: 20px;
+  }
+  .live-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulse 1.2s infinite;
+  }
+  @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+
+  .refresh-group {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; color: var(--ice);
+  }
+  .btn-refresh {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
+    color: #fff; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  .btn-refresh:active { transform: scale(0.96); background: var(--blue); }
+
+  /* 메인 뷰 스위처 (개인전 vs 팀 대항전) */
+  .view-tabs {
+    display: flex; gap: 6px; background: rgba(6, 20, 36, 0.6);
+    padding: 4px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);
+  }
+  .view-tab {
+    flex: 1; padding: 9px 0; text-align: center; font-size: 13px; font-weight: 800;
+    color: var(--ice); border-radius: 9px; cursor: pointer; transition: all 0.15s ease;
+  }
+  .view-tab.active {
+    background: var(--blue); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  /* 게임 종목 선택 가로 스크롤 탭 */
+  .game-pills {
+    display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px;
+  }
+  .game-pills::-webkit-scrollbar { display: none; }
+  .game-pill {
+    flex: 1; min-width: 68px; padding: 7px 8px; text-align: center;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px; font-size: 11px; font-weight: 700; color: var(--ice);
+    cursor: pointer; white-space: nowrap; transition: all 0.15s ease;
+  }
+  .game-pill.active {
+    background: linear-gradient(135deg, var(--sky), var(--blue));
+    border-color: var(--sky); color: #fff;
+    box-shadow: 0 2px 8px rgba(79, 157, 222, 0.35);
+  }
+
+  /* 규칙 안내 뱃지 */
+  .rule-banner {
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(6, 20, 36, 0.5); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px; padding: 6px 12px; font-size: 11px; color: var(--ice);
+  }
+  .rule-badge {
+    color: var(--sky); font-weight: 700;
+  }
+
+  /* 포디움 (TOP 1, 2, 3) */
+  .podium {
+    display: grid; grid-template-columns: 1fr 1.15fr 1fr; gap: 8px;
+    align-items: flex-end; padding: 10px 4px 6px;
+  }
+  .podium-card {
+    background: rgba(6, 20, 36, 0.75); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px; padding: 12px 6px 10px; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    position: relative;
+  }
+  .podium-card.first {
+    border-color: var(--gold);
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.14), rgba(6, 20, 36, 0.85));
+    transform: translateY(-6px);
+  }
+  .podium-card.second {
+    border-color: #cbd5e1;
+    background: linear-gradient(180deg, rgba(203, 213, 225, 0.1), rgba(6, 20, 36, 0.85));
+  }
+  .podium-card.third {
+    border-color: var(--bronze);
+    background: linear-gradient(180deg, rgba(245, 158, 11, 0.1), rgba(6, 20, 36, 0.85));
+  }
+
+  .podium-medal { font-size: 24px; line-height: 1; }
+  .podium-team { font-size: 11px; font-weight: 700; color: #fff; margin-top: 2px; }
+  .podium-sabun { font-size: 10px; color: var(--ice); opacity: 0.8; }
+  .podium-score {
+    font-family: var(--font-num); font-size: 16px; font-weight: 800;
+    color: var(--accent); margin-top: 4px;
+  }
+  .podium-card.first .podium-score { font-size: 18px; color: var(--gold); }
+
+  /* 4~10위 리스트 테이블 */
+  .rank-list {
+    display: flex; flex-direction: column; gap: 6px; width: 100%;
+  }
+  .rank-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(6, 20, 36, 0.55); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px; padding: 9px 12px; font-size: 12px;
+  }
+  .rank-row-left { display: flex; align-items: center; gap: 10px; }
+  .rank-num {
+    font-family: var(--font-num); font-weight: 800; font-size: 13px;
+    color: var(--ice); width: 20px; text-align: center;
+  }
+  .rank-team { font-weight: 700; color: #fff; }
+  .rank-sabun { font-size: 11px; color: var(--ice); opacity: 0.75; }
+  .rank-val {
+    font-family: var(--font-num); font-weight: 800; font-size: 14px; color: var(--sky);
+  }
+
+  /* 팀 대항전 카드 목록 */
+  .team-list {
+    display: flex; flex-direction: column; gap: 8px; width: 100%;
+  }
+  .team-card {
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(6, 20, 36, 0.7); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px; padding: 12px 14px; position: relative;
+    transition: transform 0.1s ease;
+  }
+  .team-card.rank-1 {
+    border-color: var(--gold);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(6, 20, 36, 0.8));
+  }
+  .team-left { display: flex; align-items: center; gap: 12px; }
+  .team-badge {
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-num); font-weight: 800; font-size: 13px;
+    background: rgba(255,255,255,0.08); color: #fff;
+  }
+  .team-card.rank-1 .team-badge { background: var(--gold); color: #041224; }
+  .team-card.rank-2 .team-badge { background: #cbd5e1; color: #041224; }
+  .team-card.rank-3 .team-badge { background: var(--bronze); color: #041224; }
+
+  .team-info { display: flex; flex-direction: column; gap: 2px; }
+  .team-title { font-size: 14px; font-weight: 800; color: #fff; }
+  .team-sub { font-size: 11px; color: var(--ice); opacity: 0.75; }
+
+  .team-score-box { text-align: right; }
+  .team-score {
+    font-family: var(--font-num); font-size: 18px; font-weight: 800; color: var(--accent);
+  }
+  .team-card.rank-1 .team-score { color: var(--gold); }
+  .team-score-lbl { font-size: 10px; color: var(--ice); opacity: 0.75; }
+
+  /* 로딩 및 빈 데이터 안내 */
+  .empty-state {
+    text-align: center; padding: 36px 12px; color: var(--ice); font-size: 13px; line-height: 1.6;
+  }
+  .empty-state .icon { font-size: 32px; margin-bottom: 8px; display: block; }
 </style>
 </head>
 <body>
 
 <div id="app">
   <!-- 브랜드 바 -->
-  <div class="brand-bar">
+  <div class="brand-bar" id="brandBar">
     <div class="brand-top">
       <div class="brand-left">
         <div class="brand-logo" aria-hidden="true">
@@ -215,45 +306,91 @@
         </div>
       </div>
       <div class="brand-right">
-        <div class="event-tag">🏆 실시간 랭킹보드</div>
+        <div class="event-tag">🏆 소통 미니게임대회</div>
+        <button class="nav-toggle" id="navToggle" aria-label="게임 목록 접기/펼치기" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
       </div>
     </div>
     
     <nav class="nav-games" aria-label="게임 종목 바로가기">
-      <a href="https://derekyn.github.io/ShinhanDSGames/ball.html" class="nav-item active">⚽ 공튀기기</a>
-      <a href="https://derekyn.github.io/ShinhanDSGames/mole.html" class="nav-item">🐹 두더지 잡기</a>
-      <a href="https://derekyn.github.io/ShinhanDSGames/apple.html" class="nav-item">🍎 사과게임</a>
-      <a href="https://derekyn.github.io/ShinhanDSGames/bomb.html" class="nav-item">💣 지뢰찾기</a>
-      <a href="https://derekyn.github.io/ShinhanDSGames/drop.html" class="nav-item">💧 낙하캐치</a>
+      <a href="ball.html" class="nav-item">⚽ 공튀기기</a>
+      <a href="mole.html" class="nav-item">🐹 두더지</a>
+      <a href="apple.html" class="nav-item">🍎 사과</a>
+      <a href="bomb.html" class="nav-item">💣 지뢰</a>
+      <a href="drop.html" class="nav-item">💧 드롭</a>
     </nav>
   </div>
 
-  <div class="rank-container">
-    <!-- 헤더 바 -->
+  <script>
+  (function(){
+    var bar = document.getElementById('brandBar');
+    var toggle = document.getElementById('navToggle');
+    var KEY = 'sh_mini_navCollapsed';
+    if(!bar || !toggle) return;
+    var saved = localStorage.getItem(KEY);
+    if(saved === '1') bar.classList.add('collapsed');
+    toggle.addEventListener('click', function(){
+      var collapsed = bar.classList.toggle('collapsed');
+      localStorage.setItem(KEY, collapsed ? '1' : '0');
+    });
+  })();
+  </script>
+
+  <!-- 랭킹 메인 패널 -->
+  <div class="rank-box">
+    <!-- 상태 바 및 갱신 제어 -->
     <div class="rank-header">
-      <div class="sync-info">
-        <div class="sync-title">🔥 금융본부 실시간 순위</div>
-        <div class="sync-time" id="syncTime">최신 기록 동기화 중...</div>
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        <span>실시간 순위</span>
       </div>
-      <button class="refresh-btn" id="refreshBtn" type="button">
-        🔄 새로고침 (<span id="countDown">15</span>s)
-      </button>
+      <div class="refresh-group">
+        <span id="countdownText">15초 후 갱신</span>
+        <button class="btn-refresh" id="btnManualRefresh" type="button">새로고침</button>
+      </div>
     </div>
 
-    <!-- 종목 탭 바 -->
-    <div class="tab-bar">
-      <button class="tab-btn team-tab active" data-target="team">🏆 종합팀순위</button>
-      <button class="tab-btn" data-target="두더지잡기">🐹 두더지</button>
-      <button class="tab-btn" data-target="사과게임">🍎 사과</button>
-      <button class="tab-btn" data-target="공튀기기">⚽ 공튀기기</button>
-      <button class="tab-btn" data-target="지뢰찾기">💣 지뢰</button>
-      <button class="tab-btn" data-target="드롭">💧 드롭</button>
-
+    <!-- 1차 탭: 개인 랭킹 vs 팀 대항전 -->
+    <div class="view-tabs">
+      <div class="view-tab active" id="tabPersonal">종목별 개인 순위</div>
+      <div class="view-tab" id="tabTeam">팀별 대항전 순위</div>
     </div>
 
-    <!-- 순위 렌더링 영역 -->
-    <div id="rankContent">
-      <div class="empty-box">데이터를 불러오는 중입니다...</div>
+    <!-- 2차 탭: 종목 선택 (개인 순위 뷰에서만 노출) -->
+    <div id="gameSelectorSection">
+      <div class="game-pills">
+        <div class="game-pill active" data-game="사과게임">🍎 사과</div>
+        <div class="game-pill" data-game="두더지잡기">🐹 두더지</div>
+        <div class="game-pill" data-game="공튀기기">⚽ 공튀기기</div>
+        <div class="game-pill" data-game="지뢰찾기">💣 지뢰</div>
+        <div class="game-pill" data-game="드롭">💧 드롭</div>
+      </div>
+    </div>
+
+    <!-- 규칙 설명 텍스트 -->
+    <div class="rule-banner" id="ruleBanner">
+      <span id="ruleDesc">합 10을 완성해 획득한 사과 개수</span>
+      <span class="rule-badge" id="ruleType">높은 점수순</span>
+    </div>
+
+    <!-- 개인 랭킹 컨테이너 -->
+    <div id="personalContainer">
+      <!-- TOP 3 포디움 -->
+      <div class="podium" id="podiumArea"></div>
+      <!-- 4위 ~ 10위 리스트 -->
+      <div class="rank-list" id="rankListArea"></div>
+    </div>
+
+    <!-- 팀 대항전 컨테이너 (기본 숨김) -->
+    <div id="teamContainer" style="display:none;">
+      <div class="team-list" id="teamListArea"></div>
+    </div>
+
+    <!-- 데이터 로딩/에러 표시 -->
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <span class="icon">📊</span>
+      <span id="emptyMsg">기록을 집계하고 있습니다...</span>
     </div>
   </div>
 </div>
@@ -261,188 +398,248 @@
 <script>
 (function(){
   var GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyY6mM4y9ltyZhDn7fMCctYajEBye1sxZpQrQ-FcabhllionztMTlJEJMCKCDy_ZxCOMg/exec";
-  
-  var currentTab = "team";
-  var rankingData = null;
-  var timer = 15;
-  var intervalId = null;
 
-  var syncTimeEl = document.getElementById("syncTime");
-  var countDownEl = document.getElementById("countDown");
-  var rankContent = document.getElementById("rankContent");
-  var refreshBtn = document.getElementById("refreshBtn");
-  var tabs = document.querySelectorAll(".tab-btn");
+  var currentView = "personal"; // "personal" | "team"
+  var currentGame = "사과게임";
 
-  // 시간 단축형 게임 판별
-  var isTimeGame = {
-    "공튀기기": true,
-    "지뢰찾기": true
+  var GAME_META = {
+    "사과게임": { desc: "합 10을 완성해 획득한 사과 개수", badge: "높은 점수순", unit: "점", isTime: false },
+    "두더지잡기": { desc: "20초 동안 잡은 두더지 콤보 합산 점수", badge: "높은 점수순", unit: "점", isTime: false },
+    "공튀기기": { desc: "5개 스테이지를 최단 시간 내 올클리어", badge: "최단 시간순", unit: "초", isTime: true },
+    "지뢰찾기": { desc: "12x12 지뢰 24개를 피해 모든 칸 오픈", badge: "최단 시간순", unit: "초", isTime: true },
+    "드롭": { desc: "60초 동안 바구니로 받은 아이템 합산 점수", badge: "높은 점수순", unit: "점", isTime: false }
   };
 
-  function fetchData(){
-    fetch(GOOGLE_WEBHOOK_URL)
+  var cachedData = {
+    updatedAt: "방금 전",
+    games: {},
+    teams: []
+  };
+
+  var REFRESH_INTERVAL = 15;
+  var countdown = REFRESH_INTERVAL;
+  var countdownTimer = null;
+
+  var tabPersonal = document.getElementById("tabPersonal");
+  var tabTeam = document.getElementById("tabTeam");
+  var gameSelectorSection = document.getElementById("gameSelectorSection");
+  var personalContainer = document.getElementById("personalContainer");
+  var teamContainer = document.getElementById("teamContainer");
+  var podiumArea = document.getElementById("podiumArea");
+  var rankListArea = document.getElementById("rankListArea");
+  var teamListArea = document.getElementById("teamListArea");
+  var ruleBanner = document.getElementById("ruleBanner");
+  var ruleDesc = document.getElementById("ruleDesc");
+  var ruleType = document.getElementById("ruleType");
+  var countdownText = document.getElementById("countdownText");
+  var btnManualRefresh = document.getElementById("btnManualRefresh");
+  var emptyState = document.getElementById("emptyState");
+  var emptyMsg = document.getElementById("emptyMsg");
+
+  tabPersonal.addEventListener("click", function(){
+    currentView = "personal";
+    tabPersonal.classList.add("active");
+    tabTeam.classList.remove("active");
+    gameSelectorSection.style.display = "block";
+    ruleBanner.style.display = "flex";
+    personalContainer.style.display = "block";
+    teamContainer.style.display = "none";
+    render();
+  });
+
+  tabTeam.addEventListener("click", function(){
+    currentView = "team";
+    tabTeam.classList.add("active");
+    tabPersonal.classList.remove("active");
+    gameSelectorSection.style.display = "none";
+    ruleBanner.style.display = "none";
+    personalContainer.style.display = "none";
+    teamContainer.style.display = "block";
+    render();
+  });
+
+  document.querySelectorAll(".game-pill").forEach(function(pill){
+    pill.addEventListener("click", function(){
+      document.querySelectorAll(".game-pill").forEach(function(p){ p.classList.remove("active"); });
+      pill.classList.add("active");
+      currentGame = pill.getAttribute("data-game");
+      render();
+    });
+  });
+
+  function render(){
+    if (currentView === "personal") {
+      renderPersonalRank();
+    } else {
+      renderTeamRank();
+    }
+  }
+
+  function formatScore(val, isTime){
+    if (isTime) {
+      return Number(val).toFixed(1) + "초";
+    }
+    return Math.round(Number(val)) + "점";
+  }
+
+  function maskSabun(sabun){
+    var s = String(sabun);
+    if (s.length <= 3) return s;
+    return s.slice(0, 3) + "*".repeat(s.length - 3);
+  }
+
+  function renderPersonalRank(){
+    var meta = GAME_META[currentGame] || GAME_META["사과게임"];
+    ruleDesc.textContent = meta.desc;
+    ruleType.textContent = meta.badge;
+
+    var list = (cachedData.games && cachedData.games[currentGame]) || [];
+
+    if (list.length === 0) {
+      podiumArea.innerHTML = "";
+      rankListArea.innerHTML = "";
+      emptyState.style.display = "block";
+      emptyMsg.textContent = "아직 기록된 랭킹 데이터가 없습니다.\n첫 번째 랭커에 도전해 보세요!";
+      return;
+    }
+    emptyState.style.display = "none";
+
+    var top3 = list.slice(0, 3);
+    var first = top3[0];
+    var second = top3[1];
+    var third = top3[2];
+
+    var podiumHtml = "";
+
+    if (second) {
+      podiumHtml += '<div class="podium-card second">' +
+        '<div class="podium-medal">🥈</div>' +
+        '<div class="podium-team">' + second.team + '</div>' +
+        '<div class="podium-sabun">' + maskSabun(second.sabun) + '</div>' +
+        '<div class="podium-score">' + formatScore(second.score, meta.isTime) + '</div>' +
+      '</div>';
+    } else {
+      podiumHtml += '<div class="podium-card second" style="opacity:0.3;"><div class="podium-medal">🥈</div><div class="podium-team">-</div></div>';
+    }
+
+    if (first) {
+      podiumHtml += '<div class="podium-card first">' +
+        '<div class="podium-medal">🥇</div>' +
+        '<div class="podium-team">' + first.team + '</div>' +
+        '<div class="podium-sabun">' + maskSabun(first.sabun) + '</div>' +
+        '<div class="podium-score">' + formatScore(first.score, meta.isTime) + '</div>' +
+      '</div>';
+    } else {
+      podiumHtml += '<div class="podium-card first" style="opacity:0.3;"><div class="podium-medal">🥇</div><div class="podium-team">-</div></div>';
+    }
+
+    if (third) {
+      podiumHtml += '<div class="podium-card third">' +
+        '<div class="podium-medal">🥉</div>' +
+        '<div class="podium-team">' + third.team + '</div>' +
+        '<div class="podium-sabun">' + maskSabun(third.sabun) + '</div>' +
+        '<div class="podium-score">' + formatScore(third.score, meta.isTime) + '</div>' +
+      '</div>';
+    } else {
+      podiumHtml += '<div class="podium-card third" style="opacity:0.3;"><div class="podium-medal">🥉</div><div class="podium-team">-</div></div>';
+    }
+
+    podiumArea.innerHTML = podiumHtml;
+
+    var restList = list.slice(3, 10);
+    var listHtml = "";
+    restList.forEach(function(item, idx){
+      var rank = idx + 4;
+      listHtml += '<div class="rank-row">' +
+        '<div class="rank-row-left">' +
+          '<span class="rank-num">' + rank + '</span>' +
+          '<div>' +
+            '<span class="rank-team">' + item.team + '</span> ' +
+            '<span class="rank-sabun">(' + maskSabun(item.sabun) + ')</span>' +
+          '</div>' +
+        '</div>' +
+        '<span class="rank-val">' + formatScore(item.score, meta.isTime) + '</span>' +
+      '</div>';
+    });
+
+    rankListArea.innerHTML = listHtml;
+  }
+
+  function renderTeamRank(){
+    var list = cachedData.teams || [];
+    if (list.length === 0) {
+      teamListArea.innerHTML = "";
+      emptyState.style.display = "block";
+      emptyMsg.textContent = "팀별 참여 기록을 집계 중입니다.";
+      return;
+    }
+    emptyState.style.display = "none";
+
+    var html = "";
+    list.forEach(function(item, idx){
+      var rank = idx + 1;
+      var rankClass = rank <= 3 ? ("rank-" + rank) : "";
+      var medal = rank === 1 ? "🥇 " : (rank === 2 ? "🥈 " : (rank === 3 ? "🥉 " : ""));
+
+      html += '<div class="team-card ' + rankClass + '">' +
+        '<div class="team-left">' +
+          '<div class="team-badge">' + rank + '</div>' +
+          '<div class="team-info">' +
+            '<div class="team-title">' + medal + item.team + '</div>' +
+            '<div class="team-sub">TOP 10 진입: ' + item.topRankCount + '회</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="team-score-box">' +
+          '<div class="team-score">' + item.totalPoints + ' pts</div>' +
+          '<div class="team-score-lbl">종합 승점</div>' +
+        '</div>' +
+      '</div>';
+    });
+
+    teamListArea.innerHTML = html;
+  }
+
+  function fetchRankings(){
+    if (!GOOGLE_WEBHOOK_URL) return;
+
+    fetch(GOOGLE_WEBHOOK_URL, { method: "GET" })
       .then(function(res){ return res.json(); })
       .then(function(data){
-        if(data.status === "success"){
-          rankingData = data;
-          syncTimeEl.textContent = "최근 갱신: " + data.updatedAt;
-          renderView();
-        } else {
-          syncTimeEl.textContent = "갱신 실패 (재시도 중)";
+        if (data && data.status === "success") {
+          cachedData = data;
+          render();
         }
       })
       .catch(function(err){
-        console.warn("데이터 조회 실패:", err);
-        syncTimeEl.textContent = "네트워크 상태를 확인해 주세요.";
+        console.warn("랭킹 패치 에러:", err);
       });
   }
 
-  function renderView(){
-    if(!rankingData){
-      rankContent.innerHTML = '<div class="empty-box">집계된 기록이 없습니다.</div>';
-      return;
-    }
-
-    if(currentTab === "team"){
-      renderTeamRank(rankingData.teams || []);
-    } else {
-      var list = (rankingData.games && rankingData.games[currentTab]) || [];
-      renderIndividualRank(currentTab, list);
-    }
+  function startAutoRefresh(){
+    clearInterval(countdownTimer);
+    countdown = REFRESH_INTERVAL;
+    countdownTimer = setInterval(function(){
+      countdown--;
+      countdownText.textContent = countdown + "초 후 갱신";
+      if (countdown <= 0) {
+        countdown = REFRESH_INTERVAL;
+        fetchRankings();
+      }
+    }, 1000);
   }
 
-  // 팀 대항전 순위 렌더링
-  function renderTeamRank(teams){
-    if(!teams || teams.length === 0){
-      rankContent.innerHTML = '<div class="empty-box">아직 완료된 팀 점수가 없습니다.</div>';
-      return;
-    }
-
-    var html = '<div class="rank-list">';
-    teams.forEach(function(item){
-      var medal = item.rank === 1 ? '🥇 ' : (item.rank === 2 ? '🥈 ' : (item.rank === 3 ? '🥉 ' : ''));
-      html += 
-        '<div class="team-rank-card">' +
-          '<div>' +
-            '<div class="team-rank-title">' + medal + item.rank + '위 ' + item.team + '</div>' +
-            '<div style="font-size:11px; color:var(--ice); opacity:0.75; margin-top:2px;">TOP 10 진입: ' + item.topRankCount + '회</div>' +
-          '</div>' +
-          '<div class="team-rank-points">' + item.totalPoints + ' pts</div>' +
-        '</div>';
-    });
-    html += '</div>';
-    rankContent.innerHTML = html;
-  }
-
-  // 종목별 개인 순위 렌더링 (1~3위 포디움 + 4~10위 카드)
-  function renderIndividualRank(gName, list){
-    if(!list || list.length === 0){
-      rankContent.innerHTML = '<div class="empty-box">아직 등록된 랭킹 기록이 없습니다.</div>';
-      return;
-    }
-
-    var isTime = !!isTimeGame[gName];
-    var unit = isTime ? "초" : "점";
-
-    var top1 = list[0];
-    var top2 = list[1];
-    var top3 = list[2];
-    var rest = list.slice(3);
-
-    var html = '';
-
-    // 포디움 (1~3위 시상대)
-    html += '<div class="podium-wrap">';
-    
-    // 2위 (좌측)
-    html += '<div class="podium-col">';
-    if(top2){
-      html += '<div class="podium-avatar">🥈</div>' +
-              '<div class="podium-name">' + top2.sabun + '</div>' +
-              '<div class="podium-team">' + top2.team + '</div>' +
-              '<div class="podium-score">' + top2.score + unit + '</div>' +
-              '<div class="podium-step step-2">2</div>';
-    }
-    html += '</div>';
-
-    // 1위 (중앙)
-    html += '<div class="podium-col">';
-    if(top1){
-      html += '<div class="podium-avatar">👑</div>' +
-              '<div class="podium-name" style="font-size:13px; color:#FBBF24;">' + top1.sabun + '</div>' +
-              '<div class="podium-team">' + top1.team + '</div>' +
-              '<div class="podium-score" style="font-size:16px;">' + top1.score + unit + '</div>' +
-              '<div class="podium-step step-1">1</div>';
-    }
-    html += '</div>';
-
-    // 3위 (우측)
-    html += '<div class="podium-col">';
-    if(top3){
-      html += '<div class="podium-avatar">🥉</div>' +
-              '<div class="podium-name">' + top3.sabun + '</div>' +
-              '<div class="podium-team">' + top3.team + '</div>' +
-              '<div class="podium-score">' + top3.score + unit + '</div>' +
-              '<div class="podium-step step-3">3</div>';
-    }
-    html += '</div>';
-
-    html += '</div>';
-
-    // 4위 ~ 10위 리스트
-    if(rest.length > 0){
-      html += '<div class="rank-list" style="margin-top:10px;">';
-      rest.forEach(function(item){
-        html += 
-          '<div class="rank-card">' +
-            '<div class="rank-card-left">' +
-              '<span class="rank-num">' + item.rank + '</span>' +
-              '<div class="rank-card-info">' +
-                '<span class="rank-card-user">' + item.sabun + '</span>' +
-                '<span class="rank-card-team">' + item.team + '</span>' +
-              '</div>' +
-            '</div>' +
-            '<div class="rank-card-score">' + item.score + unit + '</div>' +
-          '</div>';
-      });
-      html += '</div>';
-    }
-
-    rankContent.innerHTML = html;
-  }
-
-  // 탭 클릭 이벤트
-  tabs.forEach(function(tab){
-    tab.addEventListener("click", function(){
-      tabs.forEach(function(t){ t.classList.remove("active"); });
-      tab.classList.add("active");
-      currentTab = tab.dataset.target;
-      renderView();
-    });
+  btnManualRefresh.addEventListener("click", function(){
+    btnManualRefresh.textContent = "갱신 중...";
+    fetchRankings();
+    setTimeout(function(){
+      btnManualRefresh.textContent = "새로고침";
+      countdown = REFRESH_INTERVAL;
+    }, 600);
   });
 
-  // 타이머 루프 및 수동 새로고침
-  function resetTimer(){
-    timer = 15;
-    countDownEl.textContent = timer;
-  }
-
-  refreshBtn.addEventListener("click", function(){
-    resetTimer();
-    fetchData();
-  });
-
-  intervalId = setInterval(function(){
-    timer--;
-    if(timer <= 0){
-      resetTimer();
-      fetchData();
-    } else {
-      countDownEl.textContent = timer;
-    }
-  }, 1000);
-
-  fetchData();
+  render();
+  fetchRankings();
+  startAutoRefresh();
 })();
 </script>
 </body>
