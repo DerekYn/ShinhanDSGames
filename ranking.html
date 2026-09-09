@@ -37,34 +37,19 @@
 
   /* 브랜드 헤더 */
   .brand-bar {
-    width: 100%;
-    max-width: 640px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+    width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: 6px;
     background: linear-gradient(135deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02));
-    border: 1px solid rgba(255,255,255,0.16);
-    border-radius: 16px;
-    padding: 8px 12px;
-    box-sizing: border-box;
+    border: 1px solid rgba(255,255,255,0.16); border-radius: 16px; padding: 8px 12px; box-sizing: border-box;
   }
-  .brand-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    width: 100%;
-  }
+  .brand-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; }
   .brand-left { display: flex; align-items: center; gap: 10px; }
   .brand-logo { width: 32px; height: 32px; flex-shrink: 0; }
   .brand-logo svg { width: 100%; height: 100%; display: block; }
   .brand-text { display: flex; flex-direction: column; line-height: 1.2; }
   .brand-name { font-size: 13px; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
   .brand-dept {
-    display: inline-block; margin-top: 2px;
-    font-size: 10px; font-weight: 800; color: var(--navy);
-    background: var(--sky); padding: 2px 8px; border-radius: 999px;
-    width: fit-content; letter-spacing: -0.01em;
+    display: inline-block; margin-top: 2px; font-size: 10px; font-weight: 800; color: var(--navy);
+    background: var(--sky); padding: 2px 8px; border-radius: 999px; width: fit-content; letter-spacing: -0.01em;
   }
   .event-tag {
     font-size: 11px; font-weight: 700; color: var(--ice);
@@ -73,8 +58,7 @@
   }
 
   .nav-toggle {
-    width: 26px; height: 26px; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
     background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
     border-radius: 8px; color: var(--ice); cursor: pointer;
   }
@@ -86,17 +70,14 @@
   /* 바로가기 네비게이션 */
   .nav-games {
     display: flex; align-items: center; justify-content: space-between;
-    gap: 5px; width: 100%; overflow-x: auto; padding-top: 4px;
-    border-top: 1px solid rgba(255,255,255,0.08);
+    gap: 5px; width: 100%; overflow-x: auto; padding-top: 4px; border-top: 1px solid rgba(255,255,255,0.08);
   }
   .nav-games::-webkit-scrollbar { display: none; }
   .nav-item {
-    flex: 1; min-width: 50px;
-    display: inline-flex; align-items: center; justify-content: center;
-    gap: 3px; padding: 5px 6px; border-radius: 10px;
-    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
-    color: var(--ice); text-decoration: none; font-size: 11px; font-weight: 700;
-    transition: all 0.15s ease; white-space: nowrap;
+    flex: 1; min-width: 50px; display: inline-flex; align-items: center; justify-content: center;
+    gap: 3px; padding: 5px 6px; border-radius: 10px; background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12); color: var(--ice); text-decoration: none;
+    font-size: 11px; font-weight: 700; transition: all 0.15s ease; white-space: nowrap;
   }
   .nav-item:hover { background: rgba(255,255,255,0.15); color: #fff; transform: translateY(-1px); }
 
@@ -104,10 +85,8 @@
   .rank-box {
     width: 100%; max-width: 640px;
     background: linear-gradient(180deg, rgba(18, 58, 99, 0.8), rgba(11, 31, 58, 0.95));
-    border: 1px solid rgba(255,255,255,0.14);
-    border-radius: 18px; padding: 14px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
-    display: flex; flex-direction: column; gap: 12px;
+    border: 1px solid rgba(255,255,255,0.14); border-radius: 18px; padding: 14px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45); display: flex; flex-direction: column; gap: 12px;
   }
 
   /* 상단 상태 및 새로고침 바 */
@@ -116,22 +95,17 @@
     padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);
   }
   .live-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 11px; font-weight: 700; color: var(--accent);
-    background: rgba(47, 191, 158, 0.12); border: 1px solid var(--accent);
+    display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700;
+    color: var(--accent); background: rgba(47, 191, 158, 0.12); border: 1px solid var(--accent);
     padding: 3px 9px; border-radius: 20px;
   }
   .live-dot {
     width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
-    box-shadow: 0 0 8px var(--accent);
-    animation: pulse 1.2s infinite;
+    box-shadow: 0 0 8px var(--accent); animation: pulse 1.2s infinite;
   }
   @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
 
-  .refresh-group {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 11px; color: var(--ice);
-  }
+  .refresh-group { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--ice); }
   .btn-refresh {
     background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
     color: #fff; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;
@@ -140,7 +114,7 @@
   }
   .btn-refresh:active { transform: scale(0.96); background: var(--blue); }
 
-  /* 메인 뷰 스위처 (개인전 vs 팀 대항전) */
+  /* 1차 탭 */
   .view-tabs {
     display: flex; gap: 6px; background: rgba(6, 20, 36, 0.6);
     padding: 4px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);
@@ -149,14 +123,10 @@
     flex: 1; padding: 9px 0; text-align: center; font-size: 13px; font-weight: 800;
     color: var(--ice); border-radius: 9px; cursor: pointer; transition: all 0.15s ease;
   }
-  .view-tab.active {
-    background: var(--blue); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  }
+  .view-tab.active { background: var(--blue); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
 
-  /* 게임 종목 선택 가로 스크롤 탭 */
-  .game-pills {
-    display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px;
-  }
+  /* 2차 종목 선택 탭 */
+  .game-pills { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
   .game-pills::-webkit-scrollbar { display: none; }
   .game-pill {
     flex: 1; min-width: 68px; padding: 7px 8px; text-align: center;
@@ -166,11 +136,9 @@
   }
   .game-pill.active {
     background: linear-gradient(135deg, var(--sky), var(--blue));
-    border-color: var(--sky); color: #fff;
-    box-shadow: 0 2px 8px rgba(79, 157, 222, 0.35);
+    border-color: var(--sky); color: #fff; box-shadow: 0 2px 8px rgba(79, 157, 222, 0.35);
   }
 
-  /* 규칙 안내 뱃지 */
   .rule-banner {
     display: flex; align-items: center; justify-content: space-between;
     background: rgba(6, 20, 36, 0.5); border: 1px solid rgba(255,255,255,0.08);
@@ -178,7 +146,30 @@
   }
   .rule-badge { color: var(--sky); font-weight: 700; }
 
-  /* 포디움 (TOP 1, 2, 3) */
+  /* ============================================================
+     [내 순위 전용 VIP 카드 (최상단 강조)]
+     ============================================================ */
+  .my-rank-card {
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(135deg, rgba(79, 157, 222, 0.22), rgba(18, 58, 99, 0.85));
+    border: 1.5px solid var(--sky); border-radius: 14px; padding: 10px 14px;
+    box-shadow: 0 4px 15px rgba(79, 157, 222, 0.25);
+  }
+  .my-rank-left { display: flex; align-items: center; gap: 10px; }
+  .my-rank-badge {
+    background: var(--sky); color: var(--navy); font-weight: 900;
+    font-size: 11px; padding: 3px 7px; border-radius: 6px; letter-spacing: -0.02em;
+  }
+  .my-rank-info { display: flex; flex-direction: column; gap: 2px; }
+  .my-rank-title { font-size: 13.5px; font-weight: 800; color: #fff; }
+  .my-rank-title b { color: var(--gold); font-size: 15px; }
+  .my-rank-sub { font-size: 11px; color: var(--ice); opacity: 0.85; }
+  .my-rank-score {
+    font-family: var(--font-num); font-size: 17px; font-weight: 800;
+    color: var(--accent); text-align: right;
+  }
+
+  /* 포디움 */
   .podium {
     display: grid; grid-template-columns: 1fr 1.15fr 1fr; gap: 8px;
     align-items: flex-end; padding: 10px 4px 6px;
@@ -201,7 +192,6 @@
     border-color: var(--bronze);
     background: linear-gradient(180deg, rgba(245, 158, 11, 0.1), rgba(6, 20, 36, 0.85));
   }
-
   .podium-medal { font-size: 24px; line-height: 1; }
   .podium-team { font-size: 11px; font-weight: 700; color: #fff; margin-top: 2px; }
   .podium-sabun { font-size: 10px; color: var(--ice); opacity: 0.8; }
@@ -211,12 +201,15 @@
   }
   .podium-card.first .podium-score { font-size: 18px; color: var(--gold); }
 
-  /* 4~10위 리스트 테이블 */
+  /* 4~10위 리스트 */
   .rank-list { display: flex; flex-direction: column; gap: 6px; width: 100%; }
   .rank-row {
     display: flex; align-items: center; justify-content: space-between;
     background: rgba(6, 20, 36, 0.55); border: 1px solid rgba(255,255,255,0.08);
     border-radius: 10px; padding: 9px 12px; font-size: 12px;
+  }
+  .rank-row.is-me {
+    background: rgba(79, 157, 222, 0.16); border-color: var(--sky);
   }
   .rank-row-left { display: flex; align-items: center; gap: 10px; }
   .rank-num {
@@ -225,11 +218,9 @@
   }
   .rank-team { font-weight: 700; color: #fff; }
   .rank-sabun { font-size: 11px; color: var(--ice); opacity: 0.75; }
-  .rank-val {
-    font-family: var(--font-num); font-weight: 800; font-size: 14px; color: var(--sky);
-  }
+  .rank-val { font-family: var(--font-num); font-weight: 800; font-size: 14px; color: var(--sky); }
 
-  /* 팀 대항전 카드 목록 */
+  /* 팀 대항전 */
   .team-list { display: flex; flex-direction: column; gap: 8px; width: 100%; }
   .team-card {
     display: flex; align-items: center; justify-content: space-between;
@@ -237,35 +228,35 @@
     border-radius: 12px; padding: 12px 14px; position: relative;
   }
   .team-card.rank-1 {
-    border-color: var(--gold);
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(6, 20, 36, 0.8));
+    border-color: var(--gold); background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(6, 20, 36, 0.8));
   }
+  .team-card.is-my-team { border-color: var(--sky); box-shadow: 0 0 10px rgba(79, 157, 222, 0.3); }
   .team-left { display: flex; align-items: center; gap: 12px; }
   .team-badge {
-    width: 28px; height: 28px; border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--font-num); font-weight: 800; font-size: 13px;
-    background: rgba(255,255,255,0.08); color: #fff;
+    width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-num); font-weight: 800; font-size: 13px; background: rgba(255,255,255,0.08); color: #fff;
   }
   .team-card.rank-1 .team-badge { background: var(--gold); color: #041224; }
   .team-card.rank-2 .team-badge { background: #cbd5e1; color: #041224; }
   .team-card.rank-3 .team-badge { background: var(--bronze); color: #041224; }
-
   .team-info { display: flex; flex-direction: column; gap: 2px; }
   .team-title { font-size: 14px; font-weight: 800; color: #fff; }
   .team-sub { font-size: 11px; color: var(--ice); opacity: 0.75; }
   .team-score-box { text-align: right; }
-  .team-score {
-    font-family: var(--font-num); font-size: 18px; font-weight: 800; color: var(--accent);
-  }
+  .team-score { font-family: var(--font-num); font-size: 18px; font-weight: 800; color: var(--accent); }
   .team-card.rank-1 .team-score { color: var(--gold); }
   .team-score-lbl { font-size: 10px; color: var(--ice); opacity: 0.75; }
 
-  /* 로딩 및 빈 데이터 안내 */
-  .empty-state {
-    text-align: center; padding: 36px 12px; color: var(--ice); font-size: 13px; line-height: 1.6;
+  /* 로딩 스피너 및 에러 상태 */
+  .state-box {
+    text-align: center; padding: 40px 16px; color: var(--ice); font-size: 13px; line-height: 1.6;
   }
-  .empty-state .icon { font-size: 32px; margin-bottom: 8px; display: block; }
+  .spinner {
+    width: 34px; height: 34px; border: 3px solid rgba(255,255,255,0.15);
+    border-top-color: var(--sky); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -284,16 +275,16 @@
               </linearGradient>
             </defs>
             <rect x="1" y="1" width="38" height="38" rx="10" fill="url(#logoGrad)" stroke="rgba(255,255,255,0.25)"/>
-            <text x="20" y="27" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="18" fill="#fff">신한DS</text>
+            <text x="20" y="27" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="18" fill="#fff">SDS</text>
           </svg>
         </div>
         <div class="brand-text">
-          <span class="brand-name">금융본부 🏆 소통 미니게임대회</span>
+          <span class="brand-name">신한DS 금융본부</span>
           <span class="brand-dept">3분기 리버스 멘토링</span>
         </div>
       </div>
       <div class="brand-right">
-        <div class="event-tag">📊 실시간 순위</div>
+        <div class="event-tag">🏆 소통 미니게임대회</div>
         <button class="nav-toggle" id="navToggle" aria-label="게임 목록 접기/펼치기" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </button>
@@ -337,11 +328,13 @@
       </div>
     </div>
 
+    <!-- 1차 탭: 개인전 / 팀 대항전 -->
     <div class="view-tabs">
       <div class="view-tab active" id="tabPersonal">종목별 개인 순위</div>
       <div class="view-tab" id="tabTeam">팀별 대항전 순위</div>
     </div>
 
+    <!-- 2차 종목 선택 (개인전 전용) -->
     <div id="gameSelectorSection">
       <div class="game-pills">
         <div class="game-pill active" data-game="사과게임">🍎 사과</div>
@@ -357,31 +350,49 @@
       <span class="rule-badge" id="ruleType">높은 점수순</span>
     </div>
 
+    <!-- 최초 로딩 화면 (초기 진입 시 노출) -->
+    <div class="state-box" id="initialLoadingBox">
+      <div class="spinner"></div>
+      <div>실시간 순위 집계 중... 잠시만 기다려주세요 🙂</div>
+    </div>
+
     <!-- 개인 순위 컨테이너 -->
-    <div id="personalContainer">
+    <div id="personalContainer" style="display:none; flex-direction:column; gap:10px;">
+      <!-- 내 순위 VIP 카드 (최상단) -->
+      <div class="my-rank-card" id="myPersonalCard"></div>
+      <!-- 포디움 -->
       <div class="podium" id="podiumArea"></div>
+      <!-- 4~10위 리스트 -->
       <div class="rank-list" id="rankListArea"></div>
     </div>
 
     <!-- 팀 대항전 컨테이너 -->
-    <div id="teamContainer" style="display:none;">
+    <div id="teamContainer" style="display:none; flex-direction:column; gap:10px;">
+      <!-- 우리 팀 순위 VIP 카드 -->
+      <div class="my-rank-card" id="myTeamCard"></div>
+      <!-- 팀 순위 리스트 -->
       <div class="team-list" id="teamListArea"></div>
     </div>
 
-    <!-- 로딩 및 빈 데이터 안내 -->
-    <div class="empty-state" id="emptyState" style="display:none;">
-      <span class="icon">📊</span>
-      <span id="emptyMsg">기록을 집계하고 있습니다...</span>
+    <!-- 빈 데이터 안내 화면 -->
+    <div class="state-box" id="emptyState" style="display:none;">
+      <div style="font-size:32px; margin-bottom:8px;">📊</div>
+      <div id="emptyMsg">아직 기록된 랭킹 데이터가 없습니다.</div>
     </div>
   </div>
 </div>
 
 <script>
 (function(){
+  // 최신 웹 앱 URL 지정
   var GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwXeZ1OMPgMQb-JhW_uOAxQ-w1sTq5kb6XbTa6XF3BjzhVrax6uvPc8LBC0YfTSKiZKEQ/exec";
 
   var currentView = "personal";
   var currentGame = "사과게임";
+  var isFirstLoadDone = false;
+
+  var myTeam = localStorage.getItem("sh_mini_team") || "";
+  var mySabun = localStorage.getItem("sh_mini_sabun") || "";
 
   var GAME_META = {
     "사과게임": { desc: "합 10을 완성해 획득한 사과 개수", badge: "높은 점수순", unit: "점", isTime: false },
@@ -391,12 +402,7 @@
     "드롭": { desc: "60초 동안 바구니로 받은 아이템 합산 점수", badge: "높은 점수순", unit: "점", isTime: false }
   };
 
-  var cachedData = {
-    updatedAt: "방금 전",
-    games: {},
-    teams: []
-  };
-
+  var cachedData = { games: {}, teams: [] };
   var REFRESH_INTERVAL = 15;
   var countdown = REFRESH_INTERVAL;
   var countdownTimer = null;
@@ -406,6 +412,11 @@
   var gameSelectorSection = document.getElementById("gameSelectorSection");
   var personalContainer = document.getElementById("personalContainer");
   var teamContainer = document.getElementById("teamContainer");
+  var initialLoadingBox = document.getElementById("initialLoadingBox");
+  var emptyState = document.getElementById("emptyState");
+  var emptyMsg = document.getElementById("emptyMsg");
+  var myPersonalCard = document.getElementById("myPersonalCard");
+  var myTeamCard = document.getElementById("myTeamCard");
   var podiumArea = document.getElementById("podiumArea");
   var rankListArea = document.getElementById("rankListArea");
   var teamListArea = document.getElementById("teamListArea");
@@ -414,8 +425,6 @@
   var ruleType = document.getElementById("ruleType");
   var countdownText = document.getElementById("countdownText");
   var btnManualRefresh = document.getElementById("btnManualRefresh");
-  var emptyState = document.getElementById("emptyState");
-  var emptyMsg = document.getElementById("emptyMsg");
 
   tabPersonal.addEventListener("click", function(){
     currentView = "personal";
@@ -423,8 +432,6 @@
     tabTeam.classList.remove("active");
     gameSelectorSection.style.display = "block";
     ruleBanner.style.display = "flex";
-    personalContainer.style.display = "block";
-    teamContainer.style.display = "none";
     render();
   });
 
@@ -434,8 +441,6 @@
     tabPersonal.classList.remove("active");
     gameSelectorSection.style.display = "none";
     ruleBanner.style.display = "none";
-    personalContainer.style.display = "none";
-    teamContainer.style.display = "block";
     render();
   });
 
@@ -448,18 +453,8 @@
     });
   });
 
-  function render(){
-    if (currentView === "personal") {
-      renderPersonalRank();
-    } else {
-      renderTeamRank();
-    }
-  }
-
   function formatScore(val, isTime){
-    if (isTime) {
-      return Number(val).toFixed(1) + "초";
-    }
+    if (isTime) return Number(val).toFixed(1) + "초";
     return Math.round(Number(val)) + "점";
   }
 
@@ -467,6 +462,21 @@
     var s = String(sabun || "");
     if (s.length <= 3) return s;
     return s.slice(0, 3) + "*".repeat(s.length - 3);
+  }
+
+  function render(){
+    if (!isFirstLoadDone) return; // 첫 데이터 도착 전에는 로딩창 유지
+
+    initialLoadingBox.style.display = "none";
+    emptyState.style.display = "none";
+
+    if (currentView === "personal") {
+      teamContainer.style.display = "none";
+      renderPersonalRank();
+    } else {
+      personalContainer.style.display = "none";
+      renderTeamRank();
+    }
   }
 
   function renderPersonalRank(){
@@ -477,70 +487,99 @@
     var list = (cachedData.games && cachedData.games[currentGame]) || [];
 
     if (list.length === 0) {
-      podiumArea.innerHTML = "";
-      rankListArea.innerHTML = "";
+      personalContainer.style.display = "none";
       emptyState.style.display = "block";
-      emptyMsg.textContent = "아직 등록된 기록이 없습니다.\n첫 번째 랭커가 되어보세요!";
+      emptyMsg.textContent = "아직 등록된 기록이 없습니다.\n첫 번째 랭커에 도전해 보세요!";
       return;
     }
-    emptyState.style.display = "none";
 
+    personalContainer.style.display = "flex";
+
+    // 1. 내 순위 (최상단 VIP 카드) 계산 및 렌더링
+    var myIndex = -1;
+    if (mySabun) {
+      for (var i = 0; i < list.length; i++) {
+        if (String(list[i].sabun).trim() === String(mySabun).trim()) {
+          myIndex = i;
+          break;
+        }
+      }
+    }
+
+    if (mySabun && myIndex !== -1) {
+      var myRecord = list[myIndex];
+      var myRankNum = myRecord.rank || (myIndex + 1);
+      myPersonalCard.innerHTML = 
+        '<div class="my-rank-left">' +
+          '<span class="my-rank-badge">MY</span>' +
+          '<div class="my-rank-info">' +
+            '<span class="my-rank-title">내 현재 순위: <b>' + myRankNum + '위</b></span>' +
+            '<span class="my-rank-sub">' + (myRecord.team || myTeam) + ' (' + maskSabun(mySabun) + ')</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="my-rank-score">' + formatScore(myRecord.score, meta.isTime) + '</div>';
+      myPersonalCard.style.display = "flex";
+    } else if (mySabun) {
+      myPersonalCard.innerHTML = 
+        '<div class="my-rank-left">' +
+          '<span class="my-rank-badge">MY</span>' +
+          '<div class="my-rank-info">' +
+            '<span class="my-rank-title">내 현재 순위: <b>순위권 진입 도전!</b></span>' +
+            '<span class="my-rank-sub">' + myTeam + ' (' + maskSabun(mySabun) + ')</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="my-rank-score" style="font-size:12px; color:var(--ice);">도전하기 👉</div>';
+      myPersonalCard.style.display = "flex";
+    } else {
+      myPersonalCard.style.display = "none";
+    }
+
+    // 2. 포디움 (1~3위)
     var top3 = list.slice(0, 3);
-    var first = top3[0];
-    var second = top3[1];
-    var third = top3[2];
-
+    var first = top3[0], second = top3[1], third = top3[2];
     var podiumHtml = "";
 
-    // 2위
-    if (second) {
-      podiumHtml += '<div class="podium-card second">' +
+    podiumHtml += second ? (
+      '<div class="podium-card second">' +
         '<div class="podium-medal">🥈</div>' +
         '<div class="podium-team">' + second.team + '</div>' +
         '<div class="podium-sabun">' + maskSabun(second.sabun) + '</div>' +
         '<div class="podium-score">' + formatScore(second.score, meta.isTime) + '</div>' +
-      '</div>';
-    } else {
-      podiumHtml += '<div class="podium-card second" style="opacity:0.3;"><div class="podium-medal">🥈</div><div class="podium-team">-</div></div>';
-    }
+      '</div>'
+    ) : '<div class="podium-card second" style="opacity:0.3;"><div class="podium-medal">🥈</div><div class="podium-team">-</div></div>';
 
-    // 1위
-    if (first) {
-      podiumHtml += '<div class="podium-card first">' +
+    podiumHtml += first ? (
+      '<div class="podium-card first">' +
         '<div class="podium-medal">🥇</div>' +
         '<div class="podium-team">' + first.team + '</div>' +
         '<div class="podium-sabun">' + maskSabun(first.sabun) + '</div>' +
         '<div class="podium-score">' + formatScore(first.score, meta.isTime) + '</div>' +
-      '</div>';
-    } else {
-      podiumHtml += '<div class="podium-card first" style="opacity:0.3;"><div class="podium-medal">🥇</div><div class="podium-team">-</div></div>';
-    }
+      '</div>'
+    ) : '<div class="podium-card first" style="opacity:0.3;"><div class="podium-medal">🥇</div><div class="podium-team">-</div></div>';
 
-    // 3위
-    if (third) {
-      podiumHtml += '<div class="podium-card third">' +
+    podiumHtml += third ? (
+      '<div class="podium-card third">' +
         '<div class="podium-medal">🥉</div>' +
         '<div class="podium-team">' + third.team + '</div>' +
         '<div class="podium-sabun">' + maskSabun(third.sabun) + '</div>' +
         '<div class="podium-score">' + formatScore(third.score, meta.isTime) + '</div>' +
-      '</div>';
-    } else {
-      podiumHtml += '<div class="podium-card third" style="opacity:0.3;"><div class="podium-medal">🥉</div><div class="podium-team">-</div></div>';
-    }
+      '</div>'
+    ) : '<div class="podium-card third" style="opacity:0.3;"><div class="podium-medal">🥉</div><div class="podium-team">-</div></div>';
 
     podiumArea.innerHTML = podiumHtml;
 
-    // 4위 ~ 10위
+    // 3. 4위 ~ 10위 리스트 (내가 포함되어 있으면 하이라이트)
     var restList = list.slice(3, 10);
     var listHtml = "";
     restList.forEach(function(item, idx){
       var rank = idx + 4;
-      listHtml += '<div class="rank-row">' +
+      var isMe = (mySabun && String(item.sabun).trim() === String(mySabun).trim());
+      listHtml += '<div class="rank-row ' + (isMe ? 'is-me' : '') + '">' +
         '<div class="rank-row-left">' +
           '<span class="rank-num">' + rank + '</span>' +
           '<div>' +
             '<span class="rank-team">' + item.team + '</span> ' +
-            '<span class="rank-sabun">(' + maskSabun(item.sabun) + ')</span>' +
+            '<span class="rank-sabun">(' + maskSabun(item.sabun) + ')' + (isMe ? ' 👈 나' : '') + '</span>' +
           '</div>' +
         '</div>' +
         '<span class="rank-val">' + formatScore(item.score, meta.isTime) + '</span>' +
@@ -553,24 +592,54 @@
   function renderTeamRank(){
     var list = cachedData.teams || [];
     if (list.length === 0) {
-      teamListArea.innerHTML = "";
+      teamContainer.style.display = "none";
       emptyState.style.display = "block";
       emptyMsg.textContent = "팀별 참여 기록을 집계 중입니다.";
       return;
     }
-    emptyState.style.display = "none";
+
+    teamContainer.style.display = "flex";
+
+    // 우리 팀 순위 카드
+    var myTeamObj = null;
+    var myTeamRank = -1;
+    if (myTeam) {
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].team === myTeam) {
+          myTeamObj = list[i];
+          myTeamRank = i + 1;
+          break;
+        }
+      }
+    }
+
+    if (myTeamObj) {
+      myTeamCard.innerHTML = 
+        '<div class="my-rank-left">' +
+          '<span class="my-rank-badge">MY TEAM</span>' +
+          '<div class="my-rank-info">' +
+            '<span class="my-rank-title">우리 팀 순위: <b>' + myTeamRank + '위</b> (' + myTeam + ')</span>' +
+            '<span class="my-rank-sub">TOP 10 진입 횟수: ' + myTeamObj.topRankCount + '회</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="my-rank-score">' + myTeamObj.totalPoints + ' pts</div>';
+      myTeamCard.style.display = "flex";
+    } else {
+      myTeamCard.style.display = "none";
+    }
 
     var html = "";
     list.forEach(function(item, idx){
       var rank = idx + 1;
       var rankClass = rank <= 3 ? ("rank-" + rank) : "";
+      var isMyTeam = (myTeam && item.team === myTeam);
       var medal = rank === 1 ? "🥇 " : (rank === 2 ? "🥈 " : (rank === 3 ? "🥉 " : ""));
 
-      html += '<div class="team-card ' + rankClass + '">' +
+      html += '<div class="team-card ' + rankClass + ' ' + (isMyTeam ? 'is-my-team' : '') + '">' +
         '<div class="team-left">' +
           '<div class="team-badge">' + rank + '</div>' +
           '<div class="team-info">' +
-            '<div class="team-title">' + medal + item.team + '</div>' +
+            '<div class="team-title">' + medal + item.team + (isMyTeam ? ' (우리팀)' : '') + '</div>' +
             '<div class="team-sub">TOP 10 진입: ' + item.topRankCount + '회</div>' +
           '</div>' +
         '</div>' +
@@ -587,26 +656,26 @@
   function fetchRankings(){
     if (!GOOGLE_WEBHOOK_URL) return;
 
-    fetch(GOOGLE_WEBHOOK_URL, { 
-      method: "GET",
-      redirect: "follow"
-    })
+    fetch(GOOGLE_WEBHOOK_URL, { method: "GET", redirect: "follow" })
       .then(function(res){
-        if (!res.ok) throw new Error("HTTP 오류: " + res.status);
+        if (!res.ok) throw new Error("HTTP error " + res.status);
         return res.json();
       })
       .then(function(data){
         if (data && data.status === "success") {
           cachedData = data;
+          isFirstLoadDone = true;
           render();
-        } else {
-          console.warn("GAS 응답 오류:", data);
         }
       })
       .catch(function(err){
-        console.warn("랭킹 패치 에러:", err);
-        emptyState.style.display = "block";
-        emptyMsg.textContent = "실시간 순위를 불러오는 중입니다...\n(Apps Script 배포 상태를 확인해주세요)";
+        console.warn("순위 갱신 지연/오류:", err);
+        // 이미 렌더링된 화면이 있다면 하단에 에러 문구를 노출하지 않고 조용히 패스
+        if (!isFirstLoadDone) {
+          initialLoadingBox.innerHTML = 
+            '<div style="font-size:28px; margin-bottom:8px;">⚠️</div>' +
+            '<div>순위 데이터를 불러오지 못했습니다.<br><span style="font-size:11px; opacity:0.7;">잠시 후 다시 새로고침 버튼을 눌러주세요.</span></div>';
+        }
       });
   }
 
@@ -632,7 +701,6 @@
     }, 600);
   });
 
-  render();
   fetchRankings();
   startAutoRefresh();
 })();
