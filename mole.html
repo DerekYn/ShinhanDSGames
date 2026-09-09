@@ -464,7 +464,7 @@
       <option value="라이프개발팀">라이프개발팀</option>
       <option value="기타">기타</option>
     </select>
-    <input type="text" id="sabunInput" class="auth-input" placeholder="사번 입력" maxlength="10">
+    <input type="text" id="sabunInput" class="auth-input" placeholder="사번 8자리 (예: 22091019)" maxlength="8" inputmode="numeric" pattern="[0-9]*">
     <span class="auth-error" id="authError"></span>
     <button class="main" id="authStartBtn" style="width: 100%;">도전 시작</button>
   </div>
@@ -918,35 +918,50 @@
 
   adRestartBtn.addEventListener("click", startGame);
 
-  function handleAuth(){
-    var teamVal = teamSelect.value;
-    var val = sabunInput.value.trim();
+	function handleAuth() {
+	  var teamVal = teamSelect.value;
+	  var val = sabunInput.value.trim();
 
-    if(!teamVal){
-      authError.textContent = "팀을 선택해 주세요.";
-      teamSelect.classList.add('error'); teamSelect.focus(); return;
-    }
-    if(!val){
-      authError.textContent = "사번을 입력해 주세요.";
-      teamSelect.classList.remove('error'); sabunInput.classList.add('error');
-      sabunInput.focus(); return;
-    }
+	  if (!teamVal) {
+		authError.textContent = "팀을 선택해 주세요.";
+		teamSelect.classList.add('error');
+		teamSelect.focus();
+		return;
+	  }
 
-    localStorage.setItem("sh_mini_team", teamVal);
-    localStorage.setItem("sh_mini_sabun", val);
+	  // 숫자 8자리 검증 정규식
+	  if (!/^\d{8}$/.test(val)) {
+		authError.textContent = "사번은 숫자 8자리여야 합니다. (예: 22091019)";
+		sabunInput.classList.add('error');
+		sabunInput.focus();
+		return;
+	  }
 
-    currentTeam = teamVal;
-    currentSabun = val;
-    playerBadge.textContent = "플레이어: " + currentTeam + " · " + currentSabun;
-    playerBadge.style.display = "inline-block";
-    authOverlay.classList.remove('show');
-    startGame();
-  }
+	  localStorage.setItem("sh_mini_team", teamVal);
+	  localStorage.setItem("sh_mini_sabun", val);
+
+	  currentTeam = teamVal;
+	  currentSabun = val;
+	  playerBadge.textContent = "플레이어: " + currentTeam + " · " + currentSabun;
+	  playerBadge.style.display = "inline-block";
+	  authOverlay.classList.remove('show');
+	  
+	  // 게임별 시작 함수 실행 (예: startGame() 또는 resetToStage1())
+	  startGame();
+	}
 
   authStartBtn.addEventListener('click', handleAuth);
   sabunInput.addEventListener('keydown', function(e){ if(e.key === 'Enter') handleAuth(); });
   teamSelect.addEventListener('change', function(){
     teamSelect.classList.remove('error'); authError.textContent = "";
+  });
+  
+    sabunInput.addEventListener('input', function() {
+    this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8);
+    if (this.value.length === 8) {
+      this.classList.remove('error');
+      authError.textContent = "";
+    }
   });
 
   // 하단 버튼 및 결과창 재시작 시 10대 업무수칙 팝업 노출
@@ -959,20 +974,25 @@
     if(e.target === ruleOverlay) ruleOverlay.classList.remove('show');
   });
 
-  var savedTeam = localStorage.getItem("sh_mini_team");
-  var savedSabun = localStorage.getItem("sh_mini_sabun");
+	// 기존 저장 기록 확인 부분 수정
+	var savedTeam = localStorage.getItem("sh_mini_team");
+	var savedSabun = localStorage.getItem("sh_mini_sabun");
 
-  if(savedTeam && savedSabun){
-    currentTeam = savedTeam;
-    currentSabun = savedSabun;
-    playerBadge.textContent = "플레이어: " + currentTeam + " · " + currentSabun;
-    playerBadge.style.display = "inline-block";
-    authOverlay.classList.remove('show');
-    startGame();
-  } else {
-    authOverlay.classList.add('show');
-    sabunInput.focus();
-  }
+	// 8자리 숫자로 저장되어 있을 때만 자동 통과
+	if (savedTeam && savedSabun && /^\d{8}$/.test(savedSabun)) {
+	  currentTeam = savedTeam;
+	  currentSabun = savedSabun;
+	  playerBadge.textContent = "플레이어: " + currentTeam + " · " + currentSabun;
+	  playerBadge.style.display = "inline-block";
+	  authOverlay.classList.remove('show');
+	  startGame();
+	} else {
+	  // 이전 테스트용 잘못된 사번이 저장되어 있으면 초기화
+	  localStorage.removeItem("sh_mini_team");
+	  localStorage.removeItem("sh_mini_sabun");
+	  authOverlay.classList.add('show');
+	  sabunInput.focus();
+	}
 
   playerBadge.addEventListener("click", function(){
     if(confirm("등록된 팀/사번 정보를 변경하시겠습니까?")){
