@@ -417,6 +417,35 @@
     text-align: center;
   }
   #pcBlockOverlay.show { display: flex; }
+  
+  .event-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ice);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 6px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+/* 추가: 호버 및 터치 반응 */
+.event-tag:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border-color: var(--sky);
+  transform: translateY(-1px);
+}
+.event-tag:active {
+  transform: scale(0.95);
+  background: var(--blue);
+}
 </style>
 </head>
 <body>
@@ -482,12 +511,12 @@
           <span class="brand-dept">3분기 리버스 멘토링</span>
         </div>
       </div>
-      <div class="brand-right">
-        <div class="event-tag">📊 실시간 순위</div>
-        <button class="nav-toggle" id="navToggle" aria-label="게임 목록 접기/펼치기" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
-      </div>
+		<div class="brand-right">
+		  <a href="ranking.html" class="event-tag btn-ranking">📊 실시간 순위</a>
+		  <button class="nav-toggle" id="navToggle" aria-label="게임 목록 접기/펼치기" type="button">
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+		  </button>
+		</div>
     </div>
     
     <nav class="nav-games" aria-label="게임 종목 바로가기">
