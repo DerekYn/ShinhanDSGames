@@ -31,7 +31,7 @@
   }
   #app {
     display: flex; flex-direction: column; align-items: center;
-    min-height: 100vh; min-height: 100dvh; padding: 12px; gap: 10px;
+    min-height: 100vh; min-height: 100dvh; padding: 8px 12px; gap: 8px;
     width: 100%;
   }
 
@@ -43,7 +43,7 @@
   }
   .brand-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; }
   .brand-left { display: flex; align-items: center; gap: 10px; }
-  .brand-logo { width: 32px; height: 32px; flex-shrink: 0; }
+  .brand-logo { width: 56px; height: 28px; flex-shrink: 0; }
   .brand-logo svg { width: 100%; height: 100%; display: block; }
   .brand-text { display: flex; flex-direction: column; line-height: 1.2; }
   .brand-name { font-size: 13px; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
@@ -56,15 +56,6 @@
     background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2);
     padding: 6px 12px; border-radius: 999px; white-space: nowrap; letter-spacing: -0.01em;
   }
-
-  .nav-toggle {
-    width: 26px; height: 26px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
-    border-radius: 8px; color: var(--ice); cursor: pointer;
-  }
-  .nav-toggle svg { width: 14px; height: 14px; transition: transform 0.2s ease; display: block; }
-  .brand-bar.collapsed .nav-games { display: none; }
-  .brand-bar.collapsed .nav-toggle svg { transform: rotate(-90deg); }
   .brand-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 
   /* 바로가기 네비게이션 */
@@ -81,23 +72,23 @@
   }
   .nav-item:hover { background: rgba(255,255,255,0.15); color: #fff; transform: translateY(-1px); }
 
-  /* 랭킹 대시보드 메인 카드 */
+  /* 랭킹 대시보드 메인 카드 (세로 크기 미세 축소 최적화) */
   .rank-box {
     width: 100%; max-width: 640px;
     background: linear-gradient(180deg, rgba(18, 58, 99, 0.8), rgba(11, 31, 58, 0.95));
-    border: 1px solid rgba(255,255,255,0.14); border-radius: 18px; padding: 14px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.45); display: flex; flex-direction: column; gap: 12px;
+    border: 1px solid rgba(255,255,255,0.14); border-radius: 18px; padding: 10px 12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45); display: flex; flex-direction: column; gap: 8px;
   }
 
   /* 상단 상태 및 새로고침 바 */
   .rank-header {
     display: flex; align-items: center; justify-content: space-between;
-    padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1);
   }
   .live-badge {
     display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700;
     color: var(--accent); background: rgba(47, 191, 158, 0.12); border: 1px solid var(--accent);
-    padding: 3px 9px; border-radius: 20px;
+    padding: 2.5px 8px; border-radius: 20px;
   }
   .live-dot {
     width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
@@ -108,7 +99,7 @@
   .refresh-group { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--ice); }
   .btn-refresh {
     background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
-    color: #fff; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;
+    color: #fff; padding: 3px 9px; border-radius: 8px; font-size: 11px; font-weight: 700;
     cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
     transition: background 0.15s ease, transform 0.1s ease;
   }
@@ -117,10 +108,10 @@
   /* 1차 탭 */
   .view-tabs {
     display: flex; gap: 6px; background: rgba(6, 20, 36, 0.6);
-    padding: 4px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);
+    padding: 3px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);
   }
   .view-tab {
-    flex: 1; padding: 9px 0; text-align: center; font-size: 13px; font-weight: 800;
+    flex: 1; padding: 7px 0; text-align: center; font-size: 12.5px; font-weight: 800;
     color: var(--ice); border-radius: 9px; cursor: pointer; transition: all 0.15s ease;
   }
   .view-tab.active { background: var(--blue); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
@@ -129,7 +120,7 @@
   .game-pills { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
   .game-pills::-webkit-scrollbar { display: none; }
   .game-pill {
-    flex: 1; min-width: 68px; padding: 7px 8px; text-align: center;
+    flex: 1; min-width: 66px; padding: 6px 7px; text-align: center;
     background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
     border-radius: 10px; font-size: 11px; font-weight: 700; color: var(--ice);
     cursor: pointer; white-space: nowrap; transition: all 0.15s ease;
@@ -142,47 +133,45 @@
   .rule-banner {
     display: flex; align-items: center; justify-content: space-between;
     background: rgba(6, 20, 36, 0.5); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 10px; padding: 6px 12px; font-size: 11px; color: var(--ice);
+    border-radius: 10px; padding: 5px 10px; font-size: 11px; color: var(--ice);
   }
   .rule-badge { color: var(--sky); font-weight: 700; }
 
-  /* ============================================================
-     [내 순위 전용 VIP 카드 (최상단 강조)]
-     ============================================================ */
+  /* 내 순위 VIP 카드 (최상단) */
   .my-rank-card {
     display: flex; align-items: center; justify-content: space-between;
     background: linear-gradient(135deg, rgba(79, 157, 222, 0.22), rgba(18, 58, 99, 0.85));
-    border: 1.5px solid var(--sky); border-radius: 14px; padding: 10px 14px;
+    border: 1.5px solid var(--sky); border-radius: 14px; padding: 8px 12px;
     box-shadow: 0 4px 15px rgba(79, 157, 222, 0.25);
   }
   .my-rank-left { display: flex; align-items: center; gap: 10px; }
   .my-rank-badge {
     background: var(--sky); color: var(--navy); font-weight: 900;
-    font-size: 11px; padding: 3px 7px; border-radius: 6px; letter-spacing: -0.02em;
+    font-size: 11px; padding: 2.5px 6px; border-radius: 6px; letter-spacing: -0.02em;
   }
-  .my-rank-info { display: flex; flex-direction: column; gap: 2px; }
-  .my-rank-title { font-size: 13.5px; font-weight: 800; color: #fff; }
-  .my-rank-title b { color: var(--gold); font-size: 15px; }
-  .my-rank-sub { font-size: 11px; color: var(--ice); opacity: 0.85; }
+  .my-rank-info { display: flex; flex-direction: column; gap: 1px; }
+  .my-rank-title { font-size: 13px; font-weight: 800; color: #fff; }
+  .my-rank-title b { color: var(--gold); font-size: 14.5px; }
+  .my-rank-sub { font-size: 10.5px; color: var(--ice); opacity: 0.85; }
   .my-rank-score {
-    font-family: var(--font-num); font-size: 17px; font-weight: 800;
+    font-family: var(--font-num); font-size: 16px; font-weight: 800;
     color: var(--accent); text-align: right;
   }
 
   /* 포디움 */
   .podium {
     display: grid; grid-template-columns: 1fr 1.15fr 1fr; gap: 8px;
-    align-items: flex-end; padding: 10px 4px 6px;
+    align-items: flex-end; padding: 6px 4px 4px;
   }
   .podium-card {
     background: rgba(6, 20, 36, 0.75); border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 14px; padding: 12px 6px 10px; text-align: center;
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    border-radius: 14px; padding: 8px 6px 8px; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
   }
   .podium-card.first {
     border-color: var(--gold);
     background: linear-gradient(180deg, rgba(255, 215, 0, 0.14), rgba(6, 20, 36, 0.85));
-    transform: translateY(-6px);
+    transform: translateY(-5px);
   }
   .podium-card.second {
     border-color: #cbd5e1;
@@ -192,69 +181,69 @@
     border-color: var(--bronze);
     background: linear-gradient(180deg, rgba(245, 158, 11, 0.1), rgba(6, 20, 36, 0.85));
   }
-  .podium-medal { font-size: 24px; line-height: 1; }
-  .podium-team { font-size: 11px; font-weight: 700; color: #fff; margin-top: 2px; }
+  .podium-medal { font-size: 22px; line-height: 1; }
+  .podium-team { font-size: 11px; font-weight: 700; color: #fff; margin-top: 1px; }
   .podium-sabun { font-size: 10px; color: var(--ice); opacity: 0.8; }
   .podium-score {
-    font-family: var(--font-num); font-size: 16px; font-weight: 800;
-    color: var(--accent); margin-top: 4px;
+    font-family: var(--font-num); font-size: 15px; font-weight: 800;
+    color: var(--accent); margin-top: 3px;
   }
-  .podium-card.first .podium-score { font-size: 18px; color: var(--gold); }
+  .podium-card.first .podium-score { font-size: 17px; color: var(--gold); }
 
   /* 4~10위 리스트 */
-  .rank-list { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+  .rank-list { display: flex; flex-direction: column; gap: 5px; width: 100%; }
   .rank-row {
     display: flex; align-items: center; justify-content: space-between;
     background: rgba(6, 20, 36, 0.55); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 10px; padding: 9px 12px; font-size: 12px;
+    border-radius: 10px; padding: 7px 10px; font-size: 11.5px;
   }
   .rank-row.is-me {
     background: rgba(79, 157, 222, 0.16); border-color: var(--sky);
   }
-  .rank-row-left { display: flex; align-items: center; gap: 10px; }
+  .rank-row-left { display: flex; align-items: center; gap: 8px; }
   .rank-num {
-    font-family: var(--font-num); font-weight: 800; font-size: 13px;
-    color: var(--ice); width: 20px; text-align: center;
+    font-family: var(--font-num); font-weight: 800; font-size: 12.5px;
+    color: var(--ice); width: 18px; text-align: center;
   }
   .rank-team { font-weight: 700; color: #fff; }
-  .rank-sabun { font-size: 11px; color: var(--ice); opacity: 0.75; }
-  .rank-val { font-family: var(--font-num); font-weight: 800; font-size: 14px; color: var(--sky); }
+  .rank-sabun { font-size: 10.5px; color: var(--ice); opacity: 0.75; }
+  .rank-val { font-family: var(--font-num); font-weight: 800; font-size: 13.5px; color: var(--sky); }
 
   /* 팀 대항전 */
-  .team-list { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+  .team-list { display: flex; flex-direction: column; gap: 6px; width: 100%; }
   .team-card {
     display: flex; align-items: center; justify-content: space-between;
     background: rgba(6, 20, 36, 0.7); border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px; padding: 12px 14px; position: relative;
+    border-radius: 12px; padding: 10px 12px; position: relative;
   }
   .team-card.rank-1 {
     border-color: var(--gold); background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(6, 20, 36, 0.8));
   }
   .team-card.is-my-team { border-color: var(--sky); box-shadow: 0 0 10px rgba(79, 157, 222, 0.3); }
-  .team-left { display: flex; align-items: center; gap: 12px; }
+  .team-left { display: flex; align-items: center; gap: 10px; }
   .team-badge {
-    width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
-    font-family: var(--font-num); font-weight: 800; font-size: 13px; background: rgba(255,255,255,0.08); color: #fff;
+    width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-num); font-weight: 800; font-size: 12px; background: rgba(255,255,255,0.08); color: #fff;
   }
   .team-card.rank-1 .team-badge { background: var(--gold); color: #041224; }
   .team-card.rank-2 .team-badge { background: #cbd5e1; color: #041224; }
   .team-card.rank-3 .team-badge { background: var(--bronze); color: #041224; }
   .team-info { display: flex; flex-direction: column; gap: 2px; }
-  .team-title { font-size: 14px; font-weight: 800; color: #fff; }
-  .team-sub { font-size: 11px; color: var(--ice); opacity: 0.75; }
+  .team-title { font-size: 13px; font-weight: 800; color: #fff; }
+  .team-sub { font-size: 10.5px; color: var(--ice); opacity: 0.75; }
   .team-score-box { text-align: right; }
-  .team-score { font-family: var(--font-num); font-size: 18px; font-weight: 800; color: var(--accent); }
+  .team-score { font-family: var(--font-num); font-size: 16px; font-weight: 800; color: var(--accent); }
   .team-card.rank-1 .team-score { color: var(--gold); }
-  .team-score-lbl { font-size: 10px; color: var(--ice); opacity: 0.75; }
+  .team-score-lbl { font-size: 9.5px; color: var(--ice); opacity: 0.75; }
 
   /* 로딩 스피너 및 에러 상태 */
   .state-box {
-    text-align: center; padding: 40px 16px; color: var(--ice); font-size: 13px; line-height: 1.6;
+    text-align: center; padding: 36px 16px; color: var(--ice); font-size: 13px; line-height: 1.6;
   }
   .spinner {
-    width: 34px; height: 34px; border: 3px solid rgba(255,255,255,0.15);
+    width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.15);
     border-top-color: var(--sky); border-radius: 50%;
-    animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+    animation: spin 0.8s linear infinite; margin: 0 auto 10px;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
@@ -267,27 +256,24 @@
     <div class="brand-top">
       <div class="brand-left">
         <div class="brand-logo" aria-hidden="true">
-          <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <svg viewBox="0 0 68 34" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0" stop-color="#4F9DDE"/>
                 <stop offset="1" stop-color="#123A63"/>
               </linearGradient>
             </defs>
-            <rect x="1" y="1" width="38" height="38" rx="10" fill="url(#logoGrad)" stroke="rgba(255,255,255,0.25)"/>
-            <text x="20" y="27" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="18" fill="#fff">SDS</text>
+            <rect x="1" y="1" width="66" height="32" rx="8" fill="url(#logoGrad)" stroke="rgba(255,255,255,0.25)"/>
+            <text x="34" y="17" text-anchor="middle" dominant-baseline="central" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif" font-weight="800" font-size="14" fill="#fff" letter-spacing="-0.02em">신한DS</text>
           </svg>
         </div>
         <div class="brand-text">
-          <span class="brand-name">신한DS 금융본부</span>
+          <span class="brand-name">금융본부 🏆 소통 미니게임대회</span>
           <span class="brand-dept">3분기 리버스 멘토링</span>
         </div>
       </div>
       <div class="brand-right">
-        <div class="event-tag">🏆 소통 미니게임대회</div>
-        <button class="nav-toggle" id="navToggle" aria-label="게임 목록 접기/펼치기" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
+        <div class="event-tag">🏆 실시간 랭킹</div>
       </div>
     </div>
     
@@ -299,21 +285,6 @@
       <a href="drop.html" class="nav-item">💧 드롭</a>
     </nav>
   </div>
-
-  <script>
-  (function(){
-    var bar = document.getElementById('brandBar');
-    var toggle = document.getElementById('navToggle');
-    var KEY = 'sh_mini_navCollapsed';
-    if(!bar || !toggle) return;
-    var saved = localStorage.getItem(KEY);
-    if(saved === '1') bar.classList.add('collapsed');
-    toggle.addEventListener('click', function(){
-      var collapsed = bar.classList.toggle('collapsed');
-      localStorage.setItem(KEY, collapsed ? '1' : '0');
-    });
-  })();
-  </script>
 
   <!-- 랭킹 메인 패널 -->
   <div class="rank-box">
@@ -357,7 +328,7 @@
     </div>
 
     <!-- 개인 순위 컨테이너 -->
-    <div id="personalContainer" style="display:none; flex-direction:column; gap:10px;">
+    <div id="personalContainer" style="display:none; flex-direction:column; gap:8px;">
       <!-- 내 순위 VIP 카드 (최상단) -->
       <div class="my-rank-card" id="myPersonalCard"></div>
       <!-- 포디움 -->
@@ -367,7 +338,7 @@
     </div>
 
     <!-- 팀 대항전 컨테이너 -->
-    <div id="teamContainer" style="display:none; flex-direction:column; gap:10px;">
+    <div id="teamContainer" style="display:none; flex-direction:column; gap:8px;">
       <!-- 우리 팀 순위 VIP 카드 -->
       <div class="my-rank-card" id="myTeamCard"></div>
       <!-- 팀 순위 리스트 -->
@@ -376,7 +347,7 @@
 
     <!-- 빈 데이터 안내 화면 -->
     <div class="state-box" id="emptyState" style="display:none;">
-      <div style="font-size:32px; margin-bottom:8px;">📊</div>
+      <div style="font-size:30px; margin-bottom:6px;">📊</div>
       <div id="emptyMsg">아직 기록된 랭킹 데이터가 없습니다.</div>
     </div>
   </div>
@@ -384,15 +355,18 @@
 
 <script>
 (function(){
-  // 최신 웹 앱 URL 지정
   var GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwXeZ1OMPgMQb-JhW_uOAxQ-w1sTq5kb6XbTa6XF3BjzhVrax6uvPc8LBC0YfTSKiZKEQ/exec";
 
   var currentView = "personal";
   var currentGame = "사과게임";
   var isFirstLoadDone = false;
 
-  var myTeam = localStorage.getItem("sh_mini_team") || "";
-  var mySabun = localStorage.getItem("sh_mini_sabun") || "";
+  var myTeam = "";
+  var mySabun = "";
+  try {
+    myTeam = localStorage.getItem("sh_mini_team") || "";
+    mySabun = localStorage.getItem("sh_mini_sabun") || "";
+  } catch(e) {}
 
   var GAME_META = {
     "사과게임": { desc: "합 10을 완성해 획득한 사과 개수", badge: "높은 점수순", unit: "점", isTime: false },
@@ -465,7 +439,7 @@
   }
 
   function render(){
-    if (!isFirstLoadDone) return; // 첫 데이터 도착 전에는 로딩창 유지
+    if (!isFirstLoadDone) return;
 
     initialLoadingBox.style.display = "none";
     emptyState.style.display = "none";
@@ -495,7 +469,6 @@
 
     personalContainer.style.display = "flex";
 
-    // 1. 내 순위 (최상단 VIP 카드) 계산 및 렌더링
     var myIndex = -1;
     if (mySabun) {
       for (var i = 0; i < list.length; i++) {
@@ -534,7 +507,6 @@
       myPersonalCard.style.display = "none";
     }
 
-    // 2. 포디움 (1~3위)
     var top3 = list.slice(0, 3);
     var first = top3[0], second = top3[1], third = top3[2];
     var podiumHtml = "";
@@ -568,7 +540,6 @@
 
     podiumArea.innerHTML = podiumHtml;
 
-    // 3. 4위 ~ 10위 리스트 (내가 포함되어 있으면 하이라이트)
     var restList = list.slice(3, 10);
     var listHtml = "";
     restList.forEach(function(item, idx){
@@ -600,7 +571,6 @@
 
     teamContainer.style.display = "flex";
 
-    // 우리 팀 순위 카드
     var myTeamObj = null;
     var myTeamRank = -1;
     if (myTeam) {
@@ -670,7 +640,6 @@
       })
       .catch(function(err){
         console.warn("순위 갱신 지연/오류:", err);
-        // 이미 렌더링된 화면이 있다면 하단에 에러 문구를 노출하지 않고 조용히 패스
         if (!isFirstLoadDone) {
           initialLoadingBox.innerHTML = 
             '<div style="font-size:28px; margin-bottom:8px;">⚠️</div>' +
