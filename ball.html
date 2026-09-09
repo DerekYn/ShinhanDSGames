@@ -593,7 +593,7 @@
     }
   }
 
-  // 2. 실제 스마트폰 하드웨어 여부 엄격 판정
+    // 2. 실제 스마트폰 하드웨어 여부 판정 (모바일 크롬 오작동 수정 버전)
   function isRealMobileDevice() {
     var ua = navigator.userAgent || '';
     var mobileRegex = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
@@ -602,27 +602,37 @@
     // 기본 User-Agent 및 터치 센서 검증
     if (!mobileRegex.test(ua) || !hasTouch) return false;
 
-    // F12 디바이스 에뮬레이터로 위장해도 PC 그래픽카드는 속이지 못함
-    var gpu = getGpuRenderer().toLowerCase();
-    var pcGpuKeywords = [
-      'geforce', 'nvidia', 'radeon', 'amd', 'intel', 
-      'direct3d', 'angle', 'llvmpipe', 'mesa', 'swiftshader', 
-      'virtualbox', 'vmware', 'microsoft basic render'
-    ];
-    for (var i = 0; i < pcGpuKeywords.length; i++) {
-      if (gpu.indexOf(pcGpuKeywords[i]) !== -1) {
-        return false; // PC GPU 적발 시 에뮬레이터 판정
-      }
-    }
-
     // 데스크톱 OS 잔여 플랫폼 검증
     var platform = navigator.platform || '';
     if (['win32', 'win64', 'macintel'].indexOf(platform.toLowerCase()) !== -1) {
       return false;
     }
 
-    return true; // Adreno, Mali, Apple GPU 등 실제 모바일 디바이스만 통과
+    var gpu = getGpuRenderer().toLowerCase();
+
+    // 1순위: 모바일 고유 GPU 칩셋인 경우 무조건 모바일로 인정 (False Positive 방지)
+    var mobileGpuKeywords = ['mali', 'adreno', 'apple', 'powervr', 'xclipse'];
+    for (var m = 0; m < mobileGpuKeywords.length; m++) {
+      if (gpu.indexOf(mobileGpuKeywords[m]) !== -1) {
+        return true;
+      }
+    }
+
+    // 2순위: PC 전용 외장/내장 GPU 탐지 (F12 에뮬레이터 적발용, 'angle' 제외)
+    var pcGpuKeywords = [
+      'geforce', 'nvidia', 'radeon', 'intel', 
+      'direct3d', 'llvmpipe', 'mesa', 'swiftshader', 
+      'virtualbox', 'vmware', 'microsoft basic render'
+    ];
+    for (var i = 0; i < pcGpuKeywords.length; i++) {
+      if (gpu.indexOf(pcGpuKeywords[i]) !== -1) {
+        return false;
+      }
+    }
+
+    return true;
   }
+
 
   // 차단 오버레이 트리거 함수
   function triggerBlock() {
