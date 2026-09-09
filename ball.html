@@ -354,9 +354,43 @@
   #adRestartBtn{
     width:auto; min-width:140px; margin-top:16px;
   }
+
+  /* PC 차단 전면 안내 오버레이 */
+  #pcBlockOverlay {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at 50% 30%, #163A63 0%, #071426 100%);
+    z-index: 999999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+  }
+  #pcBlockOverlay.show { display: flex; }
 </style>
 </head>
 <body>
+
+<!-- PC 접속 차단 안내 모달 -->
+<div id="pcBlockOverlay">
+  <div class="modal" style="border-color: rgba(79, 157, 222, 0.4); max-width: 440px; padding: 32px 28px;">
+    <div style="font-size: 48px; margin-bottom: 12px;">📱</div>
+    <h2 style="color: #fff; font-size: 20px; margin-bottom: 14px;">모바일 환경에서 진행해주세요! 🙂</h2>
+    <p style="color: var(--ice); line-height: 1.75; font-size: 13.5px; text-align: center; margin: 0;">
+      우수하고 훌륭한 <b>금융본부 개발자</b> 여러분의 실력을<br>
+      의심하는 것은 결코 아니오나...<br><br>
+      혹시 모를 <b>'창의적인 코드 분석'</b>과<br>
+      <b>'불미스러운 초고득점 사태'</b>를 미연에 방지하고자<br>
+      본 게임은 <b style="color: var(--sky);">모바일 스마트폰</b>에서만 진행됩니다.<br><br>
+      F12는 잠시 봉인해 주세요! 🙂<br>
+	  콘솔창 대신 <b>순수 피지컬과 터치</b>로 승부해 주세요!<br>
+      <span style="font-size: 12px; color: var(--accent); display: inline-block; margin-top: 10px;">
+        👉 사내 메신저 링크를 스마트폰으로 열어 접속해 주세요.
+      </span>
+    </p>
+  </div>
+</div>
 
 <!-- 사번/팀 입력 최초 진입 모달 -->
 <div id="authOverlay" class="show">
@@ -408,9 +442,9 @@
     </div>
     
     <nav class="nav-games" aria-label="게임 종목 바로가기">
-      <a href="https://derekyn.github.io/ShinhanDSGames/ball.html" class="nav-item">⚽ 공튀기기</a>
+      <a href="https://derekyn.github.io/ShinhanDSGames/ball.html" class="nav-item active">⚽ 공튀기기</a>
       <a href="https://derekyn.github.io/ShinhanDSGames/mole.html" class="nav-item">🐹 두더지 잡기</a>
-      <a href="https://derekyn.github.io/ShinhanDSGames/apple.html" class="nav-item active">🍎 사과게임</a>
+      <a href="https://derekyn.github.io/ShinhanDSGames/apple.html" class="nav-item">🍎 사과게임</a>
       <a href="https://derekyn.github.io/ShinhanDSGames/bomb.html" class="nav-item">💣 지뢰찾기</a>
       <a href="https://derekyn.github.io/ShinhanDSGames/drop.html" class="nav-item">💧 낙하캐치</a>
     </nav>
@@ -513,6 +547,86 @@
 
 <script>
 (function(){
+  /* ============================================================
+     [F12 모바일 에뮬레이터 및 DevTools 무력화 보안 엔진]
+     ============================================================ */
+
+  // 1. WebGL을 통한 실제 GPU 그래픽 칩셋 핑거프린팅
+  function getGpuRenderer() {
+    try {
+      var canvas = document.createElement('canvas');
+      var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) return '';
+      var debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : '';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  // 2. 실제 스마트폰 하드웨어 여부 엄격 판정
+  function isRealMobileDevice() {
+    var ua = navigator.userAgent || '';
+    var mobileRegex = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+    var hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+    // 기본 User-Agent 및 터치 센서 검증
+    if (!mobileRegex.test(ua) || !hasTouch) return false;
+
+    // F12 디바이스 에뮬레이터로 위장해도 PC 그래픽카드는 속이지 못함
+    var gpu = getGpuRenderer().toLowerCase();
+    var pcGpuKeywords = [
+      'geforce', 'nvidia', 'radeon', 'amd', 'intel', 
+      'direct3d', 'angle', 'llvmpipe', 'mesa', 'swiftshader', 
+      'virtualbox', 'vmware', 'microsoft basic render'
+    ];
+    for (var i = 0; i < pcGpuKeywords.length; i++) {
+      if (gpu.indexOf(pcGpuKeywords[i]) !== -1) {
+        return false; // PC GPU 적발 시 에뮬레이터 판정
+      }
+    }
+
+    // 데스크톱 OS 잔여 플랫폼 검증
+    var platform = navigator.platform || '';
+    if (['win32', 'win64', 'macintel'].indexOf(platform.toLowerCase()) !== -1) {
+      return false;
+    }
+
+    return true; // Adreno, Mali, Apple GPU 등 실제 모바일 디바이스만 통과
+  }
+
+  // 차단 오버레이 트리거 함수
+  function triggerBlock() {
+    var pcOverlay = document.getElementById('pcBlockOverlay');
+    if (pcOverlay) pcOverlay.classList.add('show');
+  }
+
+  // PC 또는 F12 에뮬레이터 접속 시 실행 완전 차단
+  if (!isRealMobileDevice()) {
+    triggerBlock();
+    return;
+  }
+
+  // 3. F12 개발자 도구 디버거 활성화 시 즉시 실행 중단 유도
+  setInterval(function() {
+    var start = performance.now();
+    debugger;
+    var end = performance.now();
+    if (end - start > 100) {
+      triggerBlock();
+    }
+  }, 1000);
+
+  // 콘솔 디버깅 시도 시 경고 출력
+  console.log(
+    "%c🚨 금융본부 FDS(이상거래탐지) 시스템 작동 중 🚨\n%c비정상적인 점수 변조 및 패킷 조작은 실시간 모니터링되어 본부장배 커피 쏘기 대상자로 자동 지정될 수 있습니다. 정정당당하게 즐겨주세요! 🙂",
+    "color: #ff4d4d; font-size: 15px; font-weight: bold;",
+    "color: #4F9DDE; font-size: 12px;"
+  );
+
+  /* ============================================================
+     [게임 메인 로직]
+     ============================================================ */
   var GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyY6mM4y9ltyZhDn7fMCctYajEBye1sxZpQrQ-FcabhllionztMTlJEJMCKCDy_ZxCOMg/exec";
   var GAME_NAME = "공튀기기";
 
