@@ -83,6 +83,21 @@
     border-radius: 999px;
     white-space: nowrap;
     letter-spacing: -0.01em;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .event-tag:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    border-color: var(--sky);
+    transform: translateY(-1px);
+  }
+  .event-tag:active {
+    transform: scale(0.95);
+    background: var(--blue);
   }
 
   .nav-toggle{
@@ -142,9 +157,7 @@
     box-shadow: 0 0 10px rgba(79, 157, 222, 0.4);
   }
 
-  /* =========================================
-     [모바일 최적화 2단 대시보드 - 사과게임 표준]
-     ========================================= */
+  /* 2단 대시보드 */
   .game-dash{
     width: 100%;
     max-width: 640px;
@@ -398,35 +411,6 @@
     text-align: center;
   }
   #pcBlockOverlay.show { display: flex; }
-  
-  .event-tag {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--ice);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 6px 12px;
-  border-radius: 999px;
-  white-space: nowrap;
-  letter-spacing: -0.01em;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-/* 추가: 호버 및 터치 반응 */
-.event-tag:hover {
-  background: rgba(255, 255, 255, 0.18);
-  color: #fff;
-  border-color: var(--sky);
-  transform: translateY(-1px);
-}
-.event-tag:active {
-  transform: scale(0.95);
-  background: var(--blue);
-}
 </style>
 </head>
 <body>
@@ -466,7 +450,7 @@
     </select>
     <input type="text" id="sabunInput" class="auth-input" placeholder="사번 8자리 (예: 22091019)" maxlength="8" inputmode="numeric" pattern="[0-9]*">
     <span class="auth-error" id="authError"></span>
-    <button class="main" id="authStartBtn" style="width: 100%;">도전 시작</button>
+    <button type="button" class="main" id="authStartBtn" style="width: 100%;">도전 시작</button>
   </div>
 </div>
 
@@ -492,12 +476,12 @@
           <span class="brand-dept">3분기 리버스 멘토링</span>
         </div>
       </div>
-		<div class="brand-right">
-		  <a href="https://derekyn.github.io/ShinhanDSGames/ranking.html" class="event-tag btn-ranking">📊 실시간 순위</a>
-		  <button class="nav-toggle" id="navToggle" aria-label="게임 목록 접기/펼치기" type="button">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-		  </button>
-		</div>
+      <div class="brand-right">
+        <a href="https://derekyn.github.io/ShinhanDSGames/ranking.html" class="event-tag btn-ranking">📊 실시간 순위</a>
+        <button class="nav-toggle" id="navToggle" aria-label="게임 목록 접기/펼치기" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+      </div>
     </div>
     
     <nav class="nav-games" aria-label="게임 종목 바로가기">
@@ -515,16 +499,17 @@
     var toggle = document.getElementById('navToggle');
     var KEY = 'sh_mini_navCollapsed';
     if(!bar || !toggle) return;
-    var saved = localStorage.getItem(KEY);
+    var saved = null;
+    try { saved = localStorage.getItem(KEY); } catch(e){}
     if(saved === '1') bar.classList.add('collapsed');
     toggle.addEventListener('click', function(){
       var collapsed = bar.classList.toggle('collapsed');
-      localStorage.setItem(KEY, collapsed ? '1' : '0');
+      try { localStorage.setItem(KEY, collapsed ? '1' : '0'); } catch(e){}
     });
   })();
   </script>
 
-  <!-- 가로형 2단 대시보드 (사과게임 표준과 일치) -->
+  <!-- 가로형 2단 대시보드 -->
   <div class="game-dash">
     <div class="dash-left">
       <h1 class="game-title">🐹 두더지 잡기</h1>
@@ -586,7 +571,7 @@
   </div>
 </div>
 
-<!-- 10대 업무수칙 팝업 (다시 시작 클릭 시 노출) -->
+<!-- 10대 업무수칙 팝업 -->
 <div class="adPopup" id="adPopup">
   <div class="adBox">
     <img src="ds_10.png" alt="신한DS 10대 업무수칙">
@@ -601,7 +586,6 @@
      [F12 모바일 에뮬레이터 및 DevTools 무력화 보안 엔진]
      ============================================================ */
 
-  // 1. WebGL을 통한 실제 GPU 그래픽 칩셋 핑거프린팅
   function getGpuRenderer() {
     try {
       var canvas = document.createElement('canvas');
@@ -614,16 +598,13 @@
     }
   }
 
-    // 2. 실제 스마트폰 하드웨어 여부 판정 (모바일 크롬 오작동 수정 버전)
   function isRealMobileDevice() {
     var ua = navigator.userAgent || '';
     var mobileRegex = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
     var hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
-    // 기본 User-Agent 및 터치 센서 검증
     if (!mobileRegex.test(ua) || !hasTouch) return false;
 
-    // 데스크톱 OS 잔여 플랫폼 검증
     var platform = navigator.platform || '';
     if (['win32', 'win64', 'macintel'].indexOf(platform.toLowerCase()) !== -1) {
       return false;
@@ -631,7 +612,7 @@
 
     var gpu = getGpuRenderer().toLowerCase();
 
-    // 1순위: 모바일 고유 GPU 칩셋인 경우 무조건 모바일로 인정 (False Positive 방지)
+    // 1순위: 모바일 칩셋 우선 통과 (Android Chrome ANGLE 라이브러리 호환 보장)
     var mobileGpuKeywords = ['mali', 'adreno', 'apple', 'powervr', 'xclipse'];
     for (var m = 0; m < mobileGpuKeywords.length; m++) {
       if (gpu.indexOf(mobileGpuKeywords[m]) !== -1) {
@@ -639,7 +620,7 @@
       }
     }
 
-    // 2순위: PC 전용 외장/내장 GPU 탐지 (F12 에뮬레이터 적발용, 'angle' 제외)
+    // 2순위: PC 전용 GPU 탐지
     var pcGpuKeywords = [
       'geforce', 'nvidia', 'radeon', 'intel', 
       'direct3d', 'llvmpipe', 'mesa', 'swiftshader', 
@@ -654,20 +635,16 @@
     return true;
   }
 
-
-  // 차단 오버레이 트리거 함수
   function triggerBlock() {
     var pcOverlay = document.getElementById('pcBlockOverlay');
     if (pcOverlay) pcOverlay.classList.add('show');
   }
 
-  // PC 또는 F12 에뮬레이터 접속 시 실행 완전 차단
   if (!isRealMobileDevice()) {
     triggerBlock();
     return;
   }
 
-  // 3. F12 개발자 도구 디버거 활성화 시 즉시 실행 중단 유도
   setInterval(function() {
     var start = performance.now();
     debugger;
@@ -676,13 +653,6 @@
       triggerBlock();
     }
   }, 1000);
-
-  // 콘솔 디버깅 시도 시 경고 출력
-  console.log(
-    "%c🚨 금융본부 FDS(이상거래탐지) 시스템 작동 중 🚨\n%c비정상적인 점수 변조 및 패킷 조작은 실시간 모니터링되어 본부장배 커피 쏘기 대상자로 자동 지정될 수 있습니다. 정정당당하게 즐겨주세요! 🙂",
-    "color: #ff4d4d; font-size: 15px; font-weight: bold;",
-    "color: #4F9DDE; font-size: 12px;"
-  );
 
   /* ============================================================
      [게임 메인 로직]
@@ -725,7 +695,10 @@
   var spawnTimers = [];
   var timer;
 
-  var best = Number(localStorage.getItem("whackAMoleBest_" + GAME_NAME)) || 0;
+  var best = 0;
+  try {
+    best = Number(localStorage.getItem("whackAMoleBest_" + GAME_NAME)) || 0;
+  } catch (e) {}
   document.getElementById("best").textContent = best;
 
   function sendLog(eventType, extraData){
@@ -746,7 +719,7 @@
     }).catch(function(err){ console.warn("로그 실패:", err); });
   }
 
-  // 9개 구멍 생성 및 터치/클릭 즉시 반응 처리
+  // 9개 구멍 생성
   for(var i = 0; i < 9; i++){
     (function(idx){
       var hole = document.createElement("div");
@@ -902,7 +875,7 @@
 
     if(score > best){
       best = score;
-      localStorage.setItem("whackAMoleBest_" + GAME_NAME, best);
+      try { localStorage.setItem("whackAMoleBest_" + GAME_NAME, best); } catch(e){}
     }
 
     document.getElementById("finalScore").textContent = score;
@@ -918,7 +891,6 @@
     overlay.classList.add("show");
   }
 
-  // 10대 업무수칙 팝업 표시 (타이머 일시 정지)
   function showNoticePopup(){
     running = false;
     clearInterval(timer);
@@ -928,45 +900,77 @@
 
   adRestartBtn.addEventListener("click", startGame);
 
-	function handleAuth() {
-	  var teamVal = teamSelect.value;
-	  var val = sabunInput.value.trim();
+  /* ============================================================
+     [사용자 인증 및 모바일 키보드 상쇄 방어 로직]
+     ============================================================ */
+  var authActionLocked = false;
+  function handleAuth(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (authActionLocked) return;
+    authActionLocked = true;
+    setTimeout(function(){ authActionLocked = false; }, 400);
 
-	  if (!teamVal) {
-		authError.textContent = "팀을 선택해 주세요.";
-		teamSelect.classList.add('error');
-		teamSelect.focus();
-		return;
-	  }
+    var teamVal = teamSelect.value;
+    var rawSabun = (sabunInput.value || '').replace(/[^0-9]/g, '').trim();
 
-	  // 숫자 8자리 검증 정규식
-	  if (!/^\d{8}$/.test(val)) {
-		authError.textContent = "사번은 숫자 8자리여야 합니다. (예: 22091019)";
-		sabunInput.classList.add('error');
-		sabunInput.focus();
-		return;
-	  }
+    if (!teamVal) {
+      authError.textContent = "팀을 선택해 주세요.";
+      teamSelect.classList.add('error');
+      teamSelect.focus();
+      return;
+    }
 
-	  localStorage.setItem("sh_mini_team", teamVal);
-	  localStorage.setItem("sh_mini_sabun", val);
+    if (rawSabun.length !== 8) {
+      authError.textContent = "사번은 숫자 8자리여야 합니다. (예: 22091019)";
+      sabunInput.classList.add('error');
+      sabunInput.focus();
+      return;
+    }
 
-	  currentTeam = teamVal;
-	  currentSabun = val;
-	  playerBadge.textContent = "플레이어: " + currentTeam + " · " + currentSabun;
-	  playerBadge.style.display = "inline-block";
-	  authOverlay.classList.remove('show');
-	  
-	  // 게임별 시작 함수 실행 (예: startGame() 또는 resetToStage1())
-	  startGame();
-	}
+    // 모바일 가상 키보드 즉시 강제 닫힘 처리
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
 
+    // 인앱 브라우저 보안 제약 안전 처리
+    try {
+      localStorage.setItem("sh_mini_team", teamVal);
+      localStorage.setItem("sh_mini_sabun", rawSabun);
+    } catch (err) {
+      console.warn("localStorage 저장 실패 (인앱브라우저 제한):", err);
+    }
+
+    currentTeam = teamVal;
+    currentSabun = rawSabun;
+
+    if (playerBadge) {
+      playerBadge.textContent = "플레이어: " + currentTeam + " · " + currentSabun;
+      playerBadge.style.display = "inline-block";
+    }
+
+    // 모달 숨김 처리 및 게임 시작
+    authOverlay.classList.remove('show');
+    startGame();
+  }
+
+  // 모바일 가상 키보드 환경에서 click이 증발하는 현상을 touchend와 click 양쪽으로 방어
   authStartBtn.addEventListener('click', handleAuth);
-  sabunInput.addEventListener('keydown', function(e){ if(e.key === 'Enter') handleAuth(); });
-  teamSelect.addEventListener('change', function(){
-    teamSelect.classList.remove('error'); authError.textContent = "";
+  authStartBtn.addEventListener('touchend', handleAuth);
+
+  sabunInput.addEventListener('keydown', function(e){
+    if (e.key === 'Enter') handleAuth(e);
   });
-  
-    sabunInput.addEventListener('input', function() {
+
+  teamSelect.addEventListener('change', function(){
+    teamSelect.classList.remove('error');
+    authError.textContent = "";
+  });
+
+  // 숫자 이외의 문자 즉시 제거 및 8자리 제한
+  sabunInput.addEventListener('input', function() {
     this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8);
     if (this.value.length === 8) {
       this.classList.remove('error');
@@ -974,7 +978,6 @@
     }
   });
 
-  // 하단 버튼 및 결과창 재시작 시 10대 업무수칙 팝업 노출
   document.getElementById('restartBtn').addEventListener('click', showNoticePopup);
   retryButton.addEventListener('click', showNoticePopup);
 
@@ -984,30 +987,36 @@
     if(e.target === ruleOverlay) ruleOverlay.classList.remove('show');
   });
 
-	// 기존 저장 기록 확인 부분 수정
-	var savedTeam = localStorage.getItem("sh_mini_team");
-	var savedSabun = localStorage.getItem("sh_mini_sabun");
+  // 기존 저장 기록 검증
+  var savedTeam = null;
+  var savedSabun = null;
+  try {
+    savedTeam = localStorage.getItem("sh_mini_team");
+    savedSabun = localStorage.getItem("sh_mini_sabun");
+  } catch(e) {}
 
-	// 8자리 숫자로 저장되어 있을 때만 자동 통과
-	if (savedTeam && savedSabun && /^\d{8}$/.test(savedSabun)) {
-	  currentTeam = savedTeam;
-	  currentSabun = savedSabun;
-	  playerBadge.textContent = "플레이어: " + currentTeam + " · " + currentSabun;
-	  playerBadge.style.display = "inline-block";
-	  authOverlay.classList.remove('show');
-	  startGame();
-	} else {
-	  // 이전 테스트용 잘못된 사번이 저장되어 있으면 초기화
-	  localStorage.removeItem("sh_mini_team");
-	  localStorage.removeItem("sh_mini_sabun");
-	  authOverlay.classList.add('show');
-	  sabunInput.focus();
-	}
+  if (savedTeam && savedSabun && /^\d{8}$/.test(savedSabun)) {
+    currentTeam = savedTeam;
+    currentSabun = savedSabun;
+    playerBadge.textContent = "플레이어: " + currentTeam + " · " + currentSabun;
+    playerBadge.style.display = "inline-block";
+    authOverlay.classList.remove('show');
+    startGame();
+  } else {
+    try {
+      localStorage.removeItem("sh_mini_team");
+      localStorage.removeItem("sh_mini_sabun");
+    } catch(e) {}
+    authOverlay.classList.add('show');
+    sabunInput.focus();
+  }
 
   playerBadge.addEventListener("click", function(){
     if(confirm("등록된 팀/사번 정보를 변경하시겠습니까?")){
-      localStorage.removeItem("sh_mini_team");
-      localStorage.removeItem("sh_mini_sabun");
+      try {
+        localStorage.removeItem("sh_mini_team");
+        localStorage.removeItem("sh_mini_sabun");
+      } catch(e) {}
       location.reload();
     }
   });
