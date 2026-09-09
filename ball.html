@@ -29,7 +29,7 @@
   }
   #app{
     display:flex; flex-direction:column; align-items:center;
-    min-height:100vh; min-height:100dvh; padding: 12px; gap:8px;
+    min-height:100vh; min-height:100dvh; padding: 8px 12px; gap:6px;
   }
 
   /* 브랜드 헤더 */
@@ -53,7 +53,7 @@
     width:100%;
   }
   .brand-left{ display:flex; align-items:center; gap:10px; }
-  .brand-logo{ width:32px; height:32px; flex-shrink:0; }
+  .brand-logo{ width:56px; height:28px; flex-shrink:0; }
   .brand-logo svg{ width:100%; height:100%; display:block; }
   .brand-text{ display:flex; flex-direction:column; line-height:1.2; }
   .brand-name { 
@@ -101,19 +101,6 @@
     background: var(--blue);
   }
 
-  .nav-toggle{
-    width:26px; height:26px; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center;
-    background: rgba(255,255,255,0.08);
-    border:1px solid rgba(255,255,255,0.18);
-    border-radius:8px;
-    color: var(--ice);
-    cursor:pointer;
-  }
-  .nav-toggle:hover{ background: rgba(255,255,255,0.16); }
-  .nav-toggle svg{ width:14px; height:14px; transition: transform 0.2s ease; display:block; }
-  .brand-bar.collapsed .nav-games{ display:none; }
-  .brand-bar.collapsed .nav-toggle svg{ transform: rotate(-90deg); }
   .brand-right{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
 
   /* 게임 바로가기 네비게이션 바 */
@@ -164,11 +151,11 @@
     max-width: 640px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
     border: 1px solid rgba(255,255,255,0.14);
     border-radius: 14px;
-    padding: 10px 12px;
+    padding: 8px 12px;
     box-sizing: border-box;
   }
   .dash-left{
@@ -178,7 +165,7 @@
     width: 100%;
   }
   .game-title{
-    font-size: clamp(16px, 3.2vw, 19px);
+    font-size: clamp(15px, 3.2vw, 18px);
     font-weight: 800;
     color: #fff;
     margin: 0;
@@ -211,7 +198,7 @@
     background: rgba(6, 20, 36, 0.75);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 10px;
-    padding: 5px 6px;
+    padding: 4px 6px;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -227,7 +214,7 @@
     white-space: nowrap;
   }
   .stat-val{
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 800;
     font-family: var(--font-num);
     font-variant-numeric: tabular-nums;
@@ -236,12 +223,12 @@
   .stat-card.time .stat-val { color: var(--sky); }
   .stat-card.stage .stat-val { color: var(--accent); }
 
-  /* 보드 래퍼 */
+  /* 보드 래퍼 (세로 크기 미세 축소 최적화) */
   #board-wrap{
     background: linear-gradient(180deg, #0E2A4A, #0A2036);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 18px;
-    padding: 10px;
+    padding: 8px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
     display:flex; justify-content:center; align-items:center;
     width: min(94vw, 640px);
@@ -253,18 +240,18 @@
     background:#000;
     border-radius:10px;
     max-width:100%;
-    max-height:50dvh;
+    max-height:44dvh;
     border: 1px solid rgba(255,255,255,0.15);
     display: block;
   }
 
-  .hud{ font-size:12px; color:var(--ice); opacity:0.75; text-align:center; margin-top:2px; }
+  .hud{ font-size:11.5px; color:var(--ice); opacity:0.75; text-align:center; margin-top:1px; }
   .hud kbd{
     background: #061424; border:1px solid rgba(255,255,255,0.2);
     padding:1px 6px; border-radius:4px; font-family:var(--font-num); color:var(--sky);
   }
 
-  /* 하단 방향 조작 버튼 (양 끝 분할 여백 배치) */
+  /* 하단 방향 조작 버튼 (세로 크기 미세 축소) */
   .dir-controls{
     display: flex;
     justify-content: space-between;
@@ -277,9 +264,9 @@
   .dir-controls button{
     width: 44%;
     max-width: 180px;
-    font-size: 24px;
-    padding: 13px 0;
-    border-radius: 14px;
+    font-size: 22px;
+    padding: 10px 0;
+    border-radius: 12px;
     background: var(--ocean);
     color: #fff;
     border: 1px solid rgba(255,255,255,0.2);
@@ -299,7 +286,7 @@
   button.main{
     font-family: var(--font-ui); font-size:14px; font-weight:600;
     background: var(--blue); color:#fff; border:none;
-    padding: 10px 20px; border-radius: 10px; cursor:pointer;
+    padding: 9px 18px; border-radius: 10px; cursor:pointer;
     transition: background 0.15s ease, transform 0.1s ease;
   }
   button.main:hover{ background: var(--sky); }
@@ -307,12 +294,12 @@
   button.ghost{
     background: transparent; border:1px solid rgba(255,255,255,0.25);
     color: var(--ice); font-family: var(--font-ui); font-size:14px; font-weight:600;
-    padding: 10px 20px; border-radius: 10px; cursor:pointer;
+    padding: 9px 18px; border-radius: 10px; cursor:pointer;
     transition: background 0.15s ease;
   }
   button.ghost:hover{ background: rgba(255,255,255,0.08); }
 
-  .hint{ font-size:12px; color:var(--ice); opacity:0.6; text-align:center; max-width:480px; }
+  .hint{ font-size:11.5px; color:var(--ice); opacity:0.6; text-align:center; max-width:480px; }
 
   /* 모달 */
   #overlay, #ruleOverlay, #authOverlay{
@@ -354,7 +341,7 @@
   select.auth-input option{ background: #123A63; color:#fff; }
   .auth-error{ color: var(--danger); font-size: 12px; margin: -10px 0 14px; height: 14px; display: block; }
 
-  /* 10대 업무수칙 팝업 레이아웃 */
+  /* 10대 업무수칙 팝업 */
   .adPopup{
     position:fixed; inset:0;
     background:rgba(4,12,24,0.92);
@@ -427,20 +414,20 @@
 </div>
 
 <div id="app">
-  <!-- 브랜드 바 (5종 게임 바로가기 탭 내장) -->
+  <!-- 브랜드 바 -->
   <div class="brand-bar" id="brandBar">
     <div class="brand-top">
       <div class="brand-left">
         <div class="brand-logo" aria-hidden="true">
-          <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <svg viewBox="0 0 68 34" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0" stop-color="#4F9DDE"/>
                 <stop offset="1" stop-color="#123A63"/>
               </linearGradient>
             </defs>
-            <rect x="1" y="1" width="45" height="38" rx="10" fill="url(#logoGrad)" stroke="rgba(255,255,255,0.25)"/>
-            <text x="20" y="27" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="18" fill="#fff">신한DS</text>
+            <rect x="1" y="1" width="66" height="32" rx="8" fill="url(#logoGrad)" stroke="rgba(255,255,255,0.25)"/>
+            <text x="34" y="17" text-anchor="middle" dominant-baseline="central" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif" font-weight="800" font-size="14" fill="#fff" letter-spacing="-0.02em">신한DS</text>
           </svg>
         </div>
         <div class="brand-text">
@@ -450,9 +437,6 @@
       </div>
       <div class="brand-right">
         <a href="https://derekyn.github.io/ShinhanDSGames/ranking.html" class="event-tag btn-ranking">📊 실시간 순위</a>
-        <button class="nav-toggle" id="navToggle" aria-label="게임 목록 접기/펼치기" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
       </div>
     </div>
     
@@ -464,22 +448,6 @@
       <a href="https://derekyn.github.io/ShinhanDSGames/drop.html" class="nav-item">💧 낙하캐치</a>
     </nav>
   </div>
-
-  <script>
-  (function(){
-    var bar = document.getElementById('brandBar');
-    var toggle = document.getElementById('navToggle');
-    var KEY = 'sh_mini_navCollapsed';
-    if(!bar || !toggle) return;
-    var saved = null;
-    try { saved = localStorage.getItem(KEY); } catch(e){}
-    if(saved === '1') bar.classList.add('collapsed');
-    toggle.addEventListener('click', function(){
-      var collapsed = bar.classList.toggle('collapsed');
-      try { localStorage.setItem(KEY, collapsed ? '1' : '0'); } catch(e){}
-    });
-  })();
-  </script>
 
   <!-- 가로형 2단 대시보드 -->
   <div class="game-dash">
@@ -514,7 +482,7 @@
     <button id="btnRight" aria-label="Right">▶</button>
   </div>
 
-  <!-- 시스템 제어 버튼 -->
+  <!-- 컨트롤 버튼 -->
   <div class="controls">
     <button class="main" id="restartBtn">다시 시작</button>
     <button class="ghost" id="ruleBtn">규칙 보기</button>
@@ -851,7 +819,6 @@
     startGameTimer();
   }
 
-  // 공튀기기 전용 시작/재시작 진입점 함수 정의
   function startGame() {
     resetToStage1();
     paused = false;
@@ -1192,12 +1159,10 @@
       return;
     }
 
-    // 모바일 가상 키보드 즉시 강제 닫힘 처리
     if (document.activeElement) {
       document.activeElement.blur();
     }
 
-    // 인앱 브라우저 보안 제약 안전 처리
     try {
       localStorage.setItem("sh_mini_team", teamVal);
       localStorage.setItem("sh_mini_sabun", rawSabun);
@@ -1217,7 +1182,6 @@
     startGame();
   }
 
-  // 모바일 가상 키보드 환경에서 click이 증발하는 현상을 touchend와 click 양쪽으로 방어
   authStartBtn.addEventListener('click', handleAuth);
   authStartBtn.addEventListener('touchend', handleAuth);
 
@@ -1238,7 +1202,6 @@
     }
   });
 
-  // 기존 저장 기록 검증
   var savedTeam = null;
   var savedSabun = null;
   try {
