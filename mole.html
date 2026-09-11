@@ -791,8 +791,8 @@
     animal.classList.add("active");
 
     // [체류 시간 단축 및 후반 가속 로직]
-    // 전반 560ms, 후반 10초 이하 460ms, 황금 두더지는 420ms
-    var stayTime = (time <= 10) ? 460 : 560;
+    // 전반 750ms, 후반 10초 이하 460ms, 황금 두더지는 420ms
+    var stayTime = (time <= 10) ? 460 : 750;
     if(type === "gold-mole") stayTime = 420;
 
     if(animal._hideTimer) clearTimeout(animal._hideTimer);
