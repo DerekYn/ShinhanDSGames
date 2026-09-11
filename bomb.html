@@ -14,6 +14,7 @@
     --paper:#EAF4FC;
     --accent:#2FBF9E;
     --danger:#E0567A;
+    --gold:#FFD700;
     --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
     --font-num: "Segoe UI", "Consolas", "Malgun Gothic", monospace;
   }
@@ -240,7 +241,7 @@
   .facebtn:hover { background: var(--sky); }
   .facebtn:active { transform: scale(0.95); }
 
-  /* [핵심] 원터치 파기/깃발 모드 전환 버튼 */
+  /* ⛏️ 찾기 / 🚩 깃발 원터치 전환 버튼 */
   .mode-toggle-btn{
     height: 38px;
     padding: 0 10px;
@@ -270,6 +271,7 @@
 
   /* 게임 보드 영역 */
   #board-wrap{
+    position: relative;
     background: linear-gradient(180deg, #0E2A4A, #0A2036);
     border: 1.5px solid rgba(255,255,255,0.1);
     border-radius: 16px;
@@ -317,9 +319,11 @@
   .cell.revealed{
     background: #0F2E4F;
     border-color: rgba(255,255,255,0.08);
-    cursor:default;
   }
   .cell.revealed::after{ display:none; }
+  .cell.revealed.has-number{
+    cursor: pointer; /* 숫자 칸 Chording 유도 */
+  }
   .cell.mine{
     background: linear-gradient(160deg, var(--danger), #a83a58);
   }
@@ -339,6 +343,33 @@
   .n8{ color:#C4C4C4; }
 
   svg.icon{ width:60%; height:60%; }
+
+  /* ⏱️ 타임 보너스 획득 팝업 애니메이션 */
+  .bonus-pop {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(11, 31, 58, 0.95);
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 800;
+    font-family: var(--font-num);
+    padding: 1px 5px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 10;
+    animation: floatUp 0.9s ease-out forwards;
+    box-shadow: 0 0 10px rgba(47, 191, 158, 0.7);
+  }
+  @keyframes floatUp {
+    0% { opacity: 0; transform: translate(-50%, 6px); }
+    20% { opacity: 1; transform: translate(-50%, -4px); }
+    80% { opacity: 1; transform: translate(-50%, -18px); }
+    100% { opacity: 0; transform: translate(-50%, -24px); }
+  }
 
   .controls{ display:flex; gap:10px; margin-top:2px; }
   button.main{
@@ -564,7 +595,7 @@
     <button class="main" id="restartBtn">다시 시작</button>
     <button class="ghost" id="ruleBtn">규칙 보기</button>
   </div>
-  <div class="hint">모드 버튼(⛏️찾기 / 🚩깃발)으로 전환하여 터치하거나, 길게 눌러 깃발을 꽂으세요.</div>
+  <div class="hint">💡 이미 열린 숫자를 터치하면 주변 자동 열기(코드)! 숨겨진 행운의 타일(-3초)을 찾아보세요.</div>
 </div>
 
 <div id="overlay">
@@ -581,9 +612,9 @@
     <h2>게임 규칙</h2>
     <ol>
       <li>상단 <b>[⛏️ 찾기 / 🚩 깃발]</b> 버튼으로 모드를 즉시 바꿀 수 있어요.</li>
-      <li>⛏️ <b>찾기 모드</b>: 칸을 터치하면 숫자가 열려요.</li>
-      <li>🚩 <b>깃발 모드</b>: 칸을 가볍게 터치만 해도 깃발이 꽂혀요!</li>
-      <li>(기존 방식처럼 어떤 모드에서든 <b>길게 누르기</b>로 깃발을 꽂을 수도 있어요)</li>
+      <li>⚡ <b>스피드 자동 열기(코드)</b>: 이미 열린 숫자의 주변에 깃발이 숫자만큼 꽂혀있다면, <b>해당 숫자를 터치해 나머지 안전한 칸을 한 번에 열 수 있어요!</b></li>
+      <li>⏱️ <b>숨겨진 행운의 타일</b>: 보드 속 2개의 보물 타일을 열면 <b>진행 시간 -3초 즉시 단축!</b></li>
+      <li>🚩 깃발 모드에서는 칸을 가볍게 터치만 해도 깃발이 꽂혀요.</li>
       <li>지뢰가 없는 모든 칸을 열면 승리! 최단 기록을 노려보세요.</li>
     </ol>
     <button class="main" id="ruleCloseBtn">확인</button>
@@ -774,7 +805,7 @@
     for(var r=0;r<rows;r++){
       var row = [];
       for(var c=0;c<cols;c++){
-        row.push({mine:false, revealed:false, flagged:false, adj:0});
+        row.push({mine:false, revealed:false, flagged:false, adj:0, bonus:false});
       }
       grid.push(row);
     }
@@ -792,6 +823,17 @@
       grid[r][c].mine = true;
       placed++;
     }
+
+    // ⏱️ 행운의 타임 보너스 타일 2개 배치 (지뢰가 아닌 안전한 칸)
+    var bonusPlaced = 0;
+    while(bonusPlaced < 2){
+      var br = Math.floor(Math.random()*rows);
+      var bc = Math.floor(Math.random()*cols);
+      if(forbidden[br+'_'+bc] || grid[br][bc].mine || grid[br][bc].bonus) continue;
+      grid[br][bc].bonus = true;
+      bonusPlaced++;
+    }
+
     for(var r2=0;r2<rows;r2++){
       for(var c2=0;c2<cols;c2++){
         if(grid[r2][c2].mine) continue;
@@ -826,6 +868,7 @@
         if(cell.exploded) div.classList.add('exploded');
         div.innerHTML = MINE_SVG;
       } else if(cell.adj > 0){
+        div.classList.add('has-number');
         div.textContent = cell.adj;
         div.classList.add('n'+cell.adj);
       }
@@ -846,15 +889,110 @@
     }
   }
 
+  // [기능 3] 타임 보너스 획득 연출 (-3초)
+  function showBonusPop(r, c){
+    var idx = r * cols + c;
+    var cellEl = boardEl.children[idx];
+    if(!cellEl) return;
+    var tag = document.createElement('div');
+    tag.className = 'bonus-pop';
+    tag.textContent = '-3초! ⏱️';
+    cellEl.appendChild(tag);
+    setTimeout(function(){
+      if(tag.parentNode) tag.parentNode.removeChild(tag);
+    }, 900);
+  }
+
+  function collectBonus(r, c){
+    var cell = grid[r][c];
+    if(!cell.bonus) return;
+    cell.bonus = false;
+    elapsed = Math.max(0, elapsed - 3);
+    timeCountEl.textContent = String(elapsed).padStart(3, '0');
+    showBonusPop(r, c);
+    if(navigator.vibrate) navigator.vibrate(25);
+  }
+
   function revealCell(r,c){
     var cell = grid[r][c];
     if(cell.revealed || cell.flagged) return;
     cell.revealed = true;
     if(cell.mine) return;
+
+    if(cell.bonus){
+      collectBonus(r, c);
+    }
+
     if(cell.adj === 0){
       neighbors(r,c).forEach(function(p){
         if(!grid[p[0]][p[1]].revealed) revealCell(p[0], p[1]);
       });
+    }
+  }
+
+  // [기능 1] Chording: 이미 열린 숫자를 터치했을 때 깃발 수가 맞으면 주변 안전 칸 자동 일괄 열기
+  function chordCell(r, c){
+    if(gameOver || gameWon) return;
+    var cell = grid[r][c];
+    if(!cell.revealed || cell.adj <= 0) return;
+
+    var nbs = neighbors(r, c);
+    var flagCount = 0;
+    nbs.forEach(function(p){
+      if(grid[p[0]][p[1]].flagged) flagCount++;
+    });
+
+    // 깃발 개수가 적힌 숫자와 정확히 일치할 때만 동작
+    if(flagCount === cell.adj){
+      var hitMine = false;
+      var explodedR = -1, explodedC = -1;
+
+      nbs.forEach(function(p){
+        var nr = p[0], nc = p[1];
+        var nCell = grid[nr][nc];
+        if(!nCell.revealed && !nCell.flagged){
+          nCell.revealed = true;
+          if(nCell.mine){
+            hitMine = true;
+            explodedR = nr; explodedC = nc;
+          } else {
+            if(nCell.bonus) collectBonus(nr, nc);
+            if(nCell.adj === 0) revealCell(nr, nc);
+          }
+        }
+      });
+
+      refreshAllCells();
+
+      // 깃발을 엉뚱한 곳에 꽂고 코드 열기를 했다면 폭사!
+      if(hitMine){
+        gameOver = true;
+        clearInterval(timerId);
+        revealAllMines(explodedR, explodedC);
+        refreshAllCells();
+        faceBtn.textContent = '😵';
+        showEnd(false);
+
+        logEvent("종료", {
+          score: "-",
+          detail: "지뢰 폭발 (코드 자동 열기 실패, 진행: " + elapsed + "초)"
+        });
+        return;
+      }
+
+      if(checkWin()){
+        gameWon = true;
+        clearInterval(timerId);
+        faceBtn.textContent = '😎';
+        showEnd(true);
+
+        logEvent("종료", {
+          score: elapsed,
+          detail: "클리어 성공 (" + elapsed + "초 소요)"
+        });
+      } else {
+        if(navigator.vibrate) navigator.vibrate(10);
+      }
     }
   }
 
@@ -913,6 +1051,7 @@
       return;
     }
 
+    if(cell.bonus) collectBonus(r, c);
     revealCell(r,c);
     refreshAllCells();
 
@@ -969,6 +1108,13 @@
       var t = e.target.closest('.cell');
       if(!t || longPressed){ longPressed=false; return; }
       var r = parseInt(t.dataset.r), c = parseInt(t.dataset.c);
+      var cell = grid[r][c];
+
+      // [핵심] 이미 열린 숫자 칸을 터치하면 Chording(주변 일괄 열기) 실행
+      if(cell.revealed){
+        if(cell.adj > 0) chordCell(r, c);
+        return;
+      }
       
       // 모드에 따라 찾기 또는 깃발 처리
       if (currentMode === "flag") {
@@ -983,7 +1129,12 @@
       if(touchActive) return;
       var t = e.target.closest('.cell');
       if(!t) return;
-      onRightClick(parseInt(t.dataset.r), parseInt(t.dataset.c));
+      var r = parseInt(t.dataset.r), c = parseInt(t.dataset.c);
+      if(grid[r][c].revealed){
+        if(grid[r][c].adj > 0) chordCell(r, c);
+        return;
+      }
+      onRightClick(r, c);
     });
 
     // 롱클릭도 계속 지원 (모드와 상관없이 꾹 누르면 깃발 꽂기)
@@ -1037,7 +1188,7 @@
     elapsed = 0;
     timeCountEl.textContent = '000';
     faceBtn.textContent = '🙂';
-    setMode("dig"); // 기본 모드는 파기
+    setMode("dig");
     buildEmptyGrid();
     render();
     updateMineCounter();
