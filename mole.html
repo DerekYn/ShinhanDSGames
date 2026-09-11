@@ -246,7 +246,7 @@
   }
   .hole:after{
     content:""; position:absolute; left:10%; right:10%; bottom:4px; height:18px;
-    background:#38251b; border-radius:50%; z-index:4; pointer-events:none;
+    background:#38251b; border-radius:50%; z-index:6; pointer-events:none;
   }
 
   /* 동물 공통 그래픽 */
@@ -260,24 +260,38 @@
   .eye.left{ left:18px; } .eye.right{ right:18px; }
   .nose{ position:absolute; top:40px; left:50%; transform:translateX(-50%); width:12px; height:8px; background:#222; border-radius:50%; z-index:4; }
 
-  /* 일반 두더지 */
+  /* 1. 일반 두더지 */
   .mole{ background:#8b5a3c; border:3px solid #65402d; border-radius:45% 45% 35% 35%; }
   .mole .ear{ display:none; }
   .mole .eye{ top:26px; width:8px; height:8px; }
   .mole .nose{ top:41px; width:13px; height:9px; background:#e88d9d; }
 
-  /* ✨ 황금 두더지 (보너스 타겟) */
-  .gold-mole{
-    background: linear-gradient(145deg, #FFE066, #F59E0B);
-    border: 3px solid #D97706;
-    border-radius: 45% 45% 35% 35%;
-    box-shadow: 0 0 16px rgba(255, 215, 0, 0.85);
+  /* 2. 👑 대왕 두더지 (보너스 타겟) */
+  .king-mole{ 
+    background:#7c4a27; 
+    border:3px solid #542d12; 
+    border-radius:45% 45% 35% 35%;
+    box-shadow: 0 0 14px rgba(255, 215, 0, 0.45);
   }
-  .gold-mole .ear{ display:none; }
-  .gold-mole .eye{ top:26px; width:8px; height:8px; background:#451a03; }
-  .gold-mole .nose{ top:41px; width:13px; height:9px; background:#e11d48; }
+  .king-mole .ear{ display:none; }
+  .king-mole .eye{ top:26px; width:8px; height:8px; background:#222; }
+  .king-mole .nose{ top:41px; width:13px; height:9px; background:#e88d9d; }
+  
+  /* 대왕 두더지의 황금 왕관 */
+  .king-mole .crown{
+    position:absolute; top:-14px; left:50%; transform:translateX(-50%);
+    width:32px; height:18px;
+    background:linear-gradient(180deg, #FDE047 0%, #EAB308 60%, #CA8A04 100%);
+    clip-path: polygon(0% 100%, 0% 15%, 25% 65%, 50% 0%, 75% 65%, 100% 15%, 100% 100%);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    z-index: 5;
+  }
+  .king-mole .crown:after{
+    content:""; position:absolute; bottom:3px; left:50%; transform:translateX(-50%);
+    width:6px; height:4px; background:#EF4444; border-radius:50%; box-shadow:0 0 4px #EF4444;
+  }
 
-  /* 토끼 (함정 1) */
+  /* 3. 토끼 (함정 1) */
   .rabbit{ background:#f1dddd; border:3px solid #d2b5b5; border-radius:45% 45% 35% 35%; }
   .rabbit .ear{
     position:absolute; width:15px; height:28px; top:-6px; background:#f1dddd;
@@ -294,30 +308,65 @@
     border-radius:0 0 4px 4px; z-index:3;
   }
 
-  /* 호랑이 (함정 2) */
-  .tiger{ background:#e9a13b; border:3px solid #c47b22; border-radius:45% 45% 35% 35%; }
+  /* 4. 🐯 호랑이 (함정 2 - 리얼 호랑이 비주얼) */
+  .tiger{ 
+    background:#ea580c; 
+    background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
+    border:3px solid #9a3412; 
+    border-radius:45% 45% 35% 35%; 
+    overflow:hidden;
+  }
   .tiger .ear{
-    position:absolute; width:16px; height:16px; top:2px; background:#e9a13b;
-    border:3px solid #c47b22; border-radius:50%; z-index:1;
+    position:absolute; width:18px; height:18px; top:-2px; background:#9a3412;
+    border-radius:50%; z-index:1;
   }
-  .tiger .ear.left{ left:7px; } .tiger .ear.right{ right:7px; }
-  .tiger .ear:after{ content:""; position:absolute; width:6px; height:6px; left:2px; top:2px; background:#f4c47a; border-radius:50%; }
-  .tiger:before{
-    content:""; position:absolute; left:10px; top:22px; width:7px; height:13px;
-    border-left:3px solid #70451f; border-radius:50%; transform:rotate(-20deg); box-shadow:41px 0 0 -1px #70451f;
+  .tiger .ear.left{ left:5px; } .tiger .ear.right{ right:5px; }
+  .tiger .ear:after{ content:""; position:absolute; width:10px; height:10px; left:4px; top:4px; background:#fff7ed; border-radius:50%; }
+
+  /* 호랑이 이마 王자 줄무늬 */
+  .tiger .stripes-forehead{
+    position:absolute; top:7px; left:50%; transform:translateX(-50%);
+    width:14px; height:14px; z-index:3;
   }
-  .tiger:after{
-    content:""; position:absolute; left:50%; top:47px; transform:translateX(-50%);
-    width:12px; height:7px; background:#8b5a3c; border-radius:50%; z-index:3;
+  .tiger .stripes-forehead:before{
+    content:""; position:absolute; left:5px; top:0; width:4px; height:14px; background:#1c1917; border-radius:2px;
   }
-  .tiger .eye{ width:8px; height:8px; top:26px; background:#3d2a1c; }
-  .tiger .nose{ top:39px; width:10px; height:7px; background:#8b5a3c; }
+  .tiger .stripes-forehead:after{
+    content:""; position:absolute; left:0; top:2px; width:14px; height:3px; background:#1c1917; border-radius:2px;
+    box-shadow: 0 8px 0 #1c1917;
+  }
+
+  /* 호랑이 볼 줄무늬 */
+  .tiger .stripe-left{
+    position:absolute; left:0; top:32px; width:12px; height:4px; background:#1c1917;
+    border-radius:0 4px 4px 0; z-index:3;
+    box-shadow: 0 10px 0 #1c1917;
+  }
+  .tiger .stripe-right{
+    position:absolute; right:0; top:32px; width:12px; height:4px; background:#1c1917;
+    border-radius:4px 0 0 4px; z-index:3;
+    box-shadow: 0 10px 0 #1c1917;
+  }
+
+  /* 호랑이 흰 주둥이 & 수염 */
+  .tiger .muzzle{
+    position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
+    width:34px; height:22px; background:#fffbf0; border-radius:50% 50% 45% 45%; z-index:3;
+  }
+  .tiger .muzzle:after{
+    content:""; position:absolute; bottom:3px; left:50%; transform:translateX(-50%);
+    width:14px; height:3px; border-bottom:2px solid #292524; border-radius:50%;
+  }
+
+  .tiger .eye{ width:8px; height:9px; top:26px; background:#1c1917; z-index:4; }
+  .tiger .eye:after{ content:""; position:absolute; top:1px; right:1px; width:3px; height:3px; background:#fff; border-radius:50%; }
+  .tiger .nose{ top:40px; width:13px; height:8px; background:#b91c1c; border-radius:2px 2px 50% 50%; z-index:5; }
 
   /* 팝업 점수 */
   .pop{
     position:absolute; top:6px; left:50%; transform:translateX(-50%);
     font-size:20px; font-weight:800; font-family:var(--font-num); color:var(--accent);
-    animation:pop .6s forwards; z-index:5; pointer-events:none;
+    animation:pop .6s forwards; z-index:7; pointer-events:none;
   }
   .pop.bad{ color:var(--danger); }
   .pop.gold{ color:var(--gold); text-shadow:0 0 10px rgba(255,215,0,0.85); font-size:22px; }
@@ -521,7 +570,7 @@
     <button class="main" id="restartBtn">다시 시작</button>
     <button class="ghost" id="ruleBtn">규칙 보기</button>
   </div>
-  <div class="hint">두더지를 연속으로 잡으면 콤보 보너스! ✨황금 두더지(+50)를 잡고 🐰/🐯를 피하세요!</div>
+  <div class="hint">두더지를 연속으로 잡으면 콤보 보너스! 👑대왕 두더지(+50)를 잡고 🐰/🐯를 피하세요!</div>
 </div>
 
 <!-- 결과 화면 -->
@@ -545,8 +594,8 @@
     <ol>
       <li>⏱ 제한시간 : <b>20초</b> 동안 진행됩니다. (후반 10초 가속!)</li>
       <li>🐹 일반 두더지 : <b>+10점</b> (연속 성공 시 콤보 가산)</li>
-      <li>✨ 황금 두더지 : <b>+50점</b> (보너스 타겟, 초고속 체류!)</li>
-      <li>🐰 토끼 : <b>-30점</b> / 🐯 호랑이 : <b>-50점</b> (콤보 초기화)</li>
+      <li>👑 <b>대왕 두더지</b> : <b>+50점</b> (왕관 쓴 보너스 타겟, 빠른 반응 필요!)</li>
+      <li>🐰 토끼 : <b>-30점</b> / 🐯 <b>호랑이</b> : <b>-50점</b> (콤보 초기화)</li>
       <li>동시에 최대 3마리까지 등장하니 신속하게 분별하세요!</li>
     </ol>
     <button class="main" id="ruleCloseBtn">확인</button>
@@ -594,7 +643,7 @@
 
     var gpu = getGpuRenderer().toLowerCase();
 
-    // 1순위: 모바일 칩셋 우선 통과 (Android Chrome ANGLE 라이브러리 호환 보장)
+    // 1순위: 모바일 칩셋 우선 통과
     var mobileGpuKeywords = ['mali', 'adreno', 'apple', 'powervr', 'xclipse'];
     for (var m = 0; m < mobileGpuKeywords.length; m++) {
       if (gpu.indexOf(mobileGpuKeywords[m]) !== -1) {
@@ -644,9 +693,9 @@
 
   var GAME_TIME = 20;
 
-  // [난이도 상향] 마리수 및 황금 두더지 배분
+  // 마리수 배분 (대왕 두더지 3마리 포함)
   var MOLE_COUNT = 17;
-  var GOLD_MOLE_COUNT = 3;
+  var KING_MOLE_COUNT = 3;
   var RABBIT_COUNT = 6;
   var TIGER_COUNT = 6;
 
@@ -704,14 +753,22 @@
     }).catch(function(err){ console.warn("로그 실패:", err); });
   }
 
-  // 9개 구멍 생성 (일반 두더지, 황금 두더지, 토끼, 호랑이 내장)
+  // 9개 구멍 생성 (일반 두더지, 대왕 두더지, 토끼, 리얼 호랑이)
   for(var i = 0; i < 9; i++){
     (function(idx){
       var hole = document.createElement("div");
       hole.className = "hole";
-      ["mole", "gold-mole", "rabbit", "tiger"].forEach(function(type){
+      ["mole", "king-mole", "rabbit", "tiger"].forEach(function(type){
+        var extraParts = '';
+        if(type === 'king-mole'){
+          extraParts = '<div class="crown"></div>';
+        } else if(type === 'tiger'){
+          extraParts = '<div class="stripes-forehead"></div><div class="stripe-left"></div><div class="stripe-right"></div><div class="muzzle"></div>';
+        }
+
         hole.innerHTML += '<div class="animal ' + type + '">' +
           '<div class="ear left"></div><div class="ear right"></div>' +
+          extraParts +
           '<div class="eye left"></div><div class="eye right"></div>' +
           '<div class="nose"></div></div>';
       });
@@ -754,8 +811,8 @@
     randomTimes(MOLE_COUNT).forEach(function(t){
       spawnTimers.push(setTimeout(function(){ spawnAnimal("mole"); }, t));
     });
-    randomTimes(GOLD_MOLE_COUNT).forEach(function(t){
-      spawnTimers.push(setTimeout(function(){ spawnAnimal("gold-mole"); }, t));
+    randomTimes(KING_MOLE_COUNT).forEach(function(t){
+      spawnTimers.push(setTimeout(function(){ spawnAnimal("king-mole"); }, t));
     });
     randomTimes(RABBIT_COUNT).forEach(function(t){
       spawnTimers.push(setTimeout(function(){ spawnAnimal("rabbit"); }, t));
@@ -768,7 +825,6 @@
   function spawnAnimal(type){
     if(!running) return;
 
-    // 동시 출현 수 최대 3마리로 확대
     var activeAnimals = document.querySelectorAll(".animal.active");
     if(activeAnimals.length >= 3){
       setTimeout(function(){ if(running) spawnAnimal(type); }, 220);
@@ -790,10 +846,9 @@
     if(!animal) return;
     animal.classList.add("active");
 
-    // [체류 시간 단축 및 후반 가속 로직]
-    // 전반 750ms, 후반 10초 이하 600ms, 황금 두더지는 550ms
+    // 기본 체류시간: 전반 750ms, 후반 10초 이하 600ms, 대왕 두더지는 550ms
     var stayTime = (time <= 10) ? 600 : 750;
-    if(type === "gold-mole") stayTime = 550;
+    if(type === "king-mole") stayTime = 550;
 
     if(animal._hideTimer) clearTimeout(animal._hideTimer);
     animal._hideTimer = setTimeout(function(){
@@ -817,12 +872,12 @@
     if(animal._hideTimer) clearTimeout(animal._hideTimer);
     animal.classList.remove("active");
 
-    if(animal.classList.contains("gold-mole")){
+    if(animal.classList.contains("king-mole")){
       hits++; combo++;
       maxCombo = Math.max(maxCombo, combo);
       var pt = 50 + (combo - 1) * 10;
       score += pt;
-      pop(holes[index], "+" + pt + "✨", "gold");
+      pop(holes[index], "+" + pt + "👑", "gold");
     } else if(animal.classList.contains("mole")){
       hits++; combo++;
       maxCombo = Math.max(maxCombo, combo);
