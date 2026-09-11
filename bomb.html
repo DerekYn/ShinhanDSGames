@@ -56,7 +56,7 @@
   .brand-logo svg{ width:100%; height:100%; display:block; }
   .brand-text{ display:flex; flex-direction:column; line-height:1.2; }
   .brand-name { 
-    font-size: 11px; 
+    font-size: 13px; 
     font-weight: 800; 
     color: #fff; 
     letter-spacing: -0.02em; 
@@ -189,7 +189,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
+    gap: 6px;
     width: 100%;
   }
   .stat-card{
@@ -224,8 +224,8 @@
 
   .facebtn{
     font-size: 20px;
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
     border-radius: 10px;
     background: var(--blue);
     border: 1px solid rgba(255,255,255,0.2);
@@ -240,15 +240,48 @@
   .facebtn:hover { background: var(--sky); }
   .facebtn:active { transform: scale(0.95); }
 
-  /* 게임 보드 영역 (세로 크기 미세 축소 최적화) */
+  /* [핵심] 원터치 파기/깃발 모드 전환 버튼 */
+  .mode-toggle-btn{
+    height: 38px;
+    padding: 0 10px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    color: var(--ice);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+  }
+  .mode-toggle-btn:active{ transform: scale(0.95); }
+  .mode-toggle-btn.flag-mode{
+    background: linear-gradient(160deg, #F2B84B, #C98A1D);
+    border-color: #FFD700;
+    color: #041224;
+    box-shadow: 0 0 12px rgba(242, 184, 75, 0.45);
+  }
+
+  /* 게임 보드 영역 */
   #board-wrap{
     background: linear-gradient(180deg, #0E2A4A, #0A2036);
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1.5px solid rgba(255,255,255,0.1);
     border-radius: 16px;
     padding: 8px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
     width: min(92vw, 480px);
     box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  #board-wrap.flag-mode{
+    border-color: rgba(242, 184, 75, 0.6);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45), 0 0 16px rgba(242, 184, 75, 0.25);
   }
   #board{
     display:grid;
@@ -324,7 +357,7 @@
   }
   button.ghost:hover{ background: rgba(255,255,255,0.08); }
 
-  .hint{ font-size:11.5px; color:var(--ice); opacity:0.6; text-align:center; max-width:480px; }
+  .hint{ font-size:11.5px; color:var(--ice); opacity:0.65; text-align:center; max-width:480px; }
 
   /* 모달 레이아웃 */
   #overlay, #ruleOverlay, #authOverlay{
@@ -496,7 +529,7 @@
     </nav>
   </div>
 
-  <!-- 가로형 2단 대시보드 -->
+  <!-- 가로형 2단 대시보드 (원터치 모드 전환 버튼 탑재) -->
   <div class="game-dash">
     <div class="dash-left">
       <h1 class="game-title">💣 지뢰찾기</h1>
@@ -509,6 +542,13 @@
         <span class="stat-val" id="mineCount">24</span>
       </div>
       <button class="facebtn" id="faceBtn" aria-label="재시작" type="button">🙂</button>
+      
+      <!-- ⛏️ 열기 / 🚩 깃발 원터치 전환 버튼 -->
+      <button class="mode-toggle-btn" id="modeToggleBtn" type="button" title="모드 전환 (열기 / 깃발)">
+        <span id="modeIcon">⛏️</span>
+        <span id="modeText">열기</span>
+      </button>
+
       <div class="stat-card time">
         <span class="stat-lbl">진행 시간</span>
         <span class="stat-val" id="timeCount">000</span>
@@ -524,7 +564,7 @@
     <button class="main" id="restartBtn">다시 시작</button>
     <button class="ghost" id="ruleBtn">규칙 보기</button>
   </div>
-  <div class="hint">좌클릭(탭)으로 칸을 열고, 우클릭(길게 누르기)으로 깃발을 꽂으세요.</div>
+  <div class="hint">모드 버튼(⛏️열기 / 🚩깃발)으로 전환하여 터치하거나, 길게 눌러 깃발을 꽂으세요.</div>
 </div>
 
 <div id="overlay">
@@ -540,9 +580,10 @@
   <div class="modal">
     <h2>게임 규칙</h2>
     <ol>
-      <li>왼쪽 클릭(또는 탭)으로 칸을 열어요.</li>
-      <li>오른쪽 클릭(또는 길게 누르기)으로 지뢰 의심 칸에 깃발을 꽂아요.</li>
-      <li>숫자는 주변 8칸 안에 있는 지뢰 개수를 알려줘요.</li>
+      <li>상단 <b>[⛏️ 열기 / 🚩 깃발]</b> 버튼으로 모드를 즉시 바꿀 수 있어요.</li>
+      <li>⛏️ <b>열기 모드</b>: 칸을 터치하면 숫자가 열려요.</li>
+      <li>🚩 <b>깃발 모드</b>: 칸을 가볍게 터치만 해도 깃발이 꽂혀요!</li>
+      <li>(기존 방식처럼 어떤 모드에서든 <b>길게 누르기</b>로 깃발을 꽂을 수도 있어요)</li>
       <li>지뢰가 없는 모든 칸을 열면 승리! 최단 기록을 노려보세요.</li>
     </ol>
     <button class="main" id="ruleCloseBtn">확인</button>
@@ -645,10 +686,18 @@
   var currentSabun = "";
   var currentTeam = "";
 
+  // 모드 상태: "dig" (블록 열기) | "flag" (깃발 꽂기)
+  var currentMode = "dig";
+
   var boardEl = document.getElementById('board');
+  var boardWrap = document.getElementById('board-wrap');
   var mineCountEl = document.getElementById('mineCount');
   var timeCountEl = document.getElementById('timeCount');
   var faceBtn = document.getElementById('faceBtn');
+  var modeToggleBtn = document.getElementById('modeToggleBtn');
+  var modeIcon = document.getElementById('modeIcon');
+  var modeText = document.getElementById('modeText');
+
   var overlay = document.getElementById('overlay');
   var modalTitle = document.getElementById('modalTitle');
   var modalTime = document.getElementById('modalTime');
@@ -663,6 +712,26 @@
   var authStartBtn = document.getElementById('authStartBtn');
   var playerBadge = document.getElementById('playerBadge');
   var authError = document.getElementById('authError');
+
+  function setMode(mode) {
+    currentMode = mode;
+    if (currentMode === "flag") {
+      modeToggleBtn.classList.add('flag-mode');
+      boardWrap.classList.add('flag-mode');
+      modeIcon.textContent = "🚩";
+      modeText.textContent = "깃발";
+    } else {
+      modeToggleBtn.classList.remove('flag-mode');
+      boardWrap.classList.remove('flag-mode');
+      modeIcon.textContent = "⛏️";
+      modeText.textContent = "열기";
+    }
+    if (navigator.vibrate) navigator.vibrate(15);
+  }
+
+  modeToggleBtn.addEventListener('click', function() {
+    setMode(currentMode === "dig" ? "flag" : "dig");
+  });
 
   function logEvent(eventType, extraData){
     if(!GOOGLE_WEBHOOK_URL) return;
@@ -899,8 +968,16 @@
     boardEl.addEventListener('click', function(e){
       var t = e.target.closest('.cell');
       if(!t || longPressed){ longPressed=false; return; }
-      onLeftClick(parseInt(t.dataset.r), parseInt(t.dataset.c));
+      var r = parseInt(t.dataset.r), c = parseInt(t.dataset.c);
+      
+      // 모드에 따라 열기 또는 깃발 처리
+      if (currentMode === "flag") {
+        onRightClick(r, c);
+      } else {
+        onLeftClick(r, c);
+      }
     });
+
     boardEl.addEventListener('contextmenu', function(e){
       e.preventDefault();
       if(touchActive) return;
@@ -908,6 +985,8 @@
       if(!t) return;
       onRightClick(parseInt(t.dataset.r), parseInt(t.dataset.c));
     });
+
+    // 롱클릭도 계속 지원 (모드와 상관없이 꾹 누르면 깃발 꽂기)
     boardEl.addEventListener('touchstart', function(e){
       var t = e.target.closest('.cell');
       if(!t) return;
@@ -923,6 +1002,7 @@
         if(navigator.vibrate) navigator.vibrate(15);
       }, 420);
     }, {passive:true});
+
     boardEl.addEventListener('touchmove', function(e){
       if(!touchStartPos) return;
       var touch = e.touches[0];
@@ -933,12 +1013,14 @@
         touchStartPos = null;
       }
     }, {passive:true});
+
     boardEl.addEventListener('touchend', function(e){
       clearTimeout(pressTimer);
       touchStartPos = null;
       clearTimeout(touchActiveClearTimer);
       touchActiveClearTimer = setTimeout(function(){ touchActive = false; }, 400);
     });
+
     boardEl.addEventListener('touchcancel', function(e){
       clearTimeout(pressTimer);
       touchStartPos = null;
@@ -955,6 +1037,7 @@
     elapsed = 0;
     timeCountEl.textContent = '000';
     faceBtn.textContent = '🙂';
+    setMode("dig"); // 기본 모드는 파기
     buildEmptyGrid();
     render();
     updateMineCounter();
