@@ -14,6 +14,7 @@
     --paper: #EAF4FC;
     --accent: #2FBF9E;
     --danger: #E0567A;
+    --gold: #FFD700;
     --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
     --font-num: "Segoe UI", "Consolas", "Malgun Gothic", monospace;
   }
@@ -69,7 +70,7 @@
   .brand-logo svg { width: 100%; height: 100%; display: block; }
   .brand-text { display: flex; flex-direction: column; line-height: 1.2; }
   .brand-name { 
-    font-size: 11px; 
+    font-size: 13px; 
     font-weight: 800; 
     color: #fff; 
     letter-spacing: -0.02em; 
@@ -169,6 +170,11 @@
     border-radius: 14px;
     padding: 8px 12px;
     box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .game-dash.fever {
+    border-color: var(--gold);
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.35);
   }
   .dash-left {
     display: flex;
@@ -239,22 +245,24 @@
   .legend {
     display: flex;
     justify-content: center;
-    gap: 12px;
-    font-size: 11px;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    font-size: 10.5px;
     color: var(--ice);
     opacity: 0.85;
   }
   .legend span { display: inline-flex; align-items: center; gap: 4px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
   .dot.good { background: #60a5fa; }
   .dot.great { background: #34d399; }
+  .dot.diamond { background: #38bdf8; box-shadow: 0 0 6px #38bdf8; }
   .dot.bad { background: #f87171; }
 
-  /* 게임 캔버스 영역 (세로 크기 미세 축소 최적화) */
+  /* 게임 캔버스 영역 */
   #board-wrap {
     position: relative;
     background: linear-gradient(180deg, #0E2A4A, #0A2036);
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1.5px solid rgba(255,255,255,0.1);
     border-radius: 18px;
     padding: 8px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
@@ -263,6 +271,11 @@
     box-sizing: border-box;
     overflow: hidden;
     touch-action: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  #board-wrap.fever {
+    border-color: rgba(255, 215, 0, 0.7);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45), 0 0 20px rgba(255, 215, 0, 0.35);
   }
   canvas {
     display: block;
@@ -289,7 +302,7 @@
   }
   button.ghost:hover { background: rgba(255,255,255,0.08); }
 
-  .hint { font-size: 11.5px; color: var(--ice); opacity: 0.6; text-align: center; max-width: 480px; }
+  .hint { font-size: 11.5px; color: var(--ice); opacity: 0.65; text-align: center; max-width: 480px; }
 
   /* 모달 레이아웃 */
   #overlay, #ruleOverlay, #authOverlay{
@@ -440,7 +453,7 @@
   </div>
 
   <!-- 가로형 2단 대시보드 -->
-  <div class="game-dash">
+  <div class="game-dash" id="gameDash">
     <div class="dash-left">
       <h1 class="game-title"><span id="face">🧺</span> 낙하 캐치</h1>
       <span id="playerBadge" class="player-tag" style="display:none;" title="클릭 시 팀/사번 변경"></span>
@@ -464,7 +477,8 @@
 
   <div class="legend">
     <span><i class="dot good"></i>파랑 +10</span>
-    <span><i class="dot great"></i>초록 +25</span>
+    <span><i class="dot great"></i>초록(살랑) +25</span>
+    <span><i class="dot diamond"></i>다이아(고속) +50</span>
     <span><i class="dot bad"></i>폭탄 -20</span>
   </div>
 
@@ -476,7 +490,7 @@
     <button class="main" id="restartBtn">다시 시작</button>
     <button class="ghost" id="rulesBtn">규칙 보기</button>
   </div>
-  <div class="hint">화면을 좌우로 드래그하여 바구니를 이동하세요. 연속 획득 시 콤보 가산점이 붙습니다.</div>
+  <div class="hint">화면을 좌우로 드래그하세요. 콤보가 높을수록 바구니가 좁아지고, 마지막 15초는 피버 타임(점수 2배)!</div>
 </div>
 
 <!-- 결과 화면 -->
@@ -494,10 +508,12 @@
   <div class="modal">
     <h2>게임 규칙</h2>
     <ol>
-      <li>⏱ 제한시간 : <b>60초</b> 동안 진행됩니다.</li>
-      <li>💎 파란 보석: <b>+10점</b> / ⭐ 초록 별: <b>+25점</b></li>
-      <li>💣 빨간 폭탄: <b>-20점</b> 및 콤보가 초기화됩니다.</li>
-      <li>연속 획득 시 콤보 보너스가 주어집니다.</li>
+      <li>⏱ 제한시간 : <b>60초</b> (시간이 흐를수록 속도 증가)</li>
+      <li>💎 파랑: <b>+10점</b> / ⭐ 초록(지그재그): <b>+25점</b></li>
+      <li>💠 <b>초고속 다이아</b>: <b>+50점</b> (낙하 속도 1.5배)</li>
+      <li>💣 폭탄: <b>-20점</b>, 콤보 리셋 및 바구니 크기 복구</li>
+      <li>🔥 <b>피버 타임</b>: 마지막 15초 동안 <b>모든 획득 점수 2배!</b></li>
+      <li>🎯 콤보가 5, 10 이상 쌓이면 바구니가 작아져 난이도 상승!</li>
     </ol>
     <button class="main" id="ruleCloseBtn">확인</button>
   </div>
@@ -620,6 +636,7 @@
   const comboMeter = document.getElementById("comboMeter");
   const face = document.getElementById("face");
   const stageWrap = document.getElementById("board-wrap");
+  const gameDash = document.getElementById("gameDash");
 
   const overlay = document.getElementById("overlay");
   const modalScore = document.getElementById("modalScore");
@@ -642,10 +659,11 @@
 
   const CONFIG = {
     duration: 60,
-    spawnEvery: 460,
+    baseSpawnEvery: 440,
+    feverSpawnEvery: 300,
     minSpeed: 250,
-    maxSpeed: 390,
-    badChance: 0.34
+    maxSpeed: 380,
+    badChance: 0.33
   };
 
   let running = false;
@@ -658,8 +676,10 @@
   let lastTs = 0;
   let spawnAcc = 0;
   let rafId = 0;
+  let baseBasketW = 78;
   let basket = { x: 0, y: 0, w: 78, h: 22 };
   let pointerX = null;
+  let isFever = false;
 
   function resize() {
     const cssWidth = stageWrap.clientWidth;
@@ -672,14 +692,29 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     const scale = Math.min(1, cssHeight / 360);
-    basket.w = Math.max(64, Math.round(78 * scale));
+    baseBasketW = Math.max(64, Math.round(78 * scale));
     basket.h = Math.max(18, Math.round(22 * scale));
-    basket.y = cssHeight - Math.max(36, Math.round(48 * scale));
+    basket.y = cssHeight - Math.max(34, Math.round(44 * scale));
+    updateBasketWidth(0);
     basket.x = Math.min(
       Math.max(basket.x || cssWidth / 2, basket.w / 2 + 8),
       cssWidth - basket.w / 2 - 8
     );
     drawFrame(0, true);
+  }
+
+  // 콤보에 따른 바구니 크기 실시간 축소 (Risk & Reward)
+  function updateBasketWidth(dt) {
+    let targetRatio = 1.0;
+    if (combo >= 10) targetRatio = 0.70; // 10콤보 이상: 70% 크기
+    else if (combo >= 5) targetRatio = 0.85; // 5콤보 이상: 85% 크기
+
+    const targetW = baseBasketW * targetRatio;
+    if (dt > 0) {
+      basket.w += (targetW - basket.w) * Math.min(1, dt * 10);
+    } else {
+      basket.w = targetW;
+    }
   }
 
   function setFace(emoji) { if (face) face.textContent = emoji; }
@@ -699,7 +734,11 @@
     items = [];
     particles = [];
     spawnAcc = 0;
+    isFever = false;
+    stageWrap.classList.remove('fever');
+    gameDash.classList.remove('fever');
     setFace("🧺");
+    updateBasketWidth(0);
     updateMeters();
     overlay.classList.remove("show");
     adPopup.style.display = "none";
@@ -714,7 +753,9 @@
   function endGame() {
     running = false;
     cancelAnimationFrame(rafId);
-    setFace(score >= 150 ? "🏆" : score >= 80 ? "😄" : "😅");
+    stageWrap.classList.remove('fever');
+    gameDash.classList.remove('fever');
+    setFace(score >= 250 ? "🏆" : score >= 130 ? "😄" : "😅");
 
     modalScore.textContent = score;
     overlay.classList.add("show");
@@ -736,18 +777,40 @@
   function spawnItem(viewW) {
     const viewH = canvas.clientHeight || 360;
     const speedScale = Math.max(0.7, Math.min(1.15, viewH / 420));
+    
+    // 시간 경과에 따른 점진적 속도 증가 (최대 35% 가속)
+    const timeProgress = (CONFIG.duration - timeLeft) / CONFIG.duration;
+    const speedBoost = 1 + (timeProgress * 0.35);
+
     const roll = Math.random();
     let type = "good";
-    if (roll < CONFIG.badChance) type = "bad";
-    else if (roll > 0.82) type = "great";
+    let isSway = false;
+    let speedMult = 1.0;
 
-    const radius = type === "great" ? 15 : 13;
+    if (roll < CONFIG.badChance) {
+      type = "bad"; // 폭탄
+    } else if (roll > 0.90) {
+      type = "diamond"; // 💠 초고속 다이아몬드 (찬스 타겟)
+      speedMult = 1.45;
+    } else if (roll > 0.72) {
+      type = "great"; // ⭐ 초록 별 (살랑살랑 지그재그 낙하)
+      isSway = true;
+    }
+
+    const radius = type === "diamond" ? 14 : (type === "great" ? 15 : 13);
+    const startX = radius + 14 + Math.random() * (viewW - radius * 2 - 28);
+
     items.push({
-      x: radius + 10 + Math.random() * (viewW - radius * 2 - 20),
+      x: startX,
+      baseX: startX,
       y: -20,
       r: radius,
-      vy: (CONFIG.minSpeed + Math.random() * (CONFIG.maxSpeed - CONFIG.minSpeed)) * speedScale,
-      type,
+      vy: (CONFIG.minSpeed + Math.random() * (CONFIG.maxSpeed - CONFIG.minSpeed)) * speedScale * speedBoost * speedMult,
+      type: type,
+      sway: isSway,
+      swayPhase: Math.random() * Math.PI * 2,
+      swaySpeed: 3.5 + Math.random() * 2.0,
+      swayAmp: 24 + Math.random() * 18,
       rot: Math.random() * Math.PI * 2,
       spin: (Math.random() - 0.5) * 4
     });
@@ -757,8 +820,8 @@
     for (let i = 0; i < 8; i++) {
       particles.push({
         x, y,
-        vx: (Math.random() - 0.5) * 180,
-        vy: -40 - Math.random() * 120,
+        vx: (Math.random() - 0.5) * 190,
+        vy: -40 - Math.random() * 130,
         life: 0.35 + Math.random() * 0.25,
         color
       });
@@ -766,17 +829,26 @@
   }
 
   function catchItem(item) {
+    const feverMultiplier = isFever ? 2 : 1; // 피버 타임 점수 2배!
+
     if (item.type === "bad") {
       score = Math.max(0, score - 20);
       combo = 0;
       setFace("😵");
       addParticles(item.x, item.y, "#f87171");
+    } else if (item.type === "diamond") {
+      combo += 1;
+      maxCombo = Math.max(maxCombo, combo);
+      const bonus = Math.min(combo - 1, 6) * 3;
+      score += (50 + bonus) * feverMultiplier;
+      setFace("🤩");
+      addParticles(item.x, item.y, "#38bdf8");
     } else {
       const base = item.type === "great" ? 25 : 10;
       combo += 1;
       maxCombo = Math.max(maxCombo, combo);
       const bonus = Math.min(combo - 1, 5) * 2;
-      score += base + bonus;
+      score += (base + bonus) * feverMultiplier;
       setFace(combo >= 5 ? "🤩" : "😄");
       addParticles(item.x, item.y, item.type === "great" ? "#34d399" : "#60a5fa");
     }
@@ -792,15 +864,26 @@
       return;
     }
 
+    // 15초 피버 타임 감지
+    if (timeLeft <= 15 && !isFever) {
+      isFever = true;
+      stageWrap.classList.add('fever');
+      gameDash.classList.add('fever');
+    }
+
+    updateBasketWidth(dt);
+
     if (pointerX != null) {
       const target = pointerX;
-      basket.x += (target - basket.x) * Math.min(1, dt * 14);
+      basket.x += (target - basket.x) * Math.min(1, dt * 15);
       basket.x = Math.min(Math.max(basket.x, basket.w / 2 + 8), viewW - basket.w / 2 - 8);
     }
 
+    // 피버 타임에는 스폰 주기 단축
+    const currentSpawnEvery = isFever ? CONFIG.feverSpawnEvery : CONFIG.baseSpawnEvery;
     spawnAcc += dt * 1000;
-    while (spawnAcc >= CONFIG.spawnEvery) {
-      spawnAcc -= CONFIG.spawnEvery;
+    while (spawnAcc >= currentSpawnEvery) {
+      spawnAcc -= currentSpawnEvery;
       spawnItem(viewW);
     }
 
@@ -808,6 +891,13 @@
       const it = items[i];
       it.y += it.vy * dt;
       it.rot += it.spin * dt;
+
+      // 궤적 다양화 (Sine Wave 지그재그 낙하)
+      if (it.sway) {
+        it.swayPhase += dt * it.swaySpeed;
+        it.x = it.baseX + Math.sin(it.swayPhase) * it.swayAmp;
+        it.x = Math.max(it.r + 6, Math.min(viewW - it.r - 6, it.x));
+      }
 
       const withinX = Math.abs(it.x - basket.x) < basket.w * 0.48 + it.r * 0.2;
       const withinY = it.y + it.r > basket.y - 4 && it.y - it.r < basket.y + basket.h;
@@ -840,12 +930,18 @@
 
   function drawBackground(viewW, viewH) {
     const g = ctx.createLinearGradient(0, 0, 0, viewH);
-    g.addColorStop(0, "#0E2A4A");
-    g.addColorStop(1, "#071426");
+    if (isFever) {
+      // 피버 타임 골드/오렌지 빛 배경 그라데이션
+      g.addColorStop(0, "#2a1b04");
+      g.addColorStop(1, "#071426");
+    } else {
+      g.addColorStop(0, "#0E2A4A");
+      g.addColorStop(1, "#071426");
+    }
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, viewW, viewH);
 
-    ctx.fillStyle = "rgba(148, 163, 184, 0.08)";
+    ctx.fillStyle = isFever ? "rgba(255, 215, 0, 0.14)" : "rgba(148, 163, 184, 0.08)";
     for (let i = 0; i < 18; i++) {
       const x = (i * 97) % viewW;
       const y = (i * 61) % viewH;
@@ -864,8 +960,8 @@
     ctx.save();
     ctx.translate(x, y);
 
-    ctx.fillStyle = "#1B5FA8";
-    ctx.strokeStyle = "#4F9DDE";
+    ctx.fillStyle = isFever ? "#ca8a04" : "#1B5FA8";
+    ctx.strokeStyle = isFever ? "#fde047" : "#4F9DDE";
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(-w / 2, 0);
@@ -876,13 +972,13 @@
     ctx.fill();
     ctx.stroke();
 
-    ctx.fillStyle = "#4F9DDE";
+    ctx.fillStyle = isFever ? "#eab308" : "#4F9DDE";
     ctx.fillRect(-w / 2, -6, w, 8);
     ctx.fillStyle = "#fff";
-    ctx.font = "15px sans-serif";
+    ctx.font = "14px sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("🧺", 0, 8);
+    ctx.fillText(combo >= 10 ? "⚡" : "🧺", 0, 8);
     ctx.restore();
   }
 
@@ -901,6 +997,20 @@
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("💣", 0, 1);
+    } else if (it.type === "diamond") {
+      // 💠 초고속 다이아몬드 (파란 광채)
+      ctx.fillStyle = "#0284c7";
+      ctx.shadowColor = "#38bdf8";
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(0, 0, it.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = "#fff";
+      ctx.font = "14px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("💠", 0, 1);
     } else if (it.type === "great") {
       ctx.fillStyle = "#2FBF9E";
       ctx.beginPath();
@@ -938,13 +1048,23 @@
 
   function drawHud(viewW) {
     if (!running) return;
-    ctx.fillStyle = "rgba(11, 31, 58, 0.75)";
-    ctx.fillRect(10, 10, 105, 26);
-    ctx.fillStyle = "#BFE2F7";
-    ctx.font = "bold 12px sans-serif";
+
+    ctx.fillStyle = isFever ? "rgba(234, 179, 8, 0.3)" : "rgba(11, 31, 58, 0.75)";
+    ctx.strokeStyle = isFever ? "#fde047" : "rgba(255,255,255,0.15)";
+    ctx.lineWidth = 1;
+    ctx.fillRect(8, 8, isFever ? 142 : 105, 26);
+    ctx.strokeRect(8, 8, isFever ? 142 : 105, 26);
+
+    ctx.fillStyle = isFever ? "#FFD700" : "#BFE2F7";
+    ctx.font = "bold 11.5px sans-serif";
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
-    ctx.fillText(combo > 1 ? `COMBO x${combo}` : "COMBO x1", 16, 23);
+    
+    if (isFever) {
+      ctx.fillText(`🔥 FEVER x2 (C:${combo})`, 14, 21);
+    } else {
+      ctx.fillText(combo > 1 ? `COMBO x${combo}` : "COMBO x1", 14, 21);
+    }
   }
 
   function drawFrame(dt, force) {
