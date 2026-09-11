@@ -14,6 +14,7 @@
     --paper:#EAF4FC;
     --accent:#2FBF9E;
     --danger:#E0567A;
+    --gold:#FFD700;
     --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
     --font-num: "Segoe UI", "Consolas", "Malgun Gothic", monospace;
   }
@@ -57,7 +58,7 @@
   .brand-logo svg{ width:100%; height:100%; display:block; }
   .brand-text{ display:flex; flex-direction:column; line-height:1.2; }
   .brand-name { 
-    font-size: 11px; 
+    font-size: 13px; 
     font-weight: 800; 
     color: #fff; 
     letter-spacing: -0.02em; 
@@ -223,7 +224,7 @@
   .stat-card.time .stat-val { color: var(--sky); }
   .stat-card.stage .stat-val { color: var(--accent); }
 
-  /* 보드 래퍼 (세로 크기 미세 축소 최적화) */
+  /* 보드 래퍼 */
   #board-wrap{
     background: linear-gradient(180deg, #0E2A4A, #0A2036);
     border: 1px solid rgba(255,255,255,0.1);
@@ -251,7 +252,7 @@
     padding:1px 6px; border-radius:4px; font-family:var(--font-num); color:var(--sky);
   }
 
-  /* 하단 방향 조작 버튼 (세로 크기 미세 축소) */
+  /* 하단 조작 버튼 (좌 / 급강하 / 우) */
   .dir-controls{
     display: flex;
     justify-content: space-between;
@@ -260,10 +261,10 @@
     max-width: 640px;
     padding: 0 8px;
     box-sizing: border-box;
+    gap: 6px;
   }
   .dir-controls button{
-    width: 44%;
-    max-width: 180px;
+    flex: 1;
     font-size: 22px;
     padding: 10px 0;
     border-radius: 12px;
@@ -275,6 +276,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    font-family: var(--font-ui);
+    font-weight: 700;
+  }
+  .dir-controls button.btn-down{
+    background: linear-gradient(160deg, #1B5FA8, #123A63);
+    border-color: var(--sky);
+    color: #fff;
+    font-size: 13.5px;
+    gap: 3px;
   }
   .dir-controls button:active{
     background: var(--blue);
@@ -299,7 +309,7 @@
   }
   button.ghost:hover{ background: rgba(255,255,255,0.08); }
 
-  .hint{ font-size:11.5px; color:var(--ice); opacity:0.6; text-align:center; max-width:480px; }
+  .hint{ font-size:11.5px; color:var(--ice); opacity:0.65; text-align:center; max-width:480px; }
 
   /* 모달 */
   #overlay, #ruleOverlay, #authOverlay{
@@ -473,12 +483,13 @@
   </div>
 
   <div class="hud">
-    방향 조작 → <kbd>◀</kbd>/<kbd>▶</kbd> (또는 <kbd>A</kbd>/<kbd>D</kbd>)
+    방향 <kbd>◀</kbd>/<kbd>▶</kbd> · 급강하 <kbd>▼</kbd> (키보드 <kbd>A</kbd>/<kbd>S</kbd>/<kbd>D</kbd>)
   </div>
 
-  <!-- 하단 조작 버튼 -->
+  <!-- 하단 조작 버튼 (좌 / 급강하 / 우) -->
   <div class="dir-controls">
     <button id="btnLeft" aria-label="Left">◀</button>
+    <button id="btnDown" class="btn-down" aria-label="Fast Drop">▼ 급강하</button>
     <button id="btnRight" aria-label="Right">▶</button>
   </div>
 
@@ -487,7 +498,7 @@
     <button class="main" id="restartBtn">다시 시작</button>
     <button class="ghost" id="ruleBtn">규칙 보기</button>
   </div>
-  <div class="hint">공의 방향만 조작하여 🏁 골 깃발에 도달하세요. 총 5개 스테이지입니다.</div>
+  <div class="hint">⏱️타임 시계(-2초)를 모으고, ▼급강하 버튼으로 불필요한 체공시간을 줄이세요!</div>
 </div>
 
 <!-- 스테이지 클리어 / 게임오버 결과 모달 -->
@@ -509,7 +520,9 @@
     <h2>게임 규칙</h2>
     <ol>
       <li>공은 바닥에 닿으면 자동으로 계속 튕겨 오릅니다.</li>
-      <li>화면 하단 버튼(◀ / ▶) 또는 키보드(<kbd>A</kbd>/<kbd>D</kbd>)로 <b>좌우 방향만 조작</b>하세요.</li>
+      <li>화면 하단 버튼(◀ / ▶) 또는 키보드(<kbd>A</kbd>/<kbd>D</kbd>)로 <b>좌우 조작</b>하세요.</li>
+      <li>▼ <b>급강하 버튼(▼ / S)</b>: 공중에서 체공 시간을 줄이고 빠르게 착지합니다!</li>
+      <li>⏱️ <b>타임 시계</b>: 획득 시 진행 시간이 <b>-2초 단축</b>됩니다.</li>
       <li>🏁 <b>골 깃발</b>: 닿으면 다음 스테이지로 통과됩니다 (총 5개).</li>
       <li>🟩 <b>점퍼 패드(▲)</b>: 밟으면 높이 솟구치는 슈퍼 점프를 합니다.</li>
       <li>💣 <b>폭탄 & 낙사</b>: 닿으면 즉시 실패하여 해당 스테이지를 재도전합니다.</li>
@@ -630,34 +643,35 @@
     }).catch(function(err){ console.warn("로그 실패:", err); });
   }
 
+  // 맵에 전략적 시계(C) 아이템 배치
   var level1_base = [
-    "RRRRRRRRRRRRRRRRRRRR","R..................R","R.S................R","R..................R",
+    "RRRRRRRRRRRRRRRRRRRR","R.........C........R","R.S................R","R..................R",
     "R..................R","R.....RRRRRRR......R","R....RR..RRRR......R","R...RRR.R.RRR......R",
-    "R..RRRR.R.RRR......R","R.RRRRR..RRRR......R","RRRRRRRRR...RWWWWWWR","RRRRRRRRR.RRR......R",
+    "R..RRRR.R.RRR......R","R.RRRRR..RRRR......R","RRRRRRRRR...RWWWWWWR","RRRRRRRRR.RRR...C..R",
     "RRRRRRRRRR.RR......R","RRRRRRRRRRR.R......G","RRRRRRRRR...RRRRRRRR"
   ];
   var level2_base = [
-    "RRRRRRRRRRRRRRRRRRRR","R..................R","R.S...RR...........R","R.....R.R..........R",
+    "RRRRRRRRRRRRRRRRRRRR","R.......C..........R","R.S...RR...........R","R.....R.R..........R",
     "R.....R.R...RRR....R","R.....R.R...R......R","R.....RR.....R.....R","R.............R....R",
-    "R...........RRR....R","R..................R","R..................R","RRRRR..............G",
+    "R...........RRR....R","R...............C..R","R..................R","RRRRR..............G",
     "RRRRR....RRRR.RRRRRR","RRRRR.RRRRR........R","RRRRR.RRRRR........R"
   ];
   var level3_base = [
     "RRRRRRRRRRRRRRRRRRRR","R..................R","R.S................R","R..................R",
-    "R..................R","R..................R","R..................R","R..............JJ..R",
+    "R..................R","R..................R","R..................R","R...C..........JJ..R",
     "R...........J......G","R........J........RR","R.....J............R","R...R..............R",
     "R..R...............R","R..................R","RRRRR..............R"
   ];
   var level4_base = [
     "RRRRRRRRRRRRRRRRRRRR","R..................R","R.S................R","R..................R",
-    "R..................R","RRRRRWWWWWRRRRRRRRRR","R...........R......R","R...........R......R",
-    "R...........R......R","R...........R......R","R...........R......R","R..................R",
+    "R..................R","RRRRRWWWWWRRRRRRRRRR","R...C.......R......R","R...........R......R",
+    "R...........R......R","R...........R......R","R...........R......R","R...............C..R",
     "R..................G","R....RRRRWWWWJ.RRRRR","R..............RRRRR"
   ];
   var level5_base = [
     "RRRRRRRRRRRRRRRRRRRR","R................S.R","R..................R","R..................R",
-    "R.....RRBRRRBRRRRRRR","R................RRR","R................RRR","RBBRRR>..........RRR",
-    "R......BBBBBB....RRR","R................RRR","R................RRR","R................RRR",
+    "R.....RRBRRRBRRRRRRR","R................RRR","R.....C..........RRR","RBBRRR>..........RRR",
+    "R......BBBBBB....RRR","R....C...........RRR","R................RRR","R................RRR",
     "R.....RRRRRRRRRRRR.R","R..................G","R...>..............G"
   ];
 
@@ -668,7 +682,7 @@
 
   var GRAVITY = 1200, BOUNCE_VY = -420, H_SPEED = 70, ARROW_SPEED = 300;
 
-  var MOVE_KEYS = ['arrowleft','arrowright','a','d'];
+  var MOVE_KEYS = ['arrowleft','arrowright','a','d','arrowdown','s'];
   var keys = new Set();
   window.addEventListener('keydown', function(e){
     var k = e.key.toLowerCase();
@@ -678,14 +692,18 @@
   window.addEventListener('keyup', function(e){ keys.delete(e.key.toLowerCase()); });
 
   var btnLeft  = document.getElementById('btnLeft');
+  var btnDown  = document.getElementById('btnDown');
   var btnRight = document.getElementById('btnRight');
   function press(name,on){ if(on) keys.add(name); else keys.delete(name); }
+
   ['mousedown','touchstart'].forEach(function(ev){
     btnLeft.addEventListener(ev, function(e){ e.preventDefault(); if(paused) paused=false; press('touchleft', true); });
+    btnDown.addEventListener(ev, function(e){ e.preventDefault(); if(paused) paused=false; press('touchdown', true); });
     btnRight.addEventListener(ev, function(e){ e.preventDefault(); if(paused) paused=false; press('touchright',true); });
   });
   ['mouseup','mouseleave','touchend','touchcancel'].forEach(function(ev){
     btnLeft.addEventListener(ev, function(e){ e.preventDefault(); press('touchleft', false); });
+    btnDown.addEventListener(ev, function(e){ e.preventDefault(); press('touchdown', false); });
     btnRight.addEventListener(ev, function(e){ e.preventDefault(); press('touchright',false); });
   });
 
@@ -709,20 +727,29 @@
     }, {passive:false});
   });
 
-  var T = { EMPTY:0, RED:1, WHITE:2, GOAL:3, JUMPER:4, BOMB:5, ARROW_LEFT:6, ARROW_RIGHT:7 };
+  var T = { EMPTY:0, RED:1, WHITE:2, GOAL:3, JUMPER:4, BOMB:5, ARROW_LEFT:6, ARROW_RIGHT:7, CLOCK:8 };
 
+  // 시계(C) 아이템은 2x2 확대 시 단 1개의 16px 타일로 정밀 변환
   function upscaleWithSpawn(baseLines, scale){
     scale = scale || 2;
     var spawn = null, out = [];
     for(var r=0; r<baseLines.length; r++){
       var row = baseLines[r], cS = row.indexOf('S');
       if(cS !== -1){ spawn = { x: cS*scale + Math.floor(scale/2), y: r*scale + Math.floor(scale/2) }; }
-      var scaledRow = '';
-      for(var chIdx=0; chIdx<row.length; chIdx++){
-        var ch = row[chIdx];
-        scaledRow += (ch==='S'?'.':ch).repeat(scale);
+      for(var i=0; i<scale; i++){
+        var scaledRow = '';
+        for(var chIdx=0; chIdx<row.length; chIdx++){
+          var ch = row[chIdx];
+          if(ch === 'S'){
+            scaledRow += '..';
+          } else if(ch === 'C'){
+            scaledRow += (i === 0 ? 'C.' : '..');
+          } else {
+            scaledRow += ch.repeat(scale);
+          }
+        }
+        out.push(scaledRow);
       }
-      for(var i=0; i<scale; i++) out.push(scaledRow);
     }
     return { lines: out, spawn: spawn };
   }
@@ -737,7 +764,7 @@
       grid[r] = [];
       for(var c=0; c<COLS; c++){
         var ch = (lines[r] && lines[r][c]) || '.';
-        grid[r][c] = ch==='R'?T.RED : ch==='W'?T.WHITE : ch==='G'?T.GOAL : ch==='J'?T.JUMPER : ch==='B'?T.BOMB : ch==='<'?T.ARROW_LEFT : ch==='>'?T.ARROW_RIGHT : T.EMPTY;
+        grid[r][c] = ch==='R'?T.RED : ch==='W'?T.WHITE : ch==='G'?T.GOAL : ch==='J'?T.JUMPER : ch==='B'?T.BOMB : ch==='<'?T.ARROW_LEFT : ch==='>'?T.ARROW_RIGHT : ch==='C'?T.CLOCK : T.EMPTY;
       }
     }
     return grid;
@@ -759,6 +786,12 @@
   var timeCountEl = document.getElementById('timeCount');
   var stageValEl = document.getElementById('stageVal');
   var elapsedSec = 0, gameTimerId = null;
+
+  // 플로팅 안내 문구 배열 (-2초 텍스트)
+  var floatTexts = [];
+  function popFloat(x, y, text, color){
+    floatTexts.push({ x: x, y: y, text: text, color: color || '#2FBF9E', life: 0.8, maxLife: 0.8 });
+  }
 
   function updateStageDisplay(){
     if(stageValEl) stageValEl.textContent = (stage + 1) + ' / ' + levels.length;
@@ -814,6 +847,7 @@
     applySpawn();
     finalClearShown = false;
     elapsedSec = 0;
+    floatTexts = [];
     updateTimeDisplay();
     updateStageDisplay();
     startGameTimer();
@@ -857,6 +891,7 @@
     var s = levels[stage].spawn || {x:6, y:6};
     ball.x = s.x * TILE + TILE/2; ball.y = s.y * TILE;
     ball.vx = 0; ball.vy = 0; arrowMode = false; arrowDir = 0;
+    floatTexts = [];
     updateStageDisplay();
   }
   applySpawn();
@@ -879,6 +914,8 @@
   }
 
   function physics(dt){
+    var down = keys.has('arrowdown') || keys.has('s') || keys.has('touchdown');
+
     if(arrowMode){
       ball.vy = 0;
       var newX = ball.x + ball.vx * dt, signX = Math.sign(ball.vx) || 1;
@@ -892,7 +929,14 @@
       return;
     }
 
-    ball.vy += GRAVITY * dt;
+    // [급강하 테크닉 & 관통 방지 엄격 캡핑]
+    // 급강하 버튼 누를 시 중력 2.5배 가속 적용
+    var appliedGravity = down ? (GRAVITY * 2.5) : GRAVITY;
+    ball.vy += appliedGravity * dt;
+
+    // 터널링 버그 방어: 최대 하강 속도 엄격 제한 (타일 두께 16px보다 작은 이동량 유지)
+    if(ball.vy > 420) ball.vy = 420;
+
     var nX = ball.x + ball.vx * dt, sX = Math.sign(ball.vx) || 1, pX = nX + sX * ball.radius;
     if([ball.y - ball.radius + 1, ball.y, ball.y + ball.radius - 1].some(function(y){ return tileAt(pX,y)===T.RED; })){
       var tC = Math.floor(pX / TILE);
@@ -934,6 +978,25 @@
     }
     ball.y = nY;
     if(ball.y - ball.radius > H + 4){ gameOver(); return; }
+
+    // [⏱️ 타임 보너스 시계 수집 판정]
+    var minC = Math.max(0, Math.floor((ball.x - ball.radius) / TILE));
+    var maxC = Math.min(COLS - 1, Math.floor((ball.x + ball.radius) / TILE));
+    var minR = Math.max(0, Math.floor((ball.y - ball.radius) / TILE));
+    var maxR = Math.min(ROWS - 1, Math.floor((ball.y + ball.radius) / TILE));
+
+    for(var tr = minR; tr <= maxR; tr++){
+      for(var tc = minC; tc <= maxC; tc++){
+        if(grid[tr][tc] === T.CLOCK){
+          grid[tr][tc] = T.EMPTY;
+          elapsedSec = Math.max(0, elapsedSec - 2); // 음수 방지 안전 처리
+          updateTimeDisplay();
+          popFloat(tc * TILE + TILE/2, tr * TILE, "-2초!", "#2FBF9E");
+          if(navigator.vibrate) navigator.vibrate(20);
+        }
+      }
+    }
+
     var curC = Math.floor(ball.x / TILE), curR = Math.floor(ball.y / TILE);
     if(grid[curR] && grid[curR][curC] === T.GOAL){ nextStage(); }
   }
@@ -998,6 +1061,29 @@
           ctx.lineTo(x+4.5, y+9);
           ctx.closePath();
           ctx.fill();
+
+        } else if(t===T.CLOCK){
+          // ⏱️ 타임 보너스 시계
+          ctx.fillStyle = '#071d18';
+          ctx.beginPath();
+          ctx.arc(x+8, y+8, 6, 0, Math.PI*2);
+          ctx.fill();
+
+          ctx.strokeStyle = '#2FBF9E';
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+
+          ctx.strokeStyle = '#BFE2F7';
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(x+8, y+8);
+          ctx.lineTo(x+8, y+4.5);
+          ctx.moveTo(x+8, y+8);
+          ctx.lineTo(x+10.5, y+8);
+          ctx.stroke();
+
+          ctx.fillStyle = '#2FBF9E';
+          ctx.fillRect(x+7, y+1, 2, 1.5);
 
         } else if(t===T.RED){
           ctx.fillStyle = '#163A63';
@@ -1110,6 +1196,20 @@
     ctx.lineTo(ball.x - ball.vx*0.05, ball.y - ball.vy*0.05);
     ctx.stroke();
 
+    // 플로팅 텍스트 렌더링 (-2초)
+    for(var fi = floatTexts.length - 1; fi >= 0; fi--){
+      var ft = floatTexts[fi];
+      var progress = 1 - (ft.life / ft.maxLife);
+      var curY = ft.y - (progress * 24);
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, ft.life / ft.maxLife);
+      ctx.fillStyle = ft.color;
+      ctx.font = 'bold 12px var(--font-num)';
+      ctx.textAlign = 'center';
+      ctx.fillText(ft.text, ft.x, curY);
+      ctx.restore();
+    }
+
     if(messageTimer>0){
       ctx.fillStyle = 'rgba(11,31,58,0.85)';
       ctx.fillRect(0,0,W,24);
@@ -1123,7 +1223,15 @@
   function loop(now){
     var dt = Math.min(0.033, (now - last)/1000);
     last = now;
-    if(!paused){ handleInput(); physics(dt); if(messageTimer>0) messageTimer -= dt; }
+    if(!paused){ 
+      handleInput(); 
+      physics(dt); 
+      if(messageTimer>0) messageTimer -= dt; 
+      for(var fi = floatTexts.length - 1; fi >= 0; fi--){
+        floatTexts[fi].life -= dt;
+        if(floatTexts[fi].life <= 0) floatTexts.splice(fi, 1);
+      }
+    }
     draw();
     requestAnimationFrame(loop);
   }
