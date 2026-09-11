@@ -543,10 +543,10 @@
       </div>
       <button class="facebtn" id="faceBtn" aria-label="재시작" type="button">🙂</button>
       
-      <!-- ⛏️ 열기 / 🚩 깃발 원터치 전환 버튼 -->
-      <button class="mode-toggle-btn" id="modeToggleBtn" type="button" title="모드 전환 (열기 / 깃발)">
+      <!-- ⛏️ 찾기 / 🚩 깃발 원터치 전환 버튼 -->
+      <button class="mode-toggle-btn" id="modeToggleBtn" type="button" title="모드 전환 (찾기 / 깃발)">
         <span id="modeIcon">⛏️</span>
-        <span id="modeText">열기</span>
+        <span id="modeText">찾기</span>
       </button>
 
       <div class="stat-card time">
@@ -564,7 +564,7 @@
     <button class="main" id="restartBtn">다시 시작</button>
     <button class="ghost" id="ruleBtn">규칙 보기</button>
   </div>
-  <div class="hint">모드 버튼(⛏️열기 / 🚩깃발)으로 전환하여 터치하거나, 길게 눌러 깃발을 꽂으세요.</div>
+  <div class="hint">모드 버튼(⛏️찾기 / 🚩깃발)으로 전환하여 터치하거나, 길게 눌러 깃발을 꽂으세요.</div>
 </div>
 
 <div id="overlay">
@@ -580,8 +580,8 @@
   <div class="modal">
     <h2>게임 규칙</h2>
     <ol>
-      <li>상단 <b>[⛏️ 열기 / 🚩 깃발]</b> 버튼으로 모드를 즉시 바꿀 수 있어요.</li>
-      <li>⛏️ <b>열기 모드</b>: 칸을 터치하면 숫자가 열려요.</li>
+      <li>상단 <b>[⛏️ 찾기 / 🚩 깃발]</b> 버튼으로 모드를 즉시 바꿀 수 있어요.</li>
+      <li>⛏️ <b>찾기 모드</b>: 칸을 터치하면 숫자가 열려요.</li>
       <li>🚩 <b>깃발 모드</b>: 칸을 가볍게 터치만 해도 깃발이 꽂혀요!</li>
       <li>(기존 방식처럼 어떤 모드에서든 <b>길게 누르기</b>로 깃발을 꽂을 수도 있어요)</li>
       <li>지뢰가 없는 모든 칸을 열면 승리! 최단 기록을 노려보세요.</li>
@@ -686,7 +686,7 @@
   var currentSabun = "";
   var currentTeam = "";
 
-  // 모드 상태: "dig" (블록 열기) | "flag" (깃발 꽂기)
+  // 모드 상태: "dig" (블록 찾기) | "flag" (깃발 꽂기)
   var currentMode = "dig";
 
   var boardEl = document.getElementById('board');
@@ -724,7 +724,7 @@
       modeToggleBtn.classList.remove('flag-mode');
       boardWrap.classList.remove('flag-mode');
       modeIcon.textContent = "⛏️";
-      modeText.textContent = "열기";
+      modeText.textContent = "찾기";
     }
     if (navigator.vibrate) navigator.vibrate(15);
   }
@@ -970,7 +970,7 @@
       if(!t || longPressed){ longPressed=false; return; }
       var r = parseInt(t.dataset.r), c = parseInt(t.dataset.c);
       
-      // 모드에 따라 열기 또는 깃발 처리
+      // 모드에 따라 찾기 또는 깃발 처리
       if (currentMode === "flag") {
         onRightClick(r, c);
       } else {
