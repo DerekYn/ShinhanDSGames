@@ -14,6 +14,7 @@
     --paper:#EAF4FC;
     --accent:#2FBF9E;
     --danger:#E0567A;
+    --gold:#FFD700;
     --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
     --font-num: "Segoe UI", "Consolas", "Malgun Gothic", monospace;
   }
@@ -56,7 +57,7 @@
   .brand-logo svg{ width:100%; height:100%; display:block; }
   .brand-text{ display:flex; flex-direction:column; line-height:1.2; }
   .brand-name { 
-    font-size: 11px; 
+    font-size: 13px; 
     font-weight: 800; 
     color: #fff; 
     letter-spacing: -0.02em; 
@@ -223,7 +224,7 @@
   .stat-card.score .stat-val { color: var(--accent); }
   .stat-card.combo .stat-val { color: var(--sky); }
 
-  /* 게임 보드 영역 (세로 크기 미세 축소 최적화) */
+  /* 게임 보드 영역 */
   #board-wrap{
     background: linear-gradient(180deg, #0E2A4A, #0A2036);
     border: 1px solid rgba(255,255,255,0.1);
@@ -248,10 +249,10 @@
     background:#38251b; border-radius:50%; z-index:4; pointer-events:none;
   }
 
-  /* 동물 그래픽 */
+  /* 동물 공통 그래픽 */
   .animal{
     position:absolute; width:72px; height:82px; left:50%; bottom:-110px;
-    transform:translateX(-50%); transition:.15s; border-radius:45% 45% 40% 40%; z-index:2;
+    transform:translateX(-50%); transition:.12s ease-out; border-radius:45% 45% 40% 40%; z-index:2;
     pointer-events:none;
   }
   .animal.active{ bottom:4px; }
@@ -259,13 +260,24 @@
   .eye.left{ left:18px; } .eye.right{ right:18px; }
   .nose{ position:absolute; top:40px; left:50%; transform:translateX(-50%); width:12px; height:8px; background:#222; border-radius:50%; z-index:4; }
 
-  /* 두더지 */
+  /* 일반 두더지 */
   .mole{ background:#8b5a3c; border:3px solid #65402d; border-radius:45% 45% 35% 35%; }
   .mole .ear{ display:none; }
   .mole .eye{ top:26px; width:8px; height:8px; }
   .mole .nose{ top:41px; width:13px; height:9px; background:#e88d9d; }
 
-  /* 토끼 */
+  /* ✨ 황금 두더지 (보너스 타겟) */
+  .gold-mole{
+    background: linear-gradient(145deg, #FFE066, #F59E0B);
+    border: 3px solid #D97706;
+    border-radius: 45% 45% 35% 35%;
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.85);
+  }
+  .gold-mole .ear{ display:none; }
+  .gold-mole .eye{ top:26px; width:8px; height:8px; background:#451a03; }
+  .gold-mole .nose{ top:41px; width:13px; height:9px; background:#e11d48; }
+
+  /* 토끼 (함정 1) */
   .rabbit{ background:#f1dddd; border:3px solid #d2b5b5; border-radius:45% 45% 35% 35%; }
   .rabbit .ear{
     position:absolute; width:15px; height:28px; top:-6px; background:#f1dddd;
@@ -282,7 +294,7 @@
     border-radius:0 0 4px 4px; z-index:3;
   }
 
-  /* 호랑이 */
+  /* 호랑이 (함정 2) */
   .tiger{ background:#e9a13b; border:3px solid #c47b22; border-radius:45% 45% 35% 35%; }
   .tiger .ear{
     position:absolute; width:16px; height:16px; top:2px; background:#e9a13b;
@@ -308,6 +320,7 @@
     animation:pop .6s forwards; z-index:5; pointer-events:none;
   }
   .pop.bad{ color:var(--danger); }
+  .pop.gold{ color:var(--gold); text-shadow:0 0 10px rgba(255,215,0,0.85); font-size:22px; }
   @keyframes pop{ to{ opacity:0; transform:translate(-50%, -30px); } }
 
   .controls{ display:flex; gap:10px; margin-top:2px; }
@@ -327,7 +340,7 @@
   }
   button.ghost:hover{ background: rgba(255,255,255,0.08); }
 
-  .hint{ font-size:11.5px; color:var(--ice); opacity:0.6; text-align:center; max-width:480px; }
+  .hint{ font-size:11.5px; color:var(--ice); opacity:0.65; text-align:center; max-width:480px; }
 
   /* 모달 레이아웃 */
   #overlay, #ruleOverlay, #authOverlay{
@@ -508,7 +521,7 @@
     <button class="main" id="restartBtn">다시 시작</button>
     <button class="ghost" id="ruleBtn">규칙 보기</button>
   </div>
-  <div class="hint">두더지를 연속으로 잡으면 콤보 보너스가 주어집니다. 🐰/🐯를 조심하세요!</div>
+  <div class="hint">두더지를 연속으로 잡으면 콤보 보너스! ✨황금 두더지(+50)를 잡고 🐰/🐯를 피하세요!</div>
 </div>
 
 <!-- 결과 화면 -->
@@ -530,10 +543,11 @@
   <div class="modal">
     <h2>게임 규칙</h2>
     <ol>
-      <li>⏱ 제한시간 : <b>20초</b> 동안 진행됩니다.</li>
-      <li>🐹 두더지 : <b>+10점</b> (연속 성공 시 콤보 가산)</li>
+      <li>⏱ 제한시간 : <b>20초</b> 동안 진행됩니다. (후반 10초 가속!)</li>
+      <li>🐹 일반 두더지 : <b>+10점</b> (연속 성공 시 콤보 가산)</li>
+      <li>✨ 황금 두더지 : <b>+50점</b> (보너스 타겟, 초고속 체류!)</li>
       <li>🐰 토끼 : <b>-30점</b> / 🐯 호랑이 : <b>-50점</b> (콤보 초기화)</li>
-      <li>동시에 최대 2마리까지 등장하니 신속하게 캐치하세요!</li>
+      <li>동시에 최대 3마리까지 등장하니 신속하게 분별하세요!</li>
     </ol>
     <button class="main" id="ruleCloseBtn">확인</button>
   </div>
@@ -629,9 +643,12 @@
   var GAME_NAME = "두더지잡기";
 
   var GAME_TIME = 20;
-  var MOLE_COUNT = 19;
-  var RABBIT_COUNT = 4;
-  var TIGER_COUNT = 4;
+
+  // [난이도 상향] 마리수 및 황금 두더지 배분
+  var MOLE_COUNT = 17;
+  var GOLD_MOLE_COUNT = 3;
+  var RABBIT_COUNT = 6;
+  var TIGER_COUNT = 6;
 
   var currentTeam = "";
   var currentSabun = "";
@@ -687,12 +704,12 @@
     }).catch(function(err){ console.warn("로그 실패:", err); });
   }
 
-  // 9개 구멍 생성
+  // 9개 구멍 생성 (일반 두더지, 황금 두더지, 토끼, 호랑이 내장)
   for(var i = 0; i < 9; i++){
     (function(idx){
       var hole = document.createElement("div");
       hole.className = "hole";
-      ["mole", "rabbit", "tiger"].forEach(function(type){
+      ["mole", "gold-mole", "rabbit", "tiger"].forEach(function(type){
         hole.innerHTML += '<div class="animal ' + type + '">' +
           '<div class="ear left"></div><div class="ear right"></div>' +
           '<div class="eye left"></div><div class="eye right"></div>' +
@@ -729,13 +746,16 @@
     function randomTimes(count){
       var arr = [];
       for(var i = 0; i < count; i++){
-        arr.push(500 + Math.random() * 18500);
+        arr.push(400 + Math.random() * 18800);
       }
       return arr.sort(function(a, b){ return a - b; });
     }
 
     randomTimes(MOLE_COUNT).forEach(function(t){
       spawnTimers.push(setTimeout(function(){ spawnAnimal("mole"); }, t));
+    });
+    randomTimes(GOLD_MOLE_COUNT).forEach(function(t){
+      spawnTimers.push(setTimeout(function(){ spawnAnimal("gold-mole"); }, t));
     });
     randomTimes(RABBIT_COUNT).forEach(function(t){
       spawnTimers.push(setTimeout(function(){ spawnAnimal("rabbit"); }, t));
@@ -748,9 +768,10 @@
   function spawnAnimal(type){
     if(!running) return;
 
+    // 동시 출현 수 최대 3마리로 확대
     var activeAnimals = document.querySelectorAll(".animal.active");
-    if(activeAnimals.length >= 2){
-      setTimeout(function(){ if(running) spawnAnimal(type); }, 300);
+    if(activeAnimals.length >= 3){
+      setTimeout(function(){ if(running) spawnAnimal(type); }, 220);
       return;
     }
 
@@ -760,7 +781,7 @@
     });
 
     if(availableHoles.length === 0){
-      setTimeout(function(){ if(running) spawnAnimal(type); }, 300);
+      setTimeout(function(){ if(running) spawnAnimal(type); }, 220);
       return;
     }
 
@@ -769,15 +790,20 @@
     if(!animal) return;
     animal.classList.add("active");
 
+    // [체류 시간 단축 및 후반 가속 로직]
+    // 전반 560ms, 후반 10초 이하 460ms, 황금 두더지는 420ms
+    var stayTime = (time <= 10) ? 460 : 560;
+    if(type === "gold-mole") stayTime = 420;
+
     if(animal._hideTimer) clearTimeout(animal._hideTimer);
     animal._hideTimer = setTimeout(function(){
       animal.classList.remove("active");
-    }, 900);
+    }, stayTime);
   }
 
-  function pop(hole, text, bad){
+  function pop(hole, text, kind){
     var el = document.createElement("div");
-    el.className = "pop" + (bad ? " bad" : "");
+    el.className = "pop " + (kind || "");
     el.textContent = text;
     hole.appendChild(el);
     setTimeout(function(){ el.remove(); }, 600);
@@ -791,18 +817,24 @@
     if(animal._hideTimer) clearTimeout(animal._hideTimer);
     animal.classList.remove("active");
 
-    if(animal.classList.contains("mole")){
+    if(animal.classList.contains("gold-mole")){
+      hits++; combo++;
+      maxCombo = Math.max(maxCombo, combo);
+      var pt = 50 + (combo - 1) * 10;
+      score += pt;
+      pop(holes[index], "+" + pt + "✨", "gold");
+    } else if(animal.classList.contains("mole")){
       hits++; combo++;
       maxCombo = Math.max(maxCombo, combo);
       var pt = 10 + (combo - 1) * 10;
       score += pt;
-      pop(holes[index], "+" + pt, false);
+      pop(holes[index], "+" + pt, "");
     } else if(animal.classList.contains("rabbit")){
       score -= 30; combo = 0;
-      pop(holes[index], "-30", true);
+      pop(holes[index], "-30", "bad");
     } else if(animal.classList.contains("tiger")){
       score -= 50; combo = 0;
-      pop(holes[index], "-50", true);
+      pop(holes[index], "-50", "bad");
     }
     scoreEl.textContent = score;
     comboEl.textContent = combo;
