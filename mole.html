@@ -26,6 +26,7 @@
     color: var(--paper);
     overflow:auto;
     user-select:none;
+    -webkit-user-select:none;
   }
   #app{
     display:flex; flex-direction:column; align-items:center;
@@ -72,7 +73,7 @@
     padding: 2px 8px;
     border-radius: 999px;
     width: fit-content;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.01em; 
   }
   .event-tag {
     font-size: 11px;
@@ -233,16 +234,19 @@
     box-shadow: 0 20px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
     width: min(94vw, 520px);
     box-sizing: border-box;
+    touch-action: none;
   }
   .board{
     display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;
+    touch-action: none;
   }
   .hole{
     position:relative; height:94px; overflow:hidden; border-radius:50%;
     background:#6b4935;
     box-shadow: inset 0 8px 12px rgba(35,20,12,.65), 0 3px 8px rgba(0,0,0,.35);
     border:2px solid #8b654b;
-    cursor:pointer; touch-action:manipulation;
+    cursor:pointer;
+    touch-action: none;
   }
   .hole:after{
     content:""; position:absolute; left:10%; right:10%; bottom:4px; height:18px;
@@ -277,18 +281,18 @@
   .king-mole .eye{ top:26px; width:8px; height:8px; background:#222; }
   .king-mole .nose{ top:41px; width:13px; height:9px; background:#e88d9d; }
   
-  /* 대왕 두더지의 황금 왕관 */
+  /* 대왕 두더지의 황금 왕관 (클리핑 방지 위치 조정) */
   .king-mole .crown{
-    position:absolute; top:-14px; left:50%; transform:translateX(-50%);
-    width:32px; height:18px;
+    position:absolute; top:-8px; left:50%; transform:translateX(-50%);
+    width:30px; height:16px;
     background:linear-gradient(180deg, #FDE047 0%, #EAB308 60%, #CA8A04 100%);
     clip-path: polygon(0% 100%, 0% 15%, 25% 65%, 50% 0%, 75% 65%, 100% 15%, 100% 100%);
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
     z-index: 5;
   }
   .king-mole .crown:after{
-    content:""; position:absolute; bottom:3px; left:50%; transform:translateX(-50%);
-    width:6px; height:4px; background:#EF4444; border-radius:50%; box-shadow:0 0 4px #EF4444;
+    content:""; position:absolute; bottom:2px; left:50%; transform:translateX(-50%);
+    width:5px; height:3px; background:#EF4444; border-radius:50%; box-shadow:0 0 4px #EF4444;
   }
 
   /* 3. 토끼 (함정 1) */
@@ -323,7 +327,6 @@
   .tiger .ear.left{ left:5px; } .tiger .ear.right{ right:5px; }
   .tiger .ear:after{ content:""; position:absolute; width:10px; height:10px; left:4px; top:4px; background:#fff7ed; border-radius:50%; }
 
-  /* 호랑이 이마 王자 줄무늬 */
   .tiger .stripes-forehead{
     position:absolute; top:7px; left:50%; transform:translateX(-50%);
     width:14px; height:14px; z-index:3;
@@ -336,7 +339,6 @@
     box-shadow: 0 8px 0 #1c1917;
   }
 
-  /* 호랑이 볼 줄무늬 */
   .tiger .stripe-left{
     position:absolute; left:0; top:32px; width:12px; height:4px; background:#1c1917;
     border-radius:0 4px 4px 0; z-index:3;
@@ -348,7 +350,6 @@
     box-shadow: 0 10px 0 #1c1917;
   }
 
-  /* 호랑이 흰 주둥이 & 수염 */
   .tiger .muzzle{
     position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
     width:34px; height:22px; background:#fffbf0; border-radius:50% 50% 45% 45%; z-index:3;
@@ -573,15 +574,14 @@
   <div class="hint">두더지를 연속으로 잡으면 콤보 보너스! 👑대왕 두더지(+50)를 잡고 🐰/🐯를 피하세요!</div>
 </div>
 
-<!-- 결과 화면 -->
+<!-- 결과 화면 (내 최고 점수 항목 삭제 완료) -->
 <div id="overlay">
   <div class="modal">
     <h2 id="modalTitle">게임 종료!</h2>
     <div class="bigscore" id="finalScore">0</div>
     <p id="modalDesc">
       잡은 두더지: <b id="hits" style="color:var(--sky);">0</b>마리<br>
-      최대 콤보: <b id="maxCombo" style="color:var(--accent);">0</b><br>
-      내 최고 점수: <b id="best" style="color:#fff;">0</b>
+      최대 콤보: <b id="maxCombo" style="color:var(--accent);">0</b>
     </p>
     <button class="main" id="retryButton">다시 하기</button>
   </div>
@@ -693,7 +693,6 @@
 
   var GAME_TIME = 20;
 
-  // 마리수 배분 (대왕 두더지 3마리 포함)
   var MOLE_COUNT = 17;
   var KING_MOLE_COUNT = 3;
   var RABBIT_COUNT = 6;
@@ -729,12 +728,6 @@
   var spawnTimers = [];
   var timer;
 
-  var best = 0;
-  try {
-    best = Number(localStorage.getItem("whackAMoleBest_" + GAME_NAME)) || 0;
-  } catch (e) {}
-  document.getElementById("best").textContent = best;
-
   function sendLog(eventType, extraData){
     if(!GOOGLE_WEBHOOK_URL) return;
     var payload = Object.assign({
@@ -753,11 +746,14 @@
     }).catch(function(err){ console.warn("로그 실패:", err); });
   }
 
-  // 9개 구멍 생성 (일반 두더지, 대왕 두더지, 토끼, 리얼 호랑이)
+  // 9개 구멍 생성
   for(var i = 0; i < 9; i++){
     (function(idx){
       var hole = document.createElement("div");
       hole.className = "hole";
+      hole._hittableAnimal = null;
+      hole._animalType = null;
+
       ["mole", "king-mole", "rabbit", "tiger"].forEach(function(type){
         var extraParts = '';
         if(type === 'king-mole'){
@@ -773,25 +769,26 @@
           '<div class="nose"></div></div>';
       });
 
-      var lastHit = 0;
-      function handleHit(e){
-        if(e) e.preventDefault();
-        var now = Date.now();
-        if(now - lastHit < 70) return;
-        lastHit = now;
+      // [핵심] 0ms 지연 없는 즉각 터치 핸들러
+      hole.addEventListener("pointerdown", function(e){
+        e.preventDefault();
+        e.stopPropagation();
         hit(idx);
-      }
+      });
 
-      hole.addEventListener("pointerdown", handleHit);
-      hole.addEventListener("click", handleHit);
       board.appendChild(hole);
     })(i);
   }
   var holes = document.querySelectorAll(".hole");
 
   function hide(){
+    holes.forEach(function(hole){
+      hole._hittableAnimal = null;
+      hole._animalType = null;
+    });
     document.querySelectorAll(".animal").forEach(function(a){
       if(a._hideTimer) clearTimeout(a._hideTimer);
+      if(a._graceTimer) clearTimeout(a._graceTimer);
       a.classList.remove("active");
     });
   }
@@ -833,7 +830,7 @@
 
     var availableHoles = [];
     holes.forEach(function(hole, index){
-      if(!hole.querySelector(".animal.active")) availableHoles.push(index);
+      if(!hole._hittableAnimal && !hole.querySelector(".animal.active")) availableHoles.push(index);
     });
 
     if(availableHoles.length === 0){
@@ -844,15 +841,26 @@
     var index = availableHoles[Math.floor(Math.random() * availableHoles.length)];
     var animal = holes[index].querySelector("." + type);
     if(!animal) return;
-    animal.classList.add("active");
 
-    // 기본 체류시간: 전반 750ms, 후반 10초 이하 600ms, 대왕 두더지는 550ms
+    if(animal._hideTimer) clearTimeout(animal._hideTimer);
+    if(animal._graceTimer) clearTimeout(animal._graceTimer);
+
+    animal.classList.add("active");
+    holes[index]._hittableAnimal = animal;
+    holes[index]._animalType = type;
+
     var stayTime = (time <= 10) ? 600 : 750;
     if(type === "king-mole") stayTime = 550;
 
-    if(animal._hideTimer) clearTimeout(animal._hideTimer);
+    // [핵심] 퇴장 시 140ms 동안 판정을 유지하여 터치 씹힘을 100% 방지
     animal._hideTimer = setTimeout(function(){
       animal.classList.remove("active");
+      animal._graceTimer = setTimeout(function(){
+        if(holes[index]._hittableAnimal === animal){
+          holes[index]._hittableAnimal = null;
+          holes[index]._animalType = null;
+        }
+      }, 140);
     }, stayTime);
   }
 
@@ -866,30 +874,43 @@
 
   function hit(index){
     if(!running) return;
-    var animal = holes[index].querySelector(".animal.active");
+
+    var animal = holes[index]._hittableAnimal;
     if(!animal) return;
 
+    var type = holes[index]._animalType;
+
+    // 중복 타격 방지를 위해 즉시 해제
+    holes[index]._hittableAnimal = null;
+    holes[index]._animalType = null;
+
     if(animal._hideTimer) clearTimeout(animal._hideTimer);
+    if(animal._graceTimer) clearTimeout(animal._graceTimer);
+
     animal.classList.remove("active");
 
-    if(animal.classList.contains("king-mole")){
+    if(type === "king-mole"){
       hits++; combo++;
       maxCombo = Math.max(maxCombo, combo);
       var pt = 50 + (combo - 1) * 10;
       score += pt;
       pop(holes[index], "+" + pt + "👑", "gold");
-    } else if(animal.classList.contains("mole")){
+      if(navigator.vibrate) navigator.vibrate(25);
+    } else if(type === "mole"){
       hits++; combo++;
       maxCombo = Math.max(maxCombo, combo);
       var pt = 10 + (combo - 1) * 10;
       score += pt;
       pop(holes[index], "+" + pt, "");
-    } else if(animal.classList.contains("rabbit")){
+      if(navigator.vibrate) navigator.vibrate(15);
+    } else if(type === "rabbit"){
       score -= 30; combo = 0;
       pop(holes[index], "-30", "bad");
-    } else if(animal.classList.contains("tiger")){
+      if(navigator.vibrate) navigator.vibrate(40);
+    } else if(type === "tiger"){
       score -= 50; combo = 0;
       pop(holes[index], "-50", "bad");
+      if(navigator.vibrate) navigator.vibrate(60);
     }
     scoreEl.textContent = score;
     comboEl.textContent = combo;
@@ -928,15 +949,9 @@
     spawnTimers.forEach(function(t){ clearTimeout(t); });
     hide();
 
-    if(score > best){
-      best = score;
-      try { localStorage.setItem("whackAMoleBest_" + GAME_NAME, best); } catch(e){}
-    }
-
     document.getElementById("finalScore").textContent = score;
     document.getElementById("hits").textContent = hits;
     document.getElementById("maxCombo").textContent = maxCombo;
-    document.getElementById("best").textContent = best;
 
     sendLog("종료", {
       score: score,
