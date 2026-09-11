@@ -483,7 +483,7 @@
   </div>
 
   <div class="hud">
-    방향 <kbd>◀</kbd>/<kbd>▶</kbd> · 급강하 <kbd>▼</kbd> (키보드 <kbd>A</kbd>/<kbd>S</kbd>/<kbd>D</kbd>)
+    방향 <kbd>◀</kbd>/<kbd>▶</kbd> · 급강하 <kbd>▼</kbd>
   </div>
 
   <!-- 하단 조작 버튼 (좌 / 급강하 / 우) -->
@@ -498,7 +498,7 @@
     <button class="main" id="restartBtn">다시 시작</button>
     <button class="ghost" id="ruleBtn">규칙 보기</button>
   </div>
-  <div class="hint">⏱️타임 시계(-2초)를 모으고, ▼급강하 버튼으로 불필요한 체공시간을 줄이세요!</div>
+  <div class="hint">⏱️타임 시계(-2초)를 모으고, 부스터 중 방향키를 누르면 즉시 낙하합니다!</div>
 </div>
 
 <!-- 스테이지 클리어 / 게임오버 결과 모달 -->
@@ -527,7 +527,7 @@
       <li>🟩 <b>점퍼 패드(▲)</b>: 밟으면 높이 솟구치는 슈퍼 점프를 합니다.</li>
       <li>💣 <b>폭탄 & 낙사</b>: 닿으면 즉시 실패하여 해당 스테이지를 재도전합니다.</li>
       <li>⚪ <b>균열 블록</b>: 1회 밟으면 바스러져 사라집니다.</li>
-      <li>⏩ <b>부스터 화살표</b>: 닿는 순간 해당 방향으로 고속 질주합니다.</li>
+      <li>⏩ <b>부스터 화살표</b>: 고속 질주하며, <b>이동 중 방향키 입력 시 관성을 멈추고 즉시 낙하</b>합니다!</li>
     </ol>
     <button class="main" id="ruleCloseBtn">확인</button>
   </div>
@@ -643,7 +643,7 @@
     }).catch(function(err){ console.warn("로그 실패:", err); });
   }
 
-  // [100% 도달 가능한 궤적 기반 시계(C) 전면 재배치]
+  // [수정해주신 지형 100% 보존 맵 데이터]
   var level1_base = [
     "RRRRRRRRRRRRRRRRRRRR","R..................R","R.S................R","R..................R",
     "R...C..............R","R.....RRRRRRR......R","R....RR..RRRR......R","R...RRR.R.RRR......R",
@@ -652,20 +652,20 @@
   ];
   var level2_base = [
     "RRRRRRRRRRRRRRRRRRRR",
-	"R..................R",
-	"R.S...RRC..........R",
-	"R.....R.R..........R",
+    "R..................R",
+    "R.S...RRC..........R",
+    "R.....R.R..........R",
     "R.....R.R...RRR....R",
-	"R.....R.R...R......R",
-	"R.....RR.....R.....R",
-	"R...........C.R....R",
+    "R.....R.R...R......R",
+    "R.....RR.....R.....R",
+    "R...........C.R....R",
     "R...........JRR....R",
-	"R..................R",
-	"R..................R",
-	"RRRRR..............G",
+    "R..................R",
+    "R..................R",
+    "RRRRR..............G",
     "RRRRR....RJRR.RRRRRR",
-	"RRRRR.RRRRR........R",
-	"RRRRR.RRRRR........R"
+    "RRRRR.RRRRR........R",
+    "RRRRR.RRRRR........R"
   ];
   var level3_base = [
     "RRRRRRRRRRRRRRRRRRRR","R..................R","R.S................R","R..................R",
@@ -680,10 +680,21 @@
     "R......C...........G","R....RRRRWWWWJ.RRRRR","R..............RRRRR"
   ];
   var level5_base = [
-    "RRRRRRRRRRRRRRRRRRRR","R................S.R","R..................R","R......C...........R",
-    "R.....RRBRRRBRRRRRRR","R................RRR","R................RRR","RBBRRR>..........RRR",
-    "R......BBBBBB....RRR","R................RRR","R................RRR","R..........C.....RRR",
-    "R.....RRRRRRRRRRRR.R","R..................G","R...>..............G"
+    "RRRRRRRRRRRRRRRRRRRR",
+    "R................S.R",
+    "R..................R",
+    "R......C...........R",
+    "R.....RRBRRRBRRRRRRR",
+    "R................RRR",
+    "R................RRR",
+    "RBBRRR>..........RRR",
+    "R......BBBBBB....RRR",
+    "R................RRR",
+    "R................RRR",
+    "R..........C.....RRR",
+    "R.....RRRRRRRRRRRR.R",
+    "R..................G",
+    "R...>..............G"
   ];
 
   var canvas = document.getElementById('game');
@@ -792,6 +803,7 @@
   var ball = { x:0, y:0, radius:3, vx:0, vy:0 };
   var last = performance.now(), paused = true;
   var messageTimer = 0, messageText = '', arrowMode = false, arrowDir = 0;
+  var arrowIgnoredKey = ''; // 화살표 진입 시 이미 누르고 있던 키 예외 처리용 변수
   var startTime = performance.now(), failCount = 0, finalClearShown = false;
   var timeCountEl = document.getElementById('timeCount');
   var stageValEl = document.getElementById('stageVal');
@@ -899,7 +911,7 @@
   function applySpawn(){
     var s = levels[stage].spawn || {x:6, y:6};
     ball.x = s.x * TILE + TILE/2; ball.y = s.y * TILE;
-    ball.vx = 0; ball.vy = 0; arrowMode = false; arrowDir = 0;
+    ball.vx = 0; ball.vy = 0; arrowMode = false; arrowDir = 0; arrowIgnoredKey = '';
     floatTexts = [];
     updateStageDisplay();
   }
@@ -914,9 +926,33 @@
   function setTile(c, r, val){ if(r>=0&&c>=0&&r<ROWS&&c<COLS) grid[r][c]=val; }
 
   function handleInput(){
-    if(arrowMode){ ball.vx = arrowDir * ARROW_SPEED; return; }
     var left  = keys.has('arrowleft') || keys.has('a') || keys.has('touchleft');
     var right = keys.has('arrowright')|| keys.has('d') || keys.has('touchright');
+    var down  = keys.has('arrowdown') || keys.has('s') || keys.has('touchdown');
+
+    // [핵심] 화살표 부스터 이동 중 방향키 입력 시 즉시 관성 소멸 및 수직 낙하
+    if(arrowMode){
+      if(arrowIgnoredKey === 'right' && !right) arrowIgnoredKey = '';
+      if(arrowIgnoredKey === 'left' && !left) arrowIgnoredKey = '';
+
+      var cancelRequested = down ||
+        (arrowDir > 0 && left) ||
+        (arrowDir < 0 && right) ||
+        (arrowIgnoredKey === '' && (left || right));
+
+      if(cancelRequested){
+        arrowMode = false;
+        arrowDir = 0;
+        arrowIgnoredKey = '';
+        ball.vx = 0; // 전진 관성 즉시 소멸
+        ball.vy = 0; // 즉각적인 수직 낙하 시작
+        return;
+      }
+
+      ball.vx = arrowDir * ARROW_SPEED;
+      return;
+    }
+
     if(left && !right) ball.vx = -H_SPEED;
     else if(right && !left) ball.vx = H_SPEED;
     else ball.vx = 0;
@@ -932,7 +968,7 @@
       if([ball.y - ball.radius + 1, ball.y, ball.y + ball.radius - 1].some(function(y){ return tileAt(probeX,y)===T.RED; })){
         var tileC = Math.floor(probeX / TILE);
         ball.x = signX>0 ? (tileC * TILE - ball.radius - 0.01) : ((tileC+1) * TILE + ball.radius + 0.01);
-        arrowMode = false; arrowDir = 0; ball.vx = 0; ball.vy = BOUNCE_VY;
+        arrowMode = false; arrowDir = 0; arrowIgnoredKey = ''; ball.vx = 0; ball.vy = BOUNCE_VY;
       } else { ball.x = newX; }
       if(ball.y - ball.radius > H + 4){ gameOver(); }
       return;
@@ -973,7 +1009,21 @@
         var tR = Math.floor(pY / TILE);
         nY = tR * TILE - ball.radius - 0.01;
         if(hitBomb){ gameOver(); return; }
-        if(arrow){ arrowMode=true; arrowDir=arrow; ball.vx=arrow*ARROW_SPEED; ball.vy=0; ball.y=nY; return; }
+        if(arrow){
+          arrowMode = true;
+          arrowDir = arrow;
+          ball.vx = arrow * ARROW_SPEED;
+          ball.vy = 0;
+          ball.y = nY;
+          arrowIgnoredKey = '';
+          // 진입 당시 누르고 있던 방향키만 기억하여 밟자마자 꺼지는 오류 방지
+          if(arrow > 0 && (keys.has('arrowright') || keys.has('d') || keys.has('touchright'))){
+            arrowIgnoredKey = 'right';
+          } else if(arrow < 0 && (keys.has('arrowleft') || keys.has('a') || keys.has('touchleft'))){
+            arrowIgnoredKey = 'left';
+          }
+          return;
+        }
         ball.vy = hitJumper ? (BOUNCE_VY * 1.65) : BOUNCE_VY;
         if(hitWhite && whiteCR) setTile(whiteCR[0], whiteCR[1], T.EMPTY);
       } else {
