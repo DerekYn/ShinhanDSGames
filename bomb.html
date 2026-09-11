@@ -72,7 +72,7 @@
     padding: 2px 8px;
     border-radius: 999px;
     width: fit-content;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.01em; 
   }
   .event-tag {
     font-size: 11px;
@@ -322,7 +322,7 @@
   }
   .cell.revealed::after{ display:none; }
   .cell.revealed.has-number{
-    cursor: pointer; /* 숫자 칸 Chording 유도 */
+    cursor: pointer;
   }
   .cell.mine{
     background: linear-gradient(160deg, var(--danger), #a83a58);
@@ -560,7 +560,7 @@
     </nav>
   </div>
 
-  <!-- 가로형 2단 대시보드 (원터치 모드 전환 버튼 탑재) -->
+  <!-- 가로형 2단 대시보드 -->
   <div class="game-dash">
     <div class="dash-left">
       <h1 class="game-title">💣 지뢰찾기</h1>
@@ -570,7 +570,7 @@
     <div class="dash-stats">
       <div class="stat-card mine">
         <span class="stat-lbl">남은 지뢰</span>
-        <span class="stat-val" id="mineCount">24</span>
+        <span class="stat-val" id="mineCount">024</span>
       </div>
       <button class="facebtn" id="faceBtn" aria-label="재시작" type="button">🙂</button>
       
@@ -662,7 +662,7 @@
 
     var gpu = getGpuRenderer().toLowerCase();
 
-    // 1순위: 모바일 칩셋 우선 통과 (Android Chrome ANGLE 호환)
+    // 1순위: 모바일 칩셋 우선 통과
     var mobileGpuKeywords = ['mali', 'adreno', 'apple', 'powervr', 'xclipse'];
     for (var m = 0; m < mobileGpuKeywords.length; m++) {
       if (gpu.indexOf(mobileGpuKeywords[m]) !== -1) {
@@ -717,7 +717,6 @@
   var currentSabun = "";
   var currentTeam = "";
 
-  // 모드 상태: "dig" (블록 찾기) | "flag" (깃발 꽂기)
   var currentMode = "dig";
 
   var boardEl = document.getElementById('board');
@@ -889,7 +888,6 @@
     }
   }
 
-  // [기능 3] 타임 보너스 획득 연출 (-3초)
   function showBonusPop(r, c){
     var idx = r * cols + c;
     var cellEl = boardEl.children[idx];
@@ -930,7 +928,6 @@
     }
   }
 
-  // [기능 1] Chording: 이미 열린 숫자를 터치했을 때 깃발 수가 맞으면 주변 안전 칸 자동 일괄 열기
   function chordCell(r, c){
     if(gameOver || gameWon) return;
     var cell = grid[r][c];
@@ -942,7 +939,6 @@
       if(grid[p[0]][p[1]].flagged) flagCount++;
     });
 
-    // 깃발 개수가 적힌 숫자와 정확히 일치할 때만 동작
     if(flagCount === cell.adj){
       var hitMine = false;
       var explodedR = -1, explodedC = -1;
@@ -951,20 +947,18 @@
         var nr = p[0], nc = p[1];
         var nCell = grid[nr][nc];
         if(!nCell.revealed && !nCell.flagged){
-          nCell.revealed = true;
           if(nCell.mine){
+            nCell.revealed = true;
             hitMine = true;
             explodedR = nr; explodedC = nc;
           } else {
-            if(nCell.bonus) collectBonus(nr, nc);
-            if(nCell.adj === 0) revealCell(nr, nc);
+            revealCell(nr, nc);
           }
         }
       });
 
       refreshAllCells();
 
-      // 깃발을 엉뚱한 곳에 꽂고 코드 열기를 했다면 폭사!
       if(hitMine){
         gameOver = true;
         clearInterval(timerId);
@@ -1051,7 +1045,6 @@
       return;
     }
 
-    if(cell.bonus) collectBonus(r, c);
     revealCell(r,c);
     refreshAllCells();
 
@@ -1077,9 +1070,14 @@
     updateMineCounter();
   }
 
+  // [수정 완료] 음수일 때 '0-3' 대신 '-03'으로 정상 표출하는 함수
   function updateMineCounter(){
     var remaining = mineCount - countFlags();
-    mineCountEl.textContent = String(remaining).padStart(3,'0').slice(-3);
+    if (remaining < 0) {
+      mineCountEl.textContent = '-' + String(Math.min(99, Math.abs(remaining))).padStart(2, '0');
+    } else {
+      mineCountEl.textContent = String(Math.min(999, remaining)).padStart(3, '0');
+    }
   }
 
   function startTimer(){
@@ -1110,13 +1108,11 @@
       var r = parseInt(t.dataset.r), c = parseInt(t.dataset.c);
       var cell = grid[r][c];
 
-      // [핵심] 이미 열린 숫자 칸을 터치하면 Chording(주변 일괄 열기) 실행
       if(cell.revealed){
         if(cell.adj > 0) chordCell(r, c);
         return;
       }
       
-      // 모드에 따라 찾기 또는 깃발 처리
       if (currentMode === "flag") {
         onRightClick(r, c);
       } else {
@@ -1137,7 +1133,6 @@
       onRightClick(r, c);
     });
 
-    // 롱클릭도 계속 지원 (모드와 상관없이 꾹 누르면 깃발 꽂기)
     boardEl.addEventListener('touchstart', function(e){
       var t = e.target.closest('.cell');
       if(!t) return;
