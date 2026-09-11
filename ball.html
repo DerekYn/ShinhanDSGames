@@ -643,35 +643,35 @@
     }).catch(function(err){ console.warn("로그 실패:", err); });
   }
 
-  // 맵에 전략적 시계(C) 아이템 배치
+  // [100% 도달 가능한 궤적 기반 시계(C) 전면 재배치]
   var level1_base = [
-    "RRRRRRRRRRRRRRRRRRRR","R.........C........R","R.S................R","R..................R",
-    "R..................R","R.....RRRRRRR......R","R....RR..RRRR......R","R...RRR.R.RRR......R",
-    "R..RRRR.R.RRR......R","R.RRRRR..RRRR......R","RRRRRRRRR...RWWWWWWR","RRRRRRRRR.RRR...C..R",
+    "RRRRRRRRRRRRRRRRRRRR","R..................R","R.S................R","R..................R",
+    "R...C..............R","R.....RRRRRRR......R","R....RR..RRRR......R","R...RRR.R.RRR......R",
+    "R..RRRR.R.RRR......R","R.RRRRR..RRRR...C..R","RRRRRRRRR...RWWWWWWR","RRRRRRRRR.RRR......R",
     "RRRRRRRRRR.RR......R","RRRRRRRRRRR.R......G","RRRRRRRRR...RRRRRRRR"
   ];
   var level2_base = [
-    "RRRRRRRRRRRRRRRRRRRR","R.......C..........R","R.S...RR...........R","R.....R.R..........R",
-    "R.....R.R...RRR....R","R.....R.R...R......R","R.....RR.....R.....R","R.............R....R",
-    "R...........RRR....R","R...............C..R","R..................R","RRRRR..............G",
+    "RRRRRRRRRRRRRRRRRRRR","R..................R","R.S...RR...........R","R.....R.R...C......R",
+    "R.....R.R...RRR....R","R.....R.R...R......R","R.....RR.....R.....R","R...........C.R....R",
+    "R...........RRR....R","R..................R","R..................R","RRRRR..............G",
     "RRRRR....RRRR.RRRRRR","RRRRR.RRRRR........R","RRRRR.RRRRR........R"
   ];
   var level3_base = [
     "RRRRRRRRRRRRRRRRRRRR","R..................R","R.S................R","R..................R",
-    "R..................R","R..................R","R..................R","R...C..........JJ..R",
+    "R..................R","R.......C..........R","R..................R","R.............CJJ..R",
     "R...........J......G","R........J........RR","R.....J............R","R...R..............R",
     "R..R...............R","R..................R","RRRRR..............R"
   ];
   var level4_base = [
     "RRRRRRRRRRRRRRRRRRRR","R..................R","R.S................R","R..................R",
-    "R..................R","RRRRRWWWWWRRRRRRRRRR","R...C.......R......R","R...........R......R",
-    "R...........R......R","R...........R......R","R...........R......R","R...............C..R",
-    "R..................G","R....RRRRWWWWJ.RRRRR","R..............RRRRR"
+    "R......C...........R","RRRRRWWWWWRRRRRRRRRR","R...........R......R","R...........R......R",
+    "R...........R......R","R...........R......R","R...........R......R","R..................R",
+    "R......C...........G","R....RRRRWWWWJ.RRRRR","R..............RRRRR"
   ];
   var level5_base = [
-    "RRRRRRRRRRRRRRRRRRRR","R................S.R","R..................R","R..................R",
-    "R.....RRBRRRBRRRRRRR","R................RRR","R.....C..........RRR","RBBRRR>..........RRR",
-    "R......BBBBBB....RRR","R....C...........RRR","R................RRR","R................RRR",
+    "RRRRRRRRRRRRRRRRRRRR","R................S.R","R..................R","R......C...........R",
+    "R.....RRBRRRBRRRRRRR","R................RRR","R................RRR","RBBRRR>..........RRR",
+    "R......BBBBBB....RRR","R................RRR","R................RRR","R..........C.....RRR",
     "R.....RRRRRRRRRRRR.R","R..................G","R...>..............G"
   ];
 
@@ -729,7 +729,6 @@
 
   var T = { EMPTY:0, RED:1, WHITE:2, GOAL:3, JUMPER:4, BOMB:5, ARROW_LEFT:6, ARROW_RIGHT:7, CLOCK:8 };
 
-  // 시계(C) 아이템은 2x2 확대 시 단 1개의 16px 타일로 정밀 변환
   function upscaleWithSpawn(baseLines, scale){
     scale = scale || 2;
     var spawn = null, out = [];
@@ -787,7 +786,6 @@
   var stageValEl = document.getElementById('stageVal');
   var elapsedSec = 0, gameTimerId = null;
 
-  // 플로팅 안내 문구 배열 (-2초 텍스트)
   var floatTexts = [];
   function popFloat(x, y, text, color){
     floatTexts.push({ x: x, y: y, text: text, color: color || '#2FBF9E', life: 0.8, maxLife: 0.8 });
@@ -929,12 +927,9 @@
       return;
     }
 
-    // [급강하 테크닉 & 관통 방지 엄격 캡핑]
-    // 급강하 버튼 누를 시 중력 2.5배 가속 적용
+    // 급강하 가속 및 벽 관통 방어(하강 최고속도 420 엄격 캡핑)
     var appliedGravity = down ? (GRAVITY * 2.5) : GRAVITY;
     ball.vy += appliedGravity * dt;
-
-    // 터널링 버그 방어: 최대 하강 속도 엄격 제한 (타일 두께 16px보다 작은 이동량 유지)
     if(ball.vy > 420) ball.vy = 420;
 
     var nX = ball.x + ball.vx * dt, sX = Math.sign(ball.vx) || 1, pX = nX + sX * ball.radius;
@@ -979,19 +974,19 @@
     ball.y = nY;
     if(ball.y - ball.radius > H + 4){ gameOver(); return; }
 
-    // [⏱️ 타임 보너스 시계 수집 판정]
-    var minC = Math.max(0, Math.floor((ball.x - ball.radius) / TILE));
-    var maxC = Math.min(COLS - 1, Math.floor((ball.x + ball.radius) / TILE));
-    var minR = Math.max(0, Math.floor((ball.y - ball.radius) / TILE));
-    var maxR = Math.min(ROWS - 1, Math.floor((ball.y + ball.radius) / TILE));
+    // [⏱️ 타임 보너스 시계 수집 판정 (+2px 여유 판정으로 씹힘 완벽 방어)]
+    var minC = Math.max(0, Math.floor((ball.x - ball.radius - 2) / TILE));
+    var maxC = Math.min(COLS - 1, Math.floor((ball.x + ball.radius + 2) / TILE));
+    var minR = Math.max(0, Math.floor((ball.y - ball.radius - 2) / TILE));
+    var maxR = Math.min(ROWS - 1, Math.floor((ball.y + ball.radius + 2) / TILE));
 
     for(var tr = minR; tr <= maxR; tr++){
       for(var tc = minC; tc <= maxC; tc++){
         if(grid[tr][tc] === T.CLOCK){
           grid[tr][tc] = T.EMPTY;
-          elapsedSec = Math.max(0, elapsedSec - 2); // 음수 방지 안전 처리
+          elapsedSec = Math.max(0, elapsedSec - 2);
           updateTimeDisplay();
-          popFloat(tc * TILE + TILE/2, tr * TILE, "-2초!", "#2FBF9E");
+          popFloat(tc * TILE + TILE/2, tr * TILE - 2, "-2초!", "#2FBF9E");
           if(navigator.vibrate) navigator.vibrate(20);
         }
       }
@@ -1063,27 +1058,53 @@
           ctx.fill();
 
         } else if(t===T.CLOCK){
-          // ⏱️ 타임 보너스 시계
-          ctx.fillStyle = '#071d18';
+          // ⏱️ [대형 고시인성 황금 스톱워치 렌더링]
+          var cx = x + 8, cy = y + 8.5;
+
+          // 상단 용두 버튼
+          ctx.fillStyle = '#FFD700';
+          ctx.fillRect(cx - 1.5, y + 0.5, 3, 2);
+
+          // 본체 외곽
+          ctx.fillStyle = '#062822';
           ctx.beginPath();
-          ctx.arc(x+8, y+8, 6, 0, Math.PI*2);
+          ctx.arc(cx, cy, 7, 0, Math.PI * 2);
           ctx.fill();
 
+          ctx.strokeStyle = '#FFD700';
+          ctx.lineWidth = 1.8;
+          ctx.stroke();
+
+          // 내부 네온 링
           ctx.strokeStyle = '#2FBF9E';
-          ctx.lineWidth = 1.2;
-          ctx.stroke();
-
-          ctx.strokeStyle = '#BFE2F7';
-          ctx.lineWidth = 1.2;
+          ctx.lineWidth = 1;
           ctx.beginPath();
-          ctx.moveTo(x+8, y+8);
-          ctx.lineTo(x+8, y+4.5);
-          ctx.moveTo(x+8, y+8);
-          ctx.lineTo(x+10.5, y+8);
+          ctx.arc(cx, cy, 5.2, 0, Math.PI * 2);
           ctx.stroke();
 
-          ctx.fillStyle = '#2FBF9E';
-          ctx.fillRect(x+7, y+1, 2, 1.5);
+          // 4방향 눈금 점
+          ctx.fillStyle = '#BFE2F7';
+          ctx.fillRect(cx - 0.5, cy - 5, 1, 1.5);
+          ctx.fillRect(cx + 3.5, cy - 0.5, 1.5, 1);
+          ctx.fillRect(cx - 0.5, cy + 3.5, 1, 1.5);
+          ctx.fillRect(cx - 5, cy - 0.5, 1.5, 1);
+
+          // 선명한 흰색 바늘
+          ctx.strokeStyle = '#FFFFFF';
+          ctx.lineWidth = 1.4;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx, cy - 3.8); // 12시 분침
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + 2.6, cy + 0.8); // 4시 시침
+          ctx.stroke();
+
+          // 중심 핀
+          ctx.fillStyle = '#FFD700';
+          ctx.beginPath();
+          ctx.arc(cx, cy, 1.2, 0, Math.PI * 2);
+          ctx.fill();
 
         } else if(t===T.RED){
           ctx.fillStyle = '#163A63';
@@ -1196,7 +1217,7 @@
     ctx.lineTo(ball.x - ball.vx*0.05, ball.y - ball.vy*0.05);
     ctx.stroke();
 
-    // 플로팅 텍스트 렌더링 (-2초)
+    // 플로팅 안내 문구 렌더링 (-2초)
     for(var fi = floatTexts.length - 1; fi >= 0; fi--){
       var ft = floatTexts[fi];
       var progress = 1 - (ft.life / ft.maxLife);
