@@ -46,7 +46,7 @@
   .brand-logo { width: 56px; height: 28px; flex-shrink: 0; }
   .brand-logo svg { width: 100%; height: 100%; display: block; }
   .brand-text { display: flex; flex-direction: column; line-height: 1.2; }
-  .brand-name { font-size: 11px; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+  .brand-name { font-size: 13px; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
   .brand-dept {
     display: inline-block; margin-top: 2px; font-size: 10px; font-weight: 800; color: var(--navy);
     background: var(--sky); padding: 2px 8px; border-radius: 999px; width: fit-content; letter-spacing: -0.01em;
@@ -58,7 +58,7 @@
   }
   .brand-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 
-  /* 바로가기 네비게이션 */
+  /* 바로가기 네비게이션 (공튀기기, 두더지, 사과, 지뢰, 드롭) */
   .nav-games {
     display: flex; align-items: center; justify-content: space-between;
     gap: 5px; width: 100%; overflow-x: auto; padding-top: 4px; border-top: 1px solid rgba(255,255,255,0.08);
@@ -72,7 +72,7 @@
   }
   .nav-item:hover { background: rgba(255,255,255,0.15); color: #fff; transform: translateY(-1px); }
 
-  /* 랭킹 대시보드 메인 카드 (세로 크기 미세 축소 최적화) */
+  /* 랭킹 대시보드 메인 카드 */
   .rank-box {
     width: 100%; max-width: 640px;
     background: linear-gradient(180deg, rgba(18, 58, 99, 0.8), rgba(11, 31, 58, 0.95));
@@ -116,7 +116,7 @@
   }
   .view-tab.active { background: var(--blue); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
 
-  /* 2차 종목 선택 탭 */
+  /* 2차 종목 선택 탭 (공튀기기, 두더지, 사과, 지뢰, 드롭) */
   .game-pills { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
   .game-pills::-webkit-scrollbar { display: none; }
   .game-pill {
@@ -305,7 +305,7 @@
       <div class="view-tab" id="tabTeam">팀별 대항전 순위</div>
     </div>
 
-    <!-- 2차 종목 선택 (개인전 전용) -->
+    <!-- 2차 종목 선택 (공튀기기, 두더지, 사과, 지뢰, 드롭) -->
     <div id="gameSelectorSection">
       <div class="game-pills">
         <div class="game-pill active" data-game="공튀기기">⚽ 공튀기기</div>
@@ -318,7 +318,7 @@
 
     <div class="rule-banner" id="ruleBanner">
       <span id="ruleDesc">5개 스테이지 최단 시간 올클리어</span>
-      <span class="rule-badge" id="ruleType">높은 점수순</span>
+      <span class="rule-badge" id="ruleType">최단 시간순</span>
     </div>
 
     <!-- 최초 로딩 화면 (초기 진입 시 노출) -->
@@ -358,7 +358,8 @@
   var GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwXeZ1OMPgMQb-JhW_uOAxQ-w1sTq5kb6XbTa6XF3BjzhVrax6uvPc8LBC0YfTSKiZKEQ/exec";
 
   var currentView = "personal";
-  var currentGame = "사과게임";
+  // [수정 완료] 첫 진입 시 선택된 게임을 '공튀기기'로 정확히 지정
+  var currentGame = "공튀기기";
   var isFirstLoadDone = false;
 
   var myTeam = "";
@@ -368,10 +369,11 @@
     mySabun = localStorage.getItem("sh_mini_sabun") || "";
   } catch(e) {}
 
+  // 게임 순서: 공튀기기, 두더지, 사과, 지뢰, 드롭
   var GAME_META = {
-    "사과게임": { desc: "합 10을 완성해 획득한 사과 개수", badge: "높은 점수순", unit: "점", isTime: false },
-    "두더지잡기": { desc: "20초 동안 잡은 두더지 콤보 합산 점수", badge: "높은 점수순", unit: "점", isTime: false },
     "공튀기기": { desc: "5개 스테이지 최단 시간 올클리어", badge: "최단 시간순", unit: "초", isTime: true },
+    "두더지잡기": { desc: "20초 동안 잡은 두더지 콤보 합산 점수", badge: "높은 점수순", unit: "점", isTime: false },
+    "사과게임": { desc: "합 10을 완성해 획득한 사과 개수", badge: "높은 점수순", unit: "점", isTime: false },
     "지뢰찾기": { desc: "12x12 지뢰 24개를 피해 모든 칸 오픈", badge: "최단 시간순", unit: "초", isTime: true },
     "드롭": { desc: "60초 동안 바구니로 받은 아이템 합산 점수", badge: "높은 점수순", unit: "점", isTime: false }
   };
@@ -454,7 +456,8 @@
   }
 
   function renderPersonalRank(){
-    var meta = GAME_META[currentGame] || GAME_META["사과게임"];
+    // [수정 완료] 기본 폴백을 공튀기기로 지정
+    var meta = GAME_META[currentGame] || GAME_META["공튀기기"];
     ruleDesc.textContent = meta.desc;
     ruleType.textContent = meta.badge;
 
