@@ -14,6 +14,7 @@
     --paper:#EAF4FC;
     --accent:#2FBF9E;
     --danger:#E0567A;
+    --gold:#FFD700;
     --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
     --font-num: "Segoe UI", "Consolas", "Malgun Gothic", monospace;
   }
@@ -56,7 +57,7 @@
   .brand-logo svg{ width:100%; height:100%; display:block; }
   .brand-text{ display:flex; flex-direction:column; line-height:1.2; }
   .brand-name { 
-    font-size: 11px; 
+    font-size: 13px; 
     font-weight: 800; 
     color: #fff; 
     letter-spacing: -0.02em; 
@@ -144,7 +145,7 @@
     box-shadow: 0 0 10px rgba(79, 157, 222, 0.4);
   }
 
-  /* 2단 대시보드 */
+  /* 2단 대시보드 (시간/점수/콤보/남은사과) */
   .game-dash{
     width: 100%;
     max-width: 640px;
@@ -189,7 +190,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
+    gap: 6px;
     width: 100%;
   }
   .stat-card{
@@ -197,7 +198,7 @@
     background: rgba(6, 20, 36, 0.75);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 10px;
-    padding: 4px 6px;
+    padding: 4px 4px;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -205,7 +206,7 @@
     min-width: 0;
   }
   .stat-lbl{
-    font-size: 10px;
+    font-size: 9.5px;
     color: var(--ice);
     opacity: 0.75;
     line-height: 1.1;
@@ -213,7 +214,7 @@
     white-space: nowrap;
   }
   .stat-val{
-    font-size: 15px;
+    font-size: 14.5px;
     font-weight: 800;
     font-family: var(--font-num);
     font-variant-numeric: tabular-nums;
@@ -222,9 +223,10 @@
   .stat-card.time .stat-val { color: var(--sky); }
   .stat-card.time.low .stat-val { color: var(--danger); }
   .stat-card.score .stat-val { color: var(--accent); }
+  .stat-card.combo .stat-val { color: var(--gold); }
   .stat-card.left .stat-val { color: #fff; }
 
-  /* 보드 래퍼 (세로 크기 미세 축소 최적화) */
+  /* 보드 래퍼 */
   #board-wrap{
     position:relative;
     background: linear-gradient(180deg, #0E2A4A, #0A2036);
@@ -302,24 +304,31 @@
   }
   .sumTag.ok{ background: var(--accent); border-color: var(--accent); color:#04241c;}
 
-  .controls{ display:flex; gap:10px; margin-top:2px; }
+  /* 컨트롤 버튼 (다시 시작, 판 섞기, 규칙 보기) */
+  .controls{ display:flex; gap:8px; margin-top:2px; justify-content:center; flex-wrap:wrap; }
   button.main{
-    font-family: var(--font-ui); font-size:14px; font-weight:600;
+    font-family: var(--font-ui); font-size:13.5px; font-weight:700;
     background: var(--blue); color:#fff; border:none;
-    padding: 9px 18px; border-radius: 10px; cursor:pointer;
+    padding: 8px 16px; border-radius: 10px; cursor:pointer;
     transition: background 0.15s ease, transform 0.1s ease;
   }
   button.main:hover{ background: var(--sky); }
   button.main:active{ transform: scale(0.97); }
   button.ghost{
     background: transparent; border:1px solid rgba(255,255,255,0.25);
-    color: var(--ice); font-family: var(--font-ui); font-size:14px; font-weight:600;
-    padding: 9px 18px; border-radius: 10px; cursor:pointer;
-    transition: background 0.15s ease;
+    color: var(--ice); font-family: var(--font-ui); font-size:13.5px; font-weight:700;
+    padding: 8px 14px; border-radius: 10px; cursor:pointer;
+    transition: all 0.15s ease;
   }
   button.ghost:hover{ background: rgba(255,255,255,0.08); }
+  button.ghost:active{ transform: scale(0.97); }
+  button.ghost.highlight{
+    border-color: var(--gold); color: var(--gold);
+    background: rgba(255, 215, 0, 0.08);
+  }
+  button.ghost.highlight:hover{ background: rgba(255, 215, 0, 0.18); }
 
-  .hint{ font-size:11.5px; color:var(--ice); opacity:0.6; text-align:center; max-width:480px; }
+  .hint{ font-size:11.5px; color:var(--ice); opacity:0.65; text-align:center; max-width:480px; }
 
   /* 모달 */
   #overlay, #ruleOverlay, #authOverlay{
@@ -469,7 +478,7 @@
     </nav>
   </div>
 
-  <!-- 가로형 2단 대시보드 -->
+  <!-- 가로형 2단 대시보드 (콤보 카드 포함 4단 정렬) -->
   <div class="game-dash">
     <div class="dash-left">
       <h1 class="game-title">🍎 사과게임</h1>
@@ -485,6 +494,10 @@
         <span class="stat-lbl">점수</span>
         <span class="stat-val" id="scoreVal">0</span>
       </div>
+      <div class="stat-card combo" id="comboStat">
+        <span class="stat-lbl">콤보</span>
+        <span class="stat-val" id="comboVal">0</span>
+      </div>
       <div class="stat-card left">
         <span class="stat-lbl">남은 사과</span>
         <span class="stat-val" id="leftVal">108</span>
@@ -499,9 +512,10 @@
 
   <div class="controls">
     <button class="main" id="restartBtn">다시 시작</button>
+    <button class="ghost highlight" id="shuffleBtn">🎲 판 섞기 (1/1)</button>
     <button class="ghost" id="ruleBtn">규칙 보기</button>
   </div>
-  <div class="hint">마우스를 드래그해서 사각형을 만들고, 안에 있는 숫자 합이 10이면 자동으로 사라져요.</div>
+  <div class="hint">드래그로 합 10을 만드세요! 3.5초 내 연속 완성 시 콤보 보너스, 막히면 🎲판 섞기를 쓰세요.</div>
 </div>
 
 <div id="overlay">
@@ -517,9 +531,10 @@
   <div class="modal">
     <h2>게임 규칙</h2>
     <ol>
-      <li>보드 위에서 마우스(또는 손가락)를 드래그하면 사각형 범위가 만들어져요.</li>
-      <li>사각형 안에 있는 사과 숫자의 합이 10이 되면 그 사과들이 자동으로 사라져요.</li>
-      <li>제한시간 안에 최대한 많은 사과를 없애보세요!</li>
+      <li>보드 위에서 드래그하여 직사각형 안의 사과 숫자 합이 <b>10</b>이 되면 사라져요.</li>
+      <li>⚡ <b>스피드 콤보</b>: 3.5초 이내에 연속으로 10을 완성하면 <b>콤보 보너스 점수</b> 추가!</li>
+      <li>🎲 <b>판 섞기</b>: 게임당 1회, 막히거나 조합이 안 보일 때 남아있는 사과들을 재배치해요.</li>
+      <li>제한시간 안에 최대한 많은 사과를 없애 고득점을 노려보세요!</li>
     </ol>
     <button class="main" id="ruleCloseBtn">확인</button>
   </div>
@@ -566,7 +581,7 @@
 
     var gpu = getGpuRenderer().toLowerCase();
 
-    // 1순위: 모바일 고유 GPU 칩셋인 경우 무조건 모바일로 인정 (False Positive 방지)
+    // 1순위: 모바일 고유 GPU 칩셋 우선 통과
     var mobileGpuKeywords = ['mali', 'adreno', 'apple', 'powervr', 'xclipse'];
     for (var m = 0; m < mobileGpuKeywords.length; m++) {
       if (gpu.indexOf(mobileGpuKeywords[m]) !== -1) {
@@ -574,7 +589,7 @@
       }
     }
 
-    // 2순위: PC 전용 외장/내장 GPU 탐지 ('angle' 제외)
+    // 2순위: PC 전용 외장/내장 GPU 탐지
     var pcGpuKeywords = [
       'geforce', 'nvidia', 'radeon', 'intel', 
       'direct3d', 'llvmpipe', 'mesa', 'swiftshader', 
@@ -615,12 +630,20 @@
   var GAME_NAME = "사과게임";
 
   var COLS = 12, ROWS = 9, GAME_TIME = 110;
+  var COMBO_WINDOW_MS = 3500; // 콤보 유지 시간 (3.5초)
+
   var curLevel = 'medium (12x9)';
   var board, cells, boardEl, selRect, sumTag;
   var timeLeft, score, timerId, gameActive;
   var dragging = false, startCell = null, curSel = [];
   var currentSabun = "";
   var currentTeam = "";
+
+  // 콤보 & 판 섞기 상태 관리 변수
+  var combo = 0;
+  var maxCombo = 0;
+  var comboTimeoutId = null;
+  var shufflesLeft = 1;
 
   boardEl = document.getElementById('board');
   selRect = document.getElementById('selRect');
@@ -629,6 +652,7 @@
   var timeVal = document.getElementById('timeVal');
   var timeStat = document.getElementById('timeStat');
   var scoreVal = document.getElementById('scoreVal');
+  var comboVal = document.getElementById('comboVal');
   var leftVal = document.getElementById('leftVal');
 
   var overlay = document.getElementById('overlay');
@@ -639,6 +663,7 @@
 
   var adPopup = document.getElementById("adPopup");
   var adRestartBtn = document.getElementById("adRestartBtn");
+  var shuffleBtn = document.getElementById("shuffleBtn");
 
   var authOverlay = document.getElementById('authOverlay');
   var teamSelect = document.getElementById('teamSelect');
@@ -722,7 +747,77 @@
     timeVal.textContent = fmtTime(timeLeft);
     timeStat.classList.toggle('low', timeLeft<=20);
     scoreVal.textContent = score;
+    comboVal.textContent = combo > 0 ? (combo + 'x') : '0';
+    comboVal.style.color = combo >= 3 ? 'var(--gold)' : (combo >= 2 ? 'var(--accent)' : 'var(--paper)');
     leftVal.textContent = remainingCount();
+  }
+
+  function updateShuffleBtn(){
+    if(!shuffleBtn) return;
+    if(shufflesLeft > 0){
+      shuffleBtn.textContent = '🎲 판 섞기 (1/1)';
+      shuffleBtn.disabled = false;
+      shuffleBtn.style.opacity = '1';
+      shuffleBtn.style.cursor = 'pointer';
+      shuffleBtn.classList.add('highlight');
+    } else {
+      shuffleBtn.textContent = '🎲 판 섞기 (0/1)';
+      shuffleBtn.disabled = true;
+      shuffleBtn.style.opacity = '0.4';
+      shuffleBtn.style.cursor = 'not-allowed';
+      shuffleBtn.classList.remove('highlight');
+    }
+  }
+
+  // [찬스 4번] 판 섞기 (남아있는 활성 사과들만 재배치)
+  function shuffleBoard(){
+    if(!gameActive || shufflesLeft <= 0) return;
+
+    var activeCells = [];
+    var values = [];
+    for(var r=0; r<ROWS; r++){
+      for(var c=0; c<COLS; c++){
+        if(board[r][c] > 0){
+          activeCells.push({r: r, c: c});
+          values.push(board[r][c]);
+        }
+      }
+    }
+
+    if(values.length < 2) return;
+
+    // 최소 1개 이상의 합 10 조합이 나오도록 최대 20회 셔플 시도
+    for(var attempt=0; attempt<20; attempt++){
+      for(var i = values.length - 1; i > 0; i--){
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = values[i];
+        values[i] = values[j];
+        values[j] = tmp;
+      }
+      for(var k=0; k<activeCells.length; k++){
+        board[activeCells[k].r][activeCells[k].c] = values[k];
+      }
+      if(hasValidMove()) break;
+    }
+
+    // DOM 갱신 및 팝업 애니메이션
+    for(var idx=0; idx<activeCells.length; idx++){
+      var pos = activeCells[idx];
+      var val = board[pos.r][pos.c];
+      var cellEl = cells[pos.r][pos.c];
+      cellEl.textContent = val;
+      cellEl.classList.remove('pop');
+      void cellEl.offsetWidth; // reflow 강제 실행
+      cellEl.classList.add('pop');
+    }
+
+    shufflesLeft--;
+    updateShuffleBtn();
+    if(navigator.vibrate) navigator.vibrate(25);
+
+    if(!hasValidMove()){
+      endGame('nomoves');
+    }
   }
 
   function getRectFromPoints(x1,y1,x2,y2){
@@ -801,7 +896,19 @@
         board[item.r][item.c] = -1;
         setTimeout((function(el){ return function(){ el.classList.add('gone'); }; })(item.el), 150);
       });
-      score += curSel.length;
+
+      // [찬스 3번] 스피드 콤보 판정 & 보너스 점수 가산
+      clearTimeout(comboTimeoutId);
+      combo++;
+      if(combo > maxCombo) maxCombo = combo;
+      var comboBonus = (combo > 1) ? (combo - 1) : 0;
+      score += (curSel.length + comboBonus);
+
+      // 3.5초 이내에 다음 10 미달성 시 콤보 리셋
+      comboTimeoutId = setTimeout(function(){
+        combo = 0;
+        updateHud();
+      }, COMBO_WINDOW_MS);
     }
     clearSelectionVisual(); curSel = []; sumTag.textContent = '';
     updateHud();
@@ -820,8 +927,10 @@
   function endGame(reason){
     gameActive = false;
     clearInterval(timerId);
+    clearTimeout(comboTimeoutId);
+    combo = 0;
     var detailText = reason === 'cleared' ? '보드 올클리어' : (reason === 'nomoves' ? '가능한 조합 없음' : '시간 종료');
-    logEvent("종료", { score: score, detail: detailText + ` (사과 ${score}개 획득)` });
+    logEvent("종료", { score: score, detail: detailText + ` (사과 ${score}개 획득, 최대 콤보: ${maxCombo}x)` });
 
     if(reason === 'cleared'){
       modalTitle.textContent = '보드 클리어! 🎉';
@@ -831,7 +940,7 @@
       modalDesc.textContent = '합이 10이 되는 조합을 더 만들 수 없어서 게임을 종료했어요.';
     } else {
       modalTitle.textContent = '시간 종료!';
-      modalDesc.textContent = '획득한 사과 개수입니다.';
+      modalDesc.textContent = '획득한 최종 점수입니다.';
     }
     modalScore.textContent = score;
     overlay.classList.add('show');
@@ -840,10 +949,17 @@
   function startGame(){
     overlay.classList.remove('show');
     adPopup.style.display = 'none';
-    score = 0; timeLeft = GAME_TIME; gameActive = true;
+    clearTimeout(comboTimeoutId);
+    combo = 0;
+    maxCombo = 0;
+    shufflesLeft = 1;
+    score = 0; 
+    timeLeft = GAME_TIME; 
+    gameActive = true;
     buildBoard();
     var attempts = 0;
     while(!hasValidMove() && attempts < 20){ buildBoard(); attempts++; }
+    updateShuffleBtn();
     updateHud();
     startTimer();
     logEvent("시작", { score: 0 });
@@ -851,10 +967,12 @@
 
   function showNoticePopup(){
     clearInterval(timerId);
+    clearTimeout(comboTimeoutId);
     adPopup.style.display = "flex";
   }
 
   adRestartBtn.addEventListener("click", startGame);
+  shuffleBtn.addEventListener("click", shuffleBoard);
 
   /* ============================================================
      [사용자 인증 및 모바일 키보드 상쇄 방어 로직]
