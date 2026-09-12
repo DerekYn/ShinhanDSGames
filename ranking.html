@@ -84,7 +84,27 @@
   .rank-header {
     display: flex; align-items: center; justify-content: space-between;
     padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1);
+    gap: 6px; flex-wrap: wrap;
   }
+  .rank-header-left {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  }
+
+  /* 플레이어 뱃지 스타일 */
+  .player-tag {
+    font-size: 11px;
+    background: rgba(47, 191, 158, 0.15);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 2.5px 9px;
+    border-radius: 20px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .player-tag:hover { background: rgba(47, 191, 158, 0.28); }
+
   .live-badge {
     display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700;
     color: var(--accent); background: rgba(47, 191, 158, 0.12); border: 1px solid var(--accent);
@@ -116,7 +136,7 @@
   }
   .view-tab.active { background: var(--blue); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
 
-  /* 2차 종목 선택 탭 (공튀기기, 두더지, 사과, 지뢰, 드롭) */
+  /* 2차 종목 선택 탭 */
   .game-pills { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
   .game-pills::-webkit-scrollbar { display: none; }
   .game-pill {
@@ -236,6 +256,60 @@
   .team-card.rank-1 .team-score { color: var(--gold); }
   .team-score-lbl { font-size: 9.5px; color: var(--ice); opacity: 0.75; }
 
+  /* 모달 레이아웃 */
+  #authOverlay {
+    position: fixed; inset: 0;
+    background: rgba(4,12,24,0.85);
+    display: none; align-items: center; justify-content: center; z-index: 100;
+    padding: 20px;
+  }
+  #authOverlay.show { display: flex; }
+  .modal {
+    background: linear-gradient(180deg, #123A63, #0B1F3A);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 18px;
+    padding: 28px 24px;
+    text-align: center;
+    min-width: 260px;
+    max-width: 380px;
+    width: 92%;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  .modal h2 { margin: 0 0 8px; font-size: 19px; color: #fff; }
+  .modal p { margin: 0 0 16px; color: var(--ice); font-size: 12.5px; line-height: 1.6; }
+  .auth-input {
+    width: 100%; padding: 11px 14px;
+    border: 1px solid rgba(255,255,255,0.25); border-radius: 10px;
+    background: rgba(255,255,255,0.08); color: #fff; font-size: 15px;
+    font-family: var(--font-num); text-align: center; margin-bottom: 12px; outline: none;
+  }
+  .auth-input:focus { border-color: var(--sky); background: rgba(255,255,255,0.12); }
+  .auth-input.error { border-color: var(--danger); }
+  select.auth-input {
+    appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23BFE2F7' stroke-width='2'%3e%3cpath d='M6 9l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat; background-position: right 12px center; background-size: 18px;
+    text-align: left; padding-right: 38px; cursor: pointer;
+  }
+  select.auth-input option { background: #123A63; color: #fff; }
+  .auth-error { color: var(--danger); font-size: 12px; margin: -6px 0 12px; height: 14px; display: block; }
+  
+  button.main {
+    font-family: var(--font-ui); font-size: 13.5px; font-weight: 700;
+    background: var(--blue); color: #fff; border: none;
+    padding: 9px 18px; border-radius: 10px; cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  button.main:hover { background: var(--sky); }
+  button.main:active { transform: scale(0.97); }
+  button.ghost {
+    background: transparent; border: 1px solid rgba(255,255,255,0.25);
+    color: var(--ice); font-family: var(--font-ui); font-size: 13.5px; font-weight: 700;
+    padding: 9px 18px; border-radius: 10px; cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  button.ghost:hover { background: rgba(255,255,255,0.08); }
+
   /* 로딩 스피너 및 에러 상태 */
   .state-box {
     text-align: center; padding: 36px 16px; color: var(--ice); font-size: 13px; line-height: 1.6;
@@ -249,6 +323,29 @@
 </style>
 </head>
 <body>
+
+<!-- 사번/팀 정보 수정 모달 -->
+<div id="authOverlay">
+  <div class="modal">
+    <h2>👤 플레이어 정보 설정</h2>
+    <p>사내 랭킹 집계 및 참여 기록 확인을 위해<br>팀과 사번을 설정해 주세요.</p>
+    <select id="teamSelect" class="auth-input">
+      <option value="" disabled selected>팀 선택</option>
+      <option value="증권개발팀">증권개발팀</option>
+      <option value="증권채널팀">증권채널팀</option>
+      <option value="카드개발팀">카드개발팀</option>
+      <option value="라이프개발팀">라이프개발팀</option>
+      <option value="기타">기타</option>
+      <option value="영포스">영포스</option>
+    </select>
+    <input type="text" id="sabunInput" class="auth-input" placeholder="사번 8자리 (예: 22091019)" maxlength="8" inputmode="numeric" pattern="[0-9]*">
+    <span class="auth-error" id="authError"></span>
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="main" id="authSaveBtn" style="flex:1;">저장</button>
+      <button type="button" class="ghost" id="authCloseBtn" style="flex:1;">닫기</button>
+    </div>
+  </div>
+</div>
 
 <div id="app">
   <!-- 브랜드 바 -->
@@ -289,9 +386,13 @@
   <!-- 랭킹 메인 패널 -->
   <div class="rank-box">
     <div class="rank-header">
-      <div class="live-badge">
-        <span class="live-dot"></span>
-        <span>실시간 순위</span>
+      <!-- 실시간 순위 왼쪽으로 플레이어 정보 배치 -->
+      <div class="rank-header-left">
+        <span id="playerBadge" class="player-tag" style="display:none;" title="클릭 시 팀/사번 변경"></span>
+        <div class="live-badge">
+          <span class="live-dot"></span>
+          <span>실시간 순위</span>
+        </div>
       </div>
       <div class="refresh-group">
         <span id="countdownText">15초 후 갱신</span>
@@ -321,7 +422,7 @@
       <span class="rule-badge" id="ruleType">최단 시간순</span>
     </div>
 
-    <!-- 최초 로딩 화면 (초기 진입 시 노출) -->
+    <!-- 최초 로딩 화면 -->
     <div class="state-box" id="initialLoadingBox">
       <div class="spinner"></div>
       <div>실시간 순위 집계 중... 잠시만 기다려주세요 🙂</div>
@@ -358,7 +459,6 @@
   var GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwXeZ1OMPgMQb-JhW_uOAxQ-w1sTq5kb6XbTa6XF3BjzhVrax6uvPc8LBC0YfTSKiZKEQ/exec";
 
   var currentView = "personal";
-  // [수정 완료] 첫 진입 시 선택된 게임을 '공튀기기'로 정확히 지정
   var currentGame = "공튀기기";
   var isFirstLoadDone = false;
 
@@ -369,10 +469,9 @@
     mySabun = localStorage.getItem("sh_mini_sabun") || "";
   } catch(e) {}
 
-  // 게임 순서: 공튀기기, 두더지, 사과, 지뢰, 드롭
   var GAME_META = {
     "공튀기기": { desc: "5개 스테이지 최단 시간 올클리어", badge: "최단 시간순", unit: "초", isTime: true },
-    "두더지잡기": { desc: "20초 동안 잡은 두더지 콤보 합산 점수", badge: "높은 점수순", unit: "점", isTime: false },
+    "두더지잡기": { desc: "30초 동안 잡은 두더지 콤보 합산 점수", badge: "높은 점수순", unit: "점", isTime: false },
     "사과게임": { desc: "합 10을 완성해 획득한 사과 개수", badge: "높은 점수순", unit: "점", isTime: false },
     "지뢰찾기": { desc: "12x12 지뢰 24개를 피해 모든 칸 오픈", badge: "최단 시간순", unit: "초", isTime: true },
     "드롭": { desc: "60초 동안 바구니로 받은 아이템 합산 점수", badge: "높은 점수순", unit: "점", isTime: false }
@@ -401,6 +500,67 @@
   var ruleType = document.getElementById("ruleType");
   var countdownText = document.getElementById("countdownText");
   var btnManualRefresh = document.getElementById("btnManualRefresh");
+  var playerBadge = document.getElementById("playerBadge");
+
+  var authOverlay = document.getElementById("authOverlay");
+  var teamSelect = document.getElementById("teamSelect");
+  var sabunInput = document.getElementById("sabunInput");
+  var authError = document.getElementById("authError");
+  var authSaveBtn = document.getElementById("authSaveBtn");
+  var authCloseBtn = document.getElementById("authCloseBtn");
+
+  function updatePlayerBadge() {
+    if (!playerBadge) return;
+    if (mySabun && myTeam) {
+      playerBadge.textContent = "플레이어: " + myTeam + " · " + mySabun;
+      playerBadge.style.display = "inline-flex";
+    } else if (mySabun) {
+      playerBadge.textContent = "사번: " + mySabun + " (팀 미등록)";
+      playerBadge.style.display = "inline-flex";
+    } else {
+      playerBadge.textContent = "👤 플레이어 설정";
+      playerBadge.style.display = "inline-flex";
+    }
+  }
+
+  playerBadge.addEventListener("click", function(){
+    if (teamSelect && myTeam) teamSelect.value = myTeam;
+    if (sabunInput && mySabun) sabunInput.value = mySabun;
+    authError.textContent = "";
+    authOverlay.classList.add("show");
+  });
+
+  authCloseBtn.addEventListener("click", function(){
+    authOverlay.classList.remove("show");
+  });
+
+  authSaveBtn.addEventListener("click", function(e){
+    if (e) e.preventDefault();
+    var tVal = teamSelect.value;
+    var sVal = (sabunInput.value || "").replace(/[^0-9]/g, "").trim();
+
+    if (!tVal) {
+      authError.textContent = "팀을 선택해 주세요.";
+      teamSelect.focus();
+      return;
+    }
+    if (sVal.length !== 8) {
+      authError.textContent = "사번은 숫자 8자리여야 합니다. (예: 22091019)";
+      sabunInput.focus();
+      return;
+    }
+
+    myTeam = tVal;
+    mySabun = sVal;
+    try {
+      localStorage.setItem("sh_mini_team", myTeam);
+      localStorage.setItem("sh_mini_sabun", mySabun);
+    } catch(err) {}
+
+    updatePlayerBadge();
+    authOverlay.classList.remove("show");
+    render();
+  });
 
   tabPersonal.addEventListener("click", function(){
     currentView = "personal";
@@ -456,7 +616,6 @@
   }
 
   function renderPersonalRank(){
-    // [수정 완료] 기본 폴백을 공튀기기로 지정
     var meta = GAME_META[currentGame] || GAME_META["공튀기기"];
     ruleDesc.textContent = meta.desc;
     ruleType.textContent = meta.badge;
@@ -482,15 +641,18 @@
       }
     }
 
+    // [핵심] 게임 기록 유무와 상관없이 사용자의 최신 팀명(myTeam)을 일관되게 표시
     if (mySabun && myIndex !== -1) {
       var myRecord = list[myIndex];
       var myRankNum = myRecord.rank || (myIndex + 1);
+      var displayTeam = myTeam || myRecord.team || "미선택";
+
       myPersonalCard.innerHTML = 
         '<div class="my-rank-left">' +
           '<span class="my-rank-badge">MY</span>' +
           '<div class="my-rank-info">' +
             '<span class="my-rank-title">내 현재 순위: <b>' + myRankNum + '위</b></span>' +
-            '<span class="my-rank-sub">' + (myRecord.team || myTeam) + ' (' + maskSabun(mySabun) + ')</span>' +
+            '<span class="my-rank-sub">' + displayTeam + ' (' + maskSabun(mySabun) + ')</span>' +
           '</div>' +
         '</div>' +
         '<div class="my-rank-score">' + formatScore(myRecord.score, meta.isTime) + '</div>';
@@ -501,7 +663,7 @@
           '<span class="my-rank-badge">MY</span>' +
           '<div class="my-rank-info">' +
             '<span class="my-rank-title">내 현재 순위: <b>순위권 진입 도전!</b></span>' +
-            '<span class="my-rank-sub">' + myTeam + ' (' + maskSabun(mySabun) + ')</span>' +
+            '<span class="my-rank-sub">' + (myTeam || "미등록") + ' (' + maskSabun(mySabun) + ')</span>' +
           '</div>' +
         '</div>' +
         '<div class="my-rank-score" style="font-size:12px; color:var(--ice);">도전하기 👉</div>';
@@ -638,6 +800,30 @@
         if (data && data.status === "success") {
           cachedData = data;
           isFirstLoadDone = true;
+
+          // [핵심 해결] 시트 데이터 전체를 조회하여 내 사번의 가장 최근 소속 팀을 찾아 myTeam으로 자동 갱신
+          if (mySabun && cachedData.games) {
+            var latestDate = "";
+            var latestTeam = "";
+            for (var gName in cachedData.games) {
+              var gList = cachedData.games[gName] || [];
+              for (var i = 0; i < gList.length; i++) {
+                if (String(gList[i].sabun).trim() === String(mySabun).trim()) {
+                  var rDate = gList[i].date || "";
+                  if (!latestDate || rDate >= latestDate) {
+                    latestDate = rDate;
+                    latestTeam = gList[i].team;
+                  }
+                }
+              }
+            }
+            if (latestTeam && latestTeam !== "미선택" && latestTeam !== myTeam) {
+              myTeam = latestTeam;
+              try { localStorage.setItem("sh_mini_team", myTeam); } catch(e) {}
+            }
+          }
+
+          updatePlayerBadge();
           render();
         }
       })
@@ -673,6 +859,7 @@
     }, 600);
   });
 
+  updatePlayerBadge();
   fetchRankings();
   startAutoRefresh();
 })();
