@@ -281,7 +281,7 @@
   .king-mole .eye{ top:26px; width:8px; height:8px; background:#222; }
   .king-mole .nose{ top:41px; width:13px; height:9px; background:#e88d9d; }
   
-  /* 대왕 두더지의 황금 왕관 (클리핑 방지 위치 조정) */
+  /* 대왕 두더지의 황금 왕관 */
   .king-mole .crown{
     position:absolute; top:-8px; left:50%; transform:translateX(-50%);
     width:30px; height:16px;
@@ -327,6 +327,7 @@
   .tiger .ear.left{ left:5px; } .tiger .ear.right{ right:5px; }
   .tiger .ear:after{ content:""; position:absolute; width:10px; height:10px; left:4px; top:4px; background:#fff7ed; border-radius:50%; }
 
+  /* 호랑이 이마 王자 줄무늬 */
   .tiger .stripes-forehead{
     position:absolute; top:7px; left:50%; transform:translateX(-50%);
     width:14px; height:14px; z-index:3;
@@ -339,6 +340,7 @@
     box-shadow: 0 8px 0 #1c1917;
   }
 
+  /* 호랑이 볼 줄무늬 */
   .tiger .stripe-left{
     position:absolute; left:0; top:32px; width:12px; height:4px; background:#1c1917;
     border-radius:0 4px 4px 0; z-index:3;
@@ -350,6 +352,7 @@
     box-shadow: 0 10px 0 #1c1917;
   }
 
+  /* 호랑이 흰 주둥이 & 수염 */
   .tiger .muzzle{
     position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
     width:34px; height:22px; background:#fffbf0; border-radius:50% 50% 45% 45%; z-index:3;
@@ -497,6 +500,7 @@
       <option value="카드개발팀">카드개발팀</option>
       <option value="라이프개발팀">라이프개발팀</option>
       <option value="기타">기타</option>
+      <option value="영포스">영포스</option>
     </select>
     <input type="text" id="sabunInput" class="auth-input" placeholder="사번 8자리 (예: 22091019)" maxlength="8" inputmode="numeric" pattern="[0-9]*">
     <span class="auth-error" id="authError"></span>
@@ -550,7 +554,7 @@
     <div class="dash-stats">
       <div class="stat-card time">
         <span class="stat-lbl">남은 시간</span>
-        <span class="stat-val"><span id="time">20</span>초</span>
+        <span class="stat-val"><span id="time">30</span>초</span>
       </div>
       <div class="stat-card score">
         <span class="stat-lbl">점수</span>
@@ -574,7 +578,7 @@
   <div class="hint">두더지를 연속으로 잡으면 콤보 보너스! 👑대왕 두더지(+50)를 잡고 🐰/🐯를 피하세요!</div>
 </div>
 
-<!-- 결과 화면 (내 최고 점수 항목 삭제 완료) -->
+<!-- 결과 화면 -->
 <div id="overlay">
   <div class="modal">
     <h2 id="modalTitle">게임 종료!</h2>
@@ -592,7 +596,7 @@
   <div class="modal">
     <h2>게임 규칙</h2>
     <ol>
-      <li>⏱ 제한시간 : <b>20초</b> 동안 진행됩니다. (후반 10초 가속!)</li>
+      <li>⏱ 제한시간 : <b>30초</b> 동안 진행됩니다. (후반 10초 가속!)</li>
       <li>🐹 일반 두더지 : <b>+10점</b> (연속 성공 시 콤보 가산)</li>
       <li>👑 <b>대왕 두더지</b> : <b>+50점</b> (왕관 쓴 보너스 타겟, 빠른 반응 필요!)</li>
       <li>🐰 토끼 : <b>-30점</b> / 🐯 <b>호랑이</b> : <b>-50점</b> (콤보 초기화)</li>
@@ -691,12 +695,14 @@
   var GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwXeZ1OMPgMQb-JhW_uOAxQ-w1sTq5kb6XbTa6XF3BjzhVrax6uvPc8LBC0YfTSKiZKEQ/exec";
   var GAME_NAME = "두더지잡기";
 
-  var GAME_TIME = 20;
+  // 30초 설정
+  var GAME_TIME = 30;
 
-  var MOLE_COUNT = 17;
-  var KING_MOLE_COUNT = 3;
-  var RABBIT_COUNT = 6;
-  var TIGER_COUNT = 6;
+  // 30초 플레이 기준 마리수 밸런스 조정
+  var MOLE_COUNT = 25;
+  var KING_MOLE_COUNT = 5;
+  var RABBIT_COUNT = 9;
+  var TIGER_COUNT = 9;
 
   var currentTeam = "";
   var currentSabun = "";
@@ -769,7 +775,7 @@
           '<div class="nose"></div></div>';
       });
 
-      // [핵심] 0ms 지연 없는 즉각 터치 핸들러
+      // 0ms 지연 없는 즉각 터치 핸들러
       hole.addEventListener("pointerdown", function(e){
         e.preventDefault();
         e.stopPropagation();
@@ -797,10 +803,11 @@
     spawnTimers.forEach(function(t){ clearTimeout(t); });
     spawnTimers = [];
 
+    // 30초에 맞춘 랜덤 스폰 시간 생성 (400ms ~ 28800ms)
     function randomTimes(count){
       var arr = [];
       for(var i = 0; i < count; i++){
-        arr.push(400 + Math.random() * 18800);
+        arr.push(400 + Math.random() * 28800);
       }
       return arr.sort(function(a, b){ return a - b; });
     }
@@ -849,10 +856,11 @@
     holes[index]._hittableAnimal = animal;
     holes[index]._animalType = type;
 
+    // 기본 체류시간: 전반 750ms, 후반 10초 이하 600ms, 대왕 두더지는 550ms
     var stayTime = (time <= 10) ? 600 : 750;
     if(type === "king-mole") stayTime = 550;
 
-    // [핵심] 퇴장 시 140ms 동안 판정을 유지하여 터치 씹힘을 100% 방지
+    // 퇴장 시 140ms 동안 판정을 유지하여 터치 씹힘 100% 방지
     animal._hideTimer = setTimeout(function(){
       animal.classList.remove("active");
       animal._graceTimer = setTimeout(function(){
@@ -880,7 +888,6 @@
 
     var type = holes[index]._animalType;
 
-    // 중복 타격 방지를 위해 즉시 해제
     holes[index]._hittableAnimal = null;
     holes[index]._animalType = null;
 
