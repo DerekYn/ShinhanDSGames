@@ -396,11 +396,11 @@
     animation:popAnim .7s forwards ease-out; z-index:7; pointer-events:none;
     white-space:nowrap;
   }
-  .pop.perfect{ color:#22D3EE; text-shadow:0 0 10px rgba(34, 211, 238, 0.9); font-size:17.5px; }
+  .pop.perfect{ color:#22D3EE; text-shadow:0 0 10px rgba(34, 211, 238, 0.9); font-size:17px; }
   .pop.great{ color:#34D399; text-shadow:0 0 8px rgba(52, 211, 153, 0.8); }
-  .pop.gold{ color:var(--gold); text-shadow:0 0 10px rgba(255,215,0,0.85); font-size:18px; }
-  .pop.fever{ color:#FF4500; text-shadow:0 0 12px rgba(255, 69, 0, 0.9); }
-  .pop.bad{ color:var(--danger); font-size:18px; }
+  .pop.gold{ color:var(--gold); text-shadow:0 0 10px rgba(255,215,0,0.85); font-size:17.5px; }
+  .pop.fever{ color:#FF4500; text-shadow:0 0 12px rgba(255, 69, 0, 0.9); font-size:17px; }
+  .pop.bad{ color:var(--danger); font-size:15px; }
   @keyframes popAnim{ 
     0%{ opacity:0; transform:translate(-50%, 6px) scale(0.85); }
     20%{ opacity:1; transform:translate(-50%, -8px) scale(1.1); }
@@ -581,7 +581,7 @@
     <div class="dash-left">
       <h1 class="game-title">
         🐹 두더지 잡기
-        <span class="fever-badge" id="feverBadge">🔥 FEVER 2X</span>
+        <span class="fever-badge" id="feverBadge">🔥 FEVER 1.3X</span>
       </h1>
       <span id="playerBadge" class="player-tag" style="display:none;" title="클릭 시 팀/사번 변경"></span>
     </div>
@@ -610,7 +610,7 @@
     <button class="main" id="restartBtn">다시 시작</button>
     <button class="ghost" id="ruleBtn">규칙 보기</button>
   </div>
-  <div class="hint">⚡빠르게 칠수록 PERFECT(+30) 보너스! 마지막 10초 🔥피버 타임(점수 2배)을 잡으세요!</div>
+  <div class="hint">⚡빠를수록 PERFECT(+30) 보너스! 실수해도 콤보는 -3만 차감돼요.</div>
 </div>
 
 <!-- 결과 화면 -->
@@ -633,13 +633,13 @@
     <ol>
       <li>⏱ 제한시간 : <b>30초</b> 동안 진행됩니다.</li>
       <li>⚡ <b>반응속도 판정 보너스</b> (동점 원천 차단):<br>
-        - <b>PERFECT</b> (0.25초 이내): <b>+30점 보너스</b><br>
-        - <b>GREAT</b> (0.45초 이내): <b>+15점 보너스</b>
+        - <b>PERFECT</b> (0.25초 이내): <b>+30점</b><br>
+        - <b>GREAT</b> (0.45초 이내): <b>+15점</b>
       </li>
-      <li>🔥 <b>막판 10초 피버 타임</b> : <b>모든 획득 점수 2배</b> 및 고속 출현!</li>
+      <li>🔥 <b>막판 10초 피버 타임</b> : <b>획득 점수 1.3배</b> 적용!</li>
       <li>🐹 일반 두더지 : <b>+10점</b> (연속 성공 시 콤보 가산)</li>
       <li>👑 <b>대왕 두더지</b> : <b>+50점</b> (왕관 쓴 보너스 타겟)</li>
-      <li>🐰 토끼 : <b>-30점</b> / 🐯 <b>호랑이</b> : <b>-50점</b> (콤보 초기화)</li>
+      <li>🐰 토끼(-30점) / 🐯 호랑이(-50점) : <b>콤보 3 차감</b> (완전 초기화 X)</li>
     </ol>
     <button class="main" id="ruleCloseBtn">확인</button>
   </div>
@@ -736,7 +736,6 @@
 
   var GAME_TIME = 30;
 
-  // 30초 플레이 기준 마리수 (피버 구간 집중 스폰 포함)
   var MOLE_COUNT = 30;
   var KING_MOLE_COUNT = 6;
   var RABBIT_COUNT = 10;
@@ -817,7 +816,6 @@
           '<div class="nose"></div></div>';
       });
 
-      // 0ms 즉각 타격 핸들러
       hole.addEventListener("pointerdown", function(e){
         e.preventDefault();
         e.stopPropagation();
@@ -846,16 +844,16 @@
     spawnTimers.forEach(function(t){ clearTimeout(t); });
     spawnTimers = [];
 
-    // 일반 구간(0.4s~20s) 60% + 피버 구간(20s~29.2s) 40% 고밀도 스폰 분배
+    // [핵심] 일반 20초 구간에 70%, 피버 10초 구간에 30% 스폰 배분
     function generateSmartTimes(count){
       var arr = [];
-      var normalCount = Math.floor(count * 0.58);
-      var feverCount = count - normalCount;
+      var normalCount = Math.round(count * 0.7); // 70% 배분
+      var feverCount = count - normalCount;      // 30% 배분
       for(var i = 0; i < normalCount; i++){
-        arr.push(400 + Math.random() * 19400); // 0.4초 ~ 19.8초
+        arr.push(400 + Math.random() * 19400); // 0.4초 ~ 19.8초 (일반 20초 구간)
       }
       for(var j = 0; j < feverCount; j++){
-        arr.push(20000 + Math.random() * 9200); // 20.0초 ~ 29.2초 (피버 구간)
+        arr.push(20000 + Math.random() * 9200); // 20.0초 ~ 29.2초 (피버 10초 구간)
       }
       return arr.sort(function(a, b){ return a - b; });
     }
@@ -903,11 +901,10 @@
     animal.classList.add("active");
     holes[index]._hittableAnimal = animal;
     holes[index]._animalType = type;
-    holes[index]._spawnTime = performance.now(); // 반응 속도(ms) 측정용 타임스탬프
+    holes[index]._spawnTime = performance.now();
 
-    // 체류시간: 전반 700ms, 후반 10초 피버 500ms, 대왕 두더지 480ms
-    var stayTime = (time <= 10) ? 500 : 700;
-    if(type === "king-mole") stayTime = (time <= 10) ? 450 : 520;
+    var stayTime = (time <= 10) ? 520 : 680;
+    if(type === "king-mole") stayTime = (time <= 10) ? 460 : 540;
 
     animal._hideTimer = setTimeout(function(){
       animal.classList.remove("active");
@@ -949,9 +946,10 @@
     animal.classList.remove("active");
 
     var isFever = (time <= 10);
-    var multiplier = isFever ? 2 : 1;
+    // [핵심] 피버 배율 1.3배 적용 (후반 몰림 현상 해소)
+    var multiplier = isFever ? 1.3 : 1.0;
 
-    // [기능 1] 반응속도 판정 (PERFECT: 250ms 이하 +30점, GREAT: 450ms 이하 +15점)
+    // 반응속도 판정 (PERFECT: 250ms 이하 +30점, GREAT: 450ms 이하 +15점)
     var speedBonus = 0;
     var judgeText = "";
     var judgeKind = "";
@@ -972,7 +970,7 @@
       hits++; combo++;
       maxCombo = Math.max(maxCombo, combo);
       var basePt = 50 + (combo - 1) * 10 + speedBonus;
-      var finalPt = basePt * multiplier;
+      var finalPt = Math.round(basePt * multiplier);
       score += finalPt;
 
       var tag = "+" + finalPt + (judgeText ? " " + judgeText : "👑");
@@ -983,7 +981,7 @@
       hits++; combo++;
       maxCombo = Math.max(maxCombo, combo);
       var basePt = 10 + (combo - 1) * 10 + speedBonus;
-      var finalPt = basePt * multiplier;
+      var finalPt = Math.round(basePt * multiplier);
       score += finalPt;
 
       var tag = "+" + finalPt + (judgeText ? " " + judgeText : "");
@@ -991,13 +989,17 @@
       if(navigator.vibrate) navigator.vibrate(15);
 
     } else if(type === "rabbit"){
-      score -= 30; combo = 0;
-      pop(holes[index], "-30", "bad");
+      // [핵심] 콤보 0 초기화 대신 3개 차감
+      score -= 30;
+      combo = Math.max(0, combo - 3);
+      pop(holes[index], "-30 (콤보-3)", "bad");
       if(navigator.vibrate) navigator.vibrate(40);
 
     } else if(type === "tiger"){
-      score -= 50; combo = 0;
-      pop(holes[index], "-50", "bad");
+      // [핵심] 콤보 0 초기화 대신 3개 차감
+      score -= 50;
+      combo = Math.max(0, combo - 3);
+      pop(holes[index], "-50 (콤보-3)", "bad");
       if(navigator.vibrate) navigator.vibrate(60);
     }
 
