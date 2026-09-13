@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>신한DS 10대 업무원칙 방탈출 게임</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/neodgm-webfont@latest/neodgm/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#070d24;color:#eef4ff;font-family:'NeoDunggeunmo','neodgm','Jua','Malgun Gothic',sans-serif;min-height:100vh}
+button{font-family:inherit;cursor:pointer}
+.screen{display:none}
+.screen.active{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+#game.active{justify-content:flex-start;padding-top:12px}
+
+/* 인트로 화면 */
+#intro{background-color:#070f2b;background-image:radial-gradient(#ffffff 1px,transparent 1.5px),radial-gradient(rgba(0,110,255,.3) 1px,transparent 1.5px);background-size:160px 110px,95px 70px;background-position:0 0,40px 30px;text-align:center}
+.shlogo{font-size:52px;color:#2e75ff;text-shadow:3px 3px 0 #001f5c;letter-spacing:2px;font-weight:bold}
+.shlogo small{font-size:15px;color:#a5c4ff;display:block;letter-spacing:4px;margin-top:6px;text-shadow:1px 1px 0 #05102c}
+.stamp{display:inline-block;border:4px solid #ff4d6d;color:#ff4d6d;padding:4px 18px;font-size:17px;transform:rotate(-5deg);margin:16px 0;letter-spacing:3px;box-shadow:4px 4px 0 rgba(0,0,0,.5);background:rgba(40,10,20,.5)}
+.gtitle{font-size:32px;color:#60a5fa;text-shadow:3px 3px 0 #0b2559;margin:6px 0 18px;line-height:1.4}
+.story{max-width:580px;background:#0d1b40;border:4px solid #1e3a8a;box-shadow:6px 6px 0 rgba(0,0,0,.5);padding:18px 22px;line-height:1.8;font-size:14px;color:#d5e3ff}
+.story b{color:#ffd23f}
+.storyWarn{margin-top:14px;font-size:16px;color:#ffd23f;background:rgba(255,210,63,.1);border:3px dashed #ffd23f;padding:12px 10px;line-height:1.8}
+
+/* 버튼 스타일 */
+.btn{background:#0051ff;color:#ffffff;border:4px solid #00227a;padding:13px 42px;font-size:19px;box-shadow:0 6px 0 #002f99,6px 10px 0 rgba(0,0,0,.4);margin-top:24px;letter-spacing:1px;text-shadow:1px 1px 0 #000}
+.btn:hover{filter:brightness(1.15)}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #002f99}
+.btn2{background:#172554;color:#bfdbfe;border:3px solid #2563eb;padding:7px 14px;font-size:12px;box-shadow:3px 3px 0 rgba(0,0,0,.4)}
+.btn2:hover{background:#1e3a8a}
+
+/* HUD */
+#hud{width:min(960px,96vw);display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#0e1e48;border:4px solid #1e3a8a;box-shadow:5px 5px 0 rgba(0,0,0,.4);padding:8px 12px}
+#roomNav{display:flex;gap:4px}
+.navb{background:#172554;color:#93c5fd;border:3px solid #2563eb;padding:6px 10px;font-size:11px}
+.navb.cur{border-color:#60a5fa;color:#ffffff;background:#1d4ed8}
+#roomName{font-size:14px;color:#93c5fd}
+#timer{font-size:18px;color:#ffd23f;background:#050c21;padding:3px 12px;border:3px solid #1e3a8a}
+#timer.warn{color:#ff4d4d;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.3}}
+#clueSlots{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.slot{min-width:34px;height:30px;border:2px dashed #2563eb;display:flex;align-items:center;justify-content:center;font-size:11px;padding:0 8px;color:#93c5fd;background:#050c21}
+.slot.fill{border-style:solid;border-color:#38bdf8;color:#e0f2fe;box-shadow:2px 2px 0 rgba(56,189,248,.3)}
+#ansChips{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.chip{background:#172554;border:2px solid #2563eb;padding:3px 10px;font-size:11px;color:#ffd23f}
+#btnMemo{background:#3b2904;border-color:#ca8a04;color:#fef08a}
+
+/* 스테이지 배경 */
+#stage{position:relative;width:min(960px,96vw);height:560px;margin:10px auto;overflow:hidden;border:5px solid #1e3a8a;box-shadow:8px 8px 0 rgba(0,0,0,.5);background:#08102a}
+#stage::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.12) 0 2px,transparent 2px 4px);pointer-events:none;z-index:40}
+.wall{position:absolute;left:0;right:0;top:0;height:72%;background:#101c40;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.02) 0 4px,transparent 4px 24px)}
+.wall.meet{background:#0f224a}
+.wall.plan{background:#151c44}
+.wall.lobby{background:#111b42}
+.floor{position:absolute;left:0;right:0;bottom:0;height:28%;background:repeating-linear-gradient(90deg,rgba(0,0,0,.2) 0 3px,transparent 3px 80px),linear-gradient(#475569,#334155)}
+.floor.marble{background:repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 3px,transparent 3px 100px),linear-gradient(#64748b,#475569)}
+.baseline{position:absolute;left:0;right:0;bottom:28%;height:10px;background:#050c21}
+.lamp{position:absolute;top:0;width:140px;height:12px;background:#e0f2fe;border:3px solid #1e293b;border-top:none;box-shadow:0 24px 60px 14px rgba(14,165,233,.2)}
+.win{position:absolute;border:8px solid #334155;background:#081432;overflow:hidden;box-shadow:5px 5px 0 rgba(0,0,0,.4)}
+.win::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:6px;margin-left:-3px;background:#334155}
+.win .bldg{position:absolute;bottom:0;background:#0c1c44}
+.win .bldg i{position:absolute;width:4px;height:4px;background:#38bdf8}
+.clock{position:absolute;width:44px;height:44px;background:#f8fafc;border:4px solid #1e293b;box-shadow:3px 3px 0 rgba(0,0,0,.4)}
+.clock .h{position:absolute;left:50%;bottom:50%;transform-origin:50% 100%;background:#1e293b;margin-left:-1.5px}
+.clock .hh{width:3px;height:10px;transform:rotate(-20deg)}
+.clock .mm{width:2px;height:14px;transform:rotate(240deg)}
+.poster{position:absolute;background:#eff6ff;color:#1e293b;padding:8px;font-size:9px;line-height:1.5;box-shadow:4px 4px 0 rgba(0,0,0,.5);max-width:160px;border:3px solid #1e3a8a;z-index:3}
+.poster b{color:#0046ff;font-size:11px}
+.pscreen{position:absolute;background:rgba(5,13,38,.92);border:8px solid #334155;display:flex;align-items:center;justify-content:center;box-shadow:5px 5px 0 rgba(0,0,0,.4);z-index:3}
+.pslogo{display:block;font-size:36px;color:#3b82f6;text-shadow:3px 3px 0 #001a52;letter-spacing:2px;text-align:center;font-weight:bold}
+.pssub{display:block;font-size:11px;color:#bfdbfe;letter-spacing:2px;text-align:center;margin-top:4px}
+.furn{position:absolute;background:linear-gradient(#475569 0 28%,#334155 28%);border:3px solid #0f172a;box-shadow:4px 4px 0 rgba(0,0,0,.35)}
+
+/* 인터랙션 오브젝트 */
+.obj{position:absolute;cursor:pointer;text-align:center;transition:transform .15s;z-index:5}
+.obj:hover{transform:scale(1.12)}
+.oicon{font-size:44px;filter:drop-shadow(3px 3px 0 rgba(0,0,0,.5))}
+.olabel{font-size:11px;background:#050c21;border:2px solid #2563eb;padding:2px 8px;margin-top:3px;white-space:nowrap;color:#e2e8f0}
+.obj .badge{position:absolute;top:-10px;right:-6px;font-size:18px;display:none}
+.obj.done .badge{display:block}
+.obj.done .oicon{opacity:.65}
+
+/* 문 */
+.door{position:absolute;right:4%;bottom:22%;width:94px;height:200px;background:repeating-linear-gradient(0deg,#1e293b 0 44px,#0f172a 44px 50px);border:5px solid #0f172a;cursor:pointer;z-index:4;box-shadow:5px 5px 0 rgba(0,0,0,.4);transition:box-shadow .3s,border-color .3s}
+.door .knob{position:absolute;right:10px;top:96px;width:12px;height:12px;background:#ffd23f;border:2px solid #000}
+.door .dlabel{position:absolute;top:-30px;width:180px;left:50%;transform:translateX(-50%);text-align:center;font-size:12px;color:#bfdbfe;text-shadow:2px 2px 0 rgba(0,0,0,.8)}
+.door.open{border-color:#38bdf8;box-shadow:0 0 0 4px rgba(56,189,248,.35),5px 5px 0 rgba(0,0,0,.4)}
+.door.open .dlabel{color:#67e8f9}
+.door.gdoor{width:160px;height:230px;background:linear-gradient(rgba(30,58,138,.35),rgba(15,23,42,.6));border:5px solid #60a5fa}
+.door.gdoor::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:4px;margin-left:-2px;background:#60a5fa}
+
+/* 캐릭터 */
+#char{position:absolute;bottom:8%;left:10%;width:96px;transition:left .75s ease;z-index:6}
+#char.walk{animation:hop .3s infinite alternate}
+@keyframes hop{from{transform:translateY(0)}to{transform:translateY(-8px)}}
+#bubble{position:absolute;bottom:104%;left:50%;transform:translateX(-50%);background:#ffffff;color:#0f172a;padding:8px 12px;font-size:12px;width:max-content;max-width:250px;display:none;box-shadow:4px 4px 0 rgba(0,0,0,.4);line-height:1.6;z-index:7;border:3px solid #0f172a}
+#bubble::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:8px solid transparent;border-top-color:#0f172a}
+
+/* 모달 및 퀴즈 */
+#modalBg{position:fixed;inset:0;background:rgba(3,7,20,.85);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+#modalBox{background:#0e1b3d;border:4px solid #2563eb;box-shadow:8px 8px 0 rgba(0,0,0,.6);padding:22px;width:min(480px,94vw);max-height:88vh;overflow-y:auto}
+#modalBox h3{color:#60a5fa;margin-bottom:10px;font-size:18px}
+#modalBox p{font-size:14px;line-height:1.8;color:#cbd5e1}
+.qtag{display:inline-block;background:#38bdf8;color:#031d38;border:2px solid #031d38;padding:2px 8px;font-size:11px;margin-bottom:8px;font-weight:bold}
+.choice{display:block;width:100%;margin:7px 0;padding:11px;border:3px solid #1d4ed8;background:#172554;color:#eff6ff;font-size:13px;text-align:left;transition:all .12s}
+.choice:hover{border-color:#38bdf8;background:#1e40af}
+.qinput{width:100%;padding:12px;margin:12px 0;border:3px solid #2563eb;background:#050c21;color:#ffd23f;font-size:24px;text-align:center;letter-spacing:6px;font-family:inherit}
+.mrow{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+.cluecard{background:#064e3b;border:3px solid #10b981;padding:12px;text-align:center;font-size:15px;color:#a7f3d0;margin:10px 0}
+.tryRow{background:#450a0a;border:3px solid #ef4444;padding:8px;text-align:center;font-size:14px;color:#fecaca;margin:8px 0;letter-spacing:2px}
+.memoPad{background:#fef9c3;border:3px solid #ca8a04;padding:12px;margin:10px 0}
+.memoRow{color:#422006;font-size:14px;padding:7px 4px;border-bottom:2px dashed #eab308;line-height:1.6}
+.memoRow:last-child{border-bottom:none}
+.memoRow b{color:#b91c1c;font-size:18px}
+.memoRow.off{color:#854d0e}
+.shake{animation:shk .4s}
+@keyframes shk{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.kdisp{background:#050c21;border:3px solid #2563eb;font-size:32px;letter-spacing:12px;text-align:center;padding:10px;color:#38bdf8;margin:10px 0;min-height:58px}
+.kgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kbtn{padding:12px;font-size:19px;border:3px solid #1d4ed8;background:#172554;color:#eff6ff}
+.kbtn:hover{border-color:#38bdf8}
+
+/* 10대 업무원칙 힌트 오버레이 */
+#sdOverlay{position:fixed;inset:0;background:rgba(3,7,20,.94);z-index:70;display:flex;align-items:center;justify-content:center;padding:12px}
+#sdBox{width:min(780px,96vw);max-height:92vh;overflow-y:auto;background:#0f172a;border:5px solid #2563eb;box-shadow:8px 8px 0 rgba(0,0,0,.6);padding:18px;color:#f8fafc;font-family:'Jua','Malgun Gothic',sans-serif}
+.sdTitle{text-align:center;font-size:20px;color:#60a5fa;margin-bottom:12px;letter-spacing:1px}
+.sdSub{text-align:center;font-size:13px;color:#94a3b8;margin-bottom:14px}
+.sdRuleGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:640px){.sdRuleGrid{grid-template-columns:1fr}}
+.sdRuleItem{background:#1e293b;border:1px solid #334155;border-radius:6px;padding:8px 10px;font-size:13px;line-height:1.5}
+.sdRuleItem b{color:#38bdf8;margin-right:6px}
+.sdClose{display:block;margin:14px auto 0;background:#0051ff;color:#fff;border:4px solid #00227a;padding:10px 40px;font-size:16px;box-shadow:0 4px 0 #002f99}
+
+/* 미니게임 */
+#mg{position:absolute;inset:0;background:#030712;z-index:20;touch-action:none;user-select:none}
+#mgTop{position:relative;z-index:3;display:flex;align-items:center;gap:14px;padding:10px 14px;background:rgba(15,23,42,.95);border-bottom:4px solid #1e3a8a;font-size:13px}
+#mgScore{color:#ffd23f;font-size:17px}
+#mgArea{position:absolute;top:52px;left:0;right:0;bottom:0;overflow:hidden;cursor:none;background:#09122b}
+.mgItem{position:absolute;padding:6px 14px;border-radius:999px;font-size:13px;border:3px solid #0f172a;white-space:nowrap;box-shadow:3px 3px 0 rgba(0,0,0,.5);z-index:2}
+#mgChar{position:absolute;bottom:6px;width:84px;transform:translateX(-50%);pointer-events:none;z-index:2}
+.pop{position:absolute;font-size:16px;font-weight:bold;animation:rise .8s forwards;pointer-events:none;z-index:22}
+@keyframes rise{to{transform:translateY(-40px);opacity:0}}
+#mgGuide{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);text-align:center;background:rgba(15,23,42,.96);border:3px solid #2563eb;padding:14px 20px;font-size:13px;line-height:1.9;pointer-events:none;z-index:23}
+
+/* 복도 추격전 */
+#chase{position:absolute;inset:0;z-index:30;background:linear-gradient(#050c21,#0c193c 70%,#030712);overflow:hidden}
+#chase .cfloor{position:absolute;left:0;right:0;bottom:0;height:26%;background:repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 3px,transparent 3px 70px),linear-gradient(#1e293b,#0f172a);animation:cscroll .45s linear infinite}
+@keyframes cscroll{from{background-position:0 0}to{background-position:-70px 0}}
+#chaseHope{position:absolute;bottom:5%;left:60%;width:96px;animation:hop .26s infinite alternate;z-index:3}
+#chaseShadow{position:absolute;bottom:5%;transition:left .6s;z-index:2}
+#chaseCard{position:absolute;top:5%;left:50%;transform:translateX(-50%);width:min(520px,94%);background:#0f172a;border:4px solid #ef4444;padding:16px 18px;box-shadow:6px 6px 0 rgba(0,0,0,.6);z-index:4}
+
+/* 클리어 / 게임오버 화면 */
+#clearScr{background-color:#05142e;text-align:center}
+#overScr{background-color:#2a0812;text-align:center}
+.bigT{font-size:36px;color:#38bdf8;text-shadow:3px 3px 0 #00227a;margin:8px 0}
+.stats{display:flex;gap:12px;justify-content:center;margin:14px 0;flex-wrap:wrap}
+.stat{background:#0e1b3d;border:3px solid #1e3a8a;box-shadow:4px 4px 0 rgba(0,0,0,.4);padding:10px 22px;font-size:13px}
+.stat b{color:#ffd23f;font-size:20px;display:block}
+.chain{font-size:20px;color:#ffd23f;background:#0e1b3d;border:3px solid #2563eb;padding:10px 26px;display:inline-block;margin:6px 0}
+.sumgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;max-width:860px;margin:16px auto;text-align:left}
+.sumcard{background:#0e1b3d;border:3px solid #1e3a8a;padding:14px 16px;font-size:13px;line-height:1.7}
+.sumcard h4{color:#38bdf8;margin-bottom:6px;font-size:15px;text-align:center}
+.capture{max-width:580px;margin:14px auto;background:#2a1f04;border:3px dashed #ca8a04;padding:14px 20px;font-size:13px;color:#fef08a;line-height:1.8}
+.capBig{font-size:18px;color:#ffd23f;margin-bottom:6px;font-weight:bold}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
+</style>
+</head>
+<body>
+
+<!-- 인트로 화면 -->
+<div id="intro" class="screen active">
+  <div class="shlogo">Shinhan DS<small>미래를 여는 Xtion · 혁신을 향한 DXign</small></div>
+  <div class="stamp">PROJECT LOCKDOWN</div>
+  <div class="gtitle">🔐 신한DS 10대 업무원칙<br>디지털 벙커 방탈출 게임</div>
+  <div class="story">
+    전사 대규모 금융 DX 시스템 오픈 전야, 마지막 배포 검증 중 깜빡 잠든 당신들!<br>
+    눈을 떠보니 자정, 사내 <b>제로 트러스트 야간 보안 락다운</b>이 발동되어 본사 전체가 폐쇄되었다!<br><br>
+    사무실 곳곳에 숨겨진 <b>신한DS 10대 업무원칙</b>의 가치를 증명하고 단서를 모아 보안 게이트를 통과해 무사히 퇴근하라! 🌙
+    <div class="storyWarn">
+      🔑 각 보안문의 답을 조합하여 마지막 <b>정문 비밀번호</b>를 찾아야 합니다!<br>
+      <span style="font-size:12px;color:#fef08a">(통과한 단계의 답은 📒 메모장에 자동 저장됩니다)</span><br>
+      <span style="font-size:13px;color:#ff9d9d">⚠️ 보안문·정문 암호 입력 기회는 <b>각 3번</b>! 초과 실패 시 야근 확정!</span>
+    </div>
+  </div>
+  <div class="introChar" id="introChar" style="margin-top:16px"></div>
+  <button class="btn" id="btnStart">🎮 미션 시작</button>
+</div>
+
+<!-- 게임 메인 화면 -->
+<div id="game" class="screen">
+  <div id="hud">
+    <div id="roomNav"></div>
+    <div id="roomName"></div>
+    <div id="timer">15:00</div>
+    <div id="clueSlots"></div>
+    <div id="ansChips"></div>
+    <button class="btn2" id="btnMemo">📒 메모장</button>
+    <button class="btn2" id="btnHint">💡 힌트 3</button>
+  </div>
+  <div id="stage"></div>
+</div>
+
+<!-- 클리어 화면 -->
+<div id="clearScr" class="screen">
+  <div style="font-size:56px">🎉</div>
+  <div class="bigT">디지털 벙커 탈출 성공! 무사히 퇴근 완료!</div>
+  <div id="clearChar"></div>
+  <div class="stats">
+    <div class="stat">⏱️ 소요 시간<b id="statTime">--:--</b></div>
+    <div class="stat">💡 사용한 힌트<b id="statHint">0회</b></div>
+  </div>
+  <div class="chain">5 → 10 → 2 &nbsp;⇒&nbsp; 최종 출입 암호 <b>5102</b></div>
+  <div style="font-size:12px;color:#93c5fd;margin:4px 0 10px">
+    1단계 [원칙(2+3)+장애건수(0)=<b>5</b>] · 2단계 [업무원칙 총 <b>10</b>개] · 3단계 [원팀(10)-완결성(8)=<b>2</b>]
+  </div>
+  <div class="sumgrid">
+    <div class="sumcard">
+      <h4>🚀 슬로건 & 핵심가치</h4>
+      • <b>미래를 여는 Xtion, 혁신을 향한 DXign</b><br>
+      • <b>바르게, 빠르게, 즐겁게!</b>
+    </div>
+    <div class="sumcard">
+      <h4>🛡️ 1~3. 신뢰와 기본</h4>
+      1. 과정의 정당성이 결과의 가치를 증명합니다.<br>
+      2. 장애 제로를 실천하고 고객의 신뢰를 완성합니다.<br>
+      3. 보안의 빈틈은 닫고 보안의 습관은 깨웁니다.
+    </div>
+    <div class="sumcard">
+      <h4>💡 4~7. 혁신과 실행</h4>
+      4. 담대한 도전으로 기술 변화를 선도합니다.<br>
+      5. 기술격차를 해소하는 진짜 혁신을 완성합니다.<br>
+      6. 단단한 원칙 위에 유연한 사고를 더합니다.<br>
+      7. 안되는 이유보다 되는 방법을 제안합니다.
+    </div>
+    <div class="sumcard">
+      <h4>🤝 8~10. 책임과 원팀</h4>
+      8. 주도성을 가지고 결과의 완결성을 책임집니다.<br>
+      9. 비난 없는 문화로 최고의 시너지를 만듭니다.<br>
+      10. 부서 간 경계를 넘어 원팀으로 움직입니다.
+    </div>
+  </div>
+  <div class="capture">
+    <div class="capBig">📸 사내 인증 캡처 안내</div>
+    최종 클리어 화면을 <b>사번 및 성명</b>이 식별되도록 캡처하여 사내 인증 설문에 제출해 주세요!<br>
+    기록 우수자 및 추첨 참여자 분들께 소정의 리워드를 지급합니다. 🎁
+  </div>
+  <button class="btn" id="btnForm">📝 클리어 인증 제출하기</button>
+</div>
+
+<!-- 게임 오버 화면 -->
+<div id="overScr" class="screen">
+  <div style="font-size:56px">🚨</div>
+  <div class="bigT" id="overTitle" style="color:#ff6b6b;text-shadow:3px 3px 0 #3a1220">보안 락다운 제한시간 초과!</div>
+  <p id="overDesc" style="color:#cbd5e1;margin:8px 0 4px">오늘 밤은 결국 벙커에 갇혀 밤샘 야근을 하게 되었습니다… 😭</p>
+  <button class="btn" id="btnRetry">🔄 시스템 재부팅 (다시 도전)</button>
+</div>
+
+<!-- 모달 & 캔버스 -->
+<div id="modalBg"><div id="modalBox"></div></div>
+<canvas id="confetti"></canvas>
+
+<script>
+"use strict";
+
+var SURVEY_FORM_URL = "https://forms.gle/shinhanDS"; // 사내 설문 링크 URL
+
+function $(s){ return document.querySelector(s); }
+function pr(x,y,w,h,c){ return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+c+'"/>'; }
+
+function worker(ox, shirt, hair, lanyard){
+  var s = "";
+  s += pr(ox+2,0,40,14,hair) + pr(ox+2,14,6,12,hair) + pr(ox+36,14,6,12,hair);
+  s += pr(ox+8,14,28,22,"#ffd9b0");
+  s += pr(ox+13,22,5,6,"#1e293b") + pr(ox+26,22,5,6,"#1e293b");
+  s += pr(ox+9,29,5,4,"#fda4af") + pr(ox+30,29,5,4,"#fda4af");
+  s += pr(ox+19,31,6,3,"#c2410c");
+  s += pr(ox+6,36,32,30,shirt) + pr(ox+16,36,12,5,"#ffffff");
+  s += pr(ox+20,41,4,12,lanyard) + pr(ox+16,53,12,9,"#ffffff") + pr(ox+18,55,8,2,lanyard);
+  s += pr(ox,38,6,22,shirt) + pr(ox+38,38,6,22,shirt);
+  s += pr(ox,60,6,6,"#ffd9b0") + pr(ox+38,60,6,6,"#ffd9b0");
+  s += pr(ox+8,66,12,16,"#1e293b") + pr(ox+24,66,12,16,"#1e293b");
+  s += pr(ox+6,82,14,6,"#0f172a") + pr(ox+24,82,14,6,"#0f172a");
+  return s;
+}
+
+function duo(w){
+  return '<svg viewBox="0 0 100 96" width="'+w+'" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">'
+    + pr(6,90,88,4,"rgba(0,0,0,.45)")
+    + worker(2,"#0051ff","#1e293b","#38bdf8")
+    + worker(54,"#f97316","#334155","#22c55e")
+    + '</svg>';
+}
+
+var ROOM_ORDER = ["room1","room2","room3","lobby"];
+var ROOM_NAMES = {
+  room1:"ROOM 1 · 코어 개발실",
+  room2:"ROOM 2 · DX 혁신 회의실",
+  room3:"ROOM 3 · 애자일 전략실",
+  lobby:"FINAL · 디지털 벙커 로비"
+};
+var NAV_NAMES = {room1:"1단계", room2:"2단계", room3:"3단계", lobby:"로비"};
+var STEP_NUM = {room1:1, room2:2, room3:3};
+var DOOR_LABELS = {
+  room1:"🚪 DX 회의실 게이트",
+  room2:"🚪 전략실 연결 게이트",
+  room3:"🚪 메인 로비 비상문",
+  lobby:"🏢 본사 정문 출입구"
+};
+
+var OBJS = {
+  room1:{
+    computer:{
+      x:20, b:30, icon:"🖥️", label:"서버 모니터",
+      quiz:{
+        q:'<span class="qtag">제2원칙</span><br>모니터에 띄워진 신한DS 시스템 운영 가이드.<br><br>『<b>____ 제로</b>를 실천하고 고객의 신뢰를 완성합니다.』<br>빈칸에 들어갈 단어와 목표 수치는?',
+        c:["야근 (0건)", "장애 (0건)", "휴가 (0일)", "불만 (0건)"], a:1,
+        clue:"🛠️ 제2원칙: 장애 제로(0)"
+      }
+    },
+    drawer:{
+      x:44, b:24, icon:"🗄️", label:"보안 서랍",
+      quiz:{
+        q:'<span class="qtag">제3원칙</span><br>서랍에 붉은색 보안 규정집이 들어있다.<br><br>『<b>보안의 빈틈은 닫고 보안의 습관은 깨웁니다.</b>』는<br>신한DS 10대 업무원칙 중 제 몇 원칙일까요?',
+        c:["제1원칙", "제3원칙", "제6원칙", "제9원칙"], a:1,
+        clue:"🔒 제3원칙: 보안 습관화"
+      }
+    },
+    board:{
+      x:66, b:44, icon:"📋", label:"현황 대시보드",
+      quiz:{
+        q:'<span class="qtag">운영 지표</span><br>대시보드 상단에 고정된 연간 핵심 품질 목표 수치!<br><br>『신한 금융 서비스 시스템 치명 장애 목표치: <b>__건</b>』',
+        c:["ZERO (0건)", "연간 5건", "분기별 1건", "10건 미만"], a:0,
+        clue:"🎯 목표치: 0 (ZERO)"
+      }
+    },
+    plant:{x:8, b:24, decoy:"공기정화 식물이다. 신한DS의 쾌적한 개발 환경을 지켜주고 있다. 🌿"},
+    coffee:{x:55, b:44, icon:"☕", label:"에스프레소 머신", decoy:"『바르게 빠르게 즐겁게!』 커피 한 잔 마시고 코드 리뷰 가자!"},
+    trash:{x:78, b:24, icon:"🗑️", label:"재활용함", decoy:"파쇄된 종이 조각: 『...과정의 정당성이 결과의 가치를 증명합니다 (제1원칙)...』"}
+  },
+  room2:{
+    projector:{x:46, b:40, icon:"📽️", label:"프로젝터", mini:true},
+    memo:{x:22, b:26, icon:"📝", label:"회의록 메모", decoy:"메모: 『프로젝터 화면에서 신한DS의 진짜 업무원칙만 골라 담아 100점을 완성하세요!』"},
+    chair:{x:66, b:24, icon:"🪑", label:"인체공학 의자", decoy:"집중 근무용 의자다. 푹신하지만 지금 쉴 틈은 없다!"},
+    plant2:{x:8, b:24, decoy:"화분 뒤에는 아무것도 숨겨져 있지 않다."}
+  },
+  room3:{
+    cabinet:{
+      x:18, b:26, icon:"🗃️", label:"전략 서류함",
+      quiz:{
+        q:'<span class="qtag">제10원칙</span><br>원팀 정신을 규정한 원칙을 발견했다.<br><br>『부서 간 경계를 넘어 <b>____</b>으로 움직입니다.』<br>그리고 이 원칙은 10대 원칙 중 몇 번째일까요?',
+        c:["파트너 (5번째)", "원팀 (10번째)", "동반자 (8번째)", "원탑 (1번째)"], a:1,
+        clue:"🤝 제10원칙: 원팀(One-Team)"
+      }
+    },
+    frame:{
+      x:42, b:46, icon:"🖼️", label:"비전 액자",
+      quiz:{
+        q:'<span class="qtag">핵심 슬로건</span><br>회의실 전면에 걸린 대형 액자의 문구!<br><br>『미래를 여는 Xtion, 혁신을 향한 <b>____</b>』<br>빈칸에 들어갈 올바른 단어는?',
+        c:["Action", "DXign", "Design", "Vision"], a:1,
+        clue:"✨ 슬로건: DXign"
+      }
+    },
+    locker:{
+      x:64, b:26, icon:"📦", label:"아카이브 라커",
+      quiz:{
+        q:'<span class="qtag">제8원칙</span><br>결과의 완결성을 강조한 원칙!<br><br>『<b>____</b>을 가지고 결과의 완결성을 책임집니다.』<br>해당 원칙의 번호는?',
+        c:["제4원칙 (창의성)", "제7원칙 (적극성)", "제8원칙 (주도성)", "제9원칙 (책임감)"], a:2,
+        clue:"💡 제8원칙: 주도성·완결성"
+      }
+    },
+    printer:{x:80, b:26, icon:"🖨️", label:"네트워크 복합기", decoy:"인쇄 중인 규정: 『제7원칙: 안되는 이유보다 되는 방법을 제안합니다.』"},
+    cactus:{x:8, b:24, icon:"📓", label:"엔지니어 노트", decoy:"『단단한 원칙 위에 유연한 사고를 더합니다. (제6원칙)』"}
+  },
+  lobby:{
+    infodesk:{x:22, b:26, icon:"💁", label:"안내데스크", decoy:"데스크 안내: 『정문 출입 암호는 <b>1단계 통과답</b>, <b>2단계 통과답</b>, <b>3단계 통과답</b>을 순서대로 이어붙인 숫자입니다. 기억이 안 나면 📒 메모장을 확인하세요!』"}
+  }
+};
+
+var DOOR_Q = {
+  room1:{
+    q:'<span class="qtag">보안 레벨 1</span><br>『이 방에서 확인한 두 업무원칙 번호의 합(제2원칙 + 제3원칙)에 <br>목표 장애 건수(ZERO=0)를 더한 값은?』<br><span style="color:#93c5fd;font-size:12px">단서 슬롯 확인 · 숫자만 입력</span>',
+    a:"5"
+  },
+  room2:{
+    q:'<span class="qtag">보안 레벨 2</span><br>『신한DS인이 실천해야 할 핵심 업무원칙(Working Rules)은 총 몇 개인가?』<br><span style="color:#93c5fd;font-size:12px">숫자만 입력</span>',
+    a:"10"
+  },
+  room3:{
+    q:'<span class="qtag">보안 레벨 3</span><br>『"원팀"을 명시한 마지막 원칙 번호(10)에서 <br>"주도성과 완결성"을 명시한 원칙 번호(8)를 뺀 값은?』<br><span style="color:#93c5fd;font-size:12px">숫자만 입력</span>',
+    a:"2"
+  }
+};
+
+var HINTS = {
+  room1:"※ 코어 개발실 단서: 제2원칙(장애 제로), 제3원칙(보안 습관), 목표치(0)를 합산해 봐!",
+  room2:"※ 프로젝터 미니게임에서 보았던 신한DS 10대 업무원칙의 '총 개수'를 생각하자.",
+  room3:"※ 제10원칙(원팀으로 움직입니다)에서 제8원칙(주도성과 결과 완결성)을 빼면?",
+  lobby:"📒 메모장 확인! 1단계 답(5) + 2단계 답(10) + 3단계 답(2)을 차례대로 누르면 열린다!"
+};
+
+var GREET = {
+  room1:"개발실 게이트가 잠겼어! 서버와 현황판에서 제2·제3원칙 단서를 찾아보자!",
+  room2:"DX 혁신 회의실이야. 프로젝터에서 신한DS 업무원칙 문구를 받아 100점을 만들어야 해!",
+  room3:"애자일 전략실 도착! 서류함과 액자에서 비전 및 원칙 번호 단서를 조합하자!",
+  lobby:"디지털 벙커 1층 로비! 1, 2, 3단계의 암호를 합쳐 정문 키패드를 해제하자!"
+};
+
+var MG_REAL = [
+  "과정의 정당성", "장애 제로 실천", "보안의 습관", "담대한 도전",
+  "진짜 혁신 완성", "유연한 사고", "되는 방법 제안", "결과의 완결성",
+  "비난 없는 시너지", "원팀으로 행동", "바르게 빠르게 즐겁게"
+];
+var MG_FAKE = [
+  "선례 없음 반려", "부서 이기주의", "남 탓하기", "안전제일 보류",
+  "적당히 타협", "비밀주의 고수", "보고를 위한 보고", "책임 회피",
+  "장애 은폐", "불통과 독단"
+];
+var MG_EMO = ["⚡","🛡️","💡","🤝","🚀","🎯","💎","📘"];
+var MG_PAL = [["#dbeafe","#1e40af"],["#eff6ff","#1d4ed8"],["#e0f2fe","#0369a1"],["#f0fdf4","#15803d"]];
+
+/* 주관식 문제 빈칸 정답 노출 버그 수정 완료: [ 빈 칸 ] 밑줄 형태로 가림 */
+var CHASE_WORDS = [
+  {w:"정당성", q:'과정의 <span style="color:#ffd23f;border-bottom:2px solid #ffd23f;padding:0 8px">[ 빈 칸 ]</span>이 결과의 가치를 증명합니다.'},
+  {w:"장애 제로", q:'<span style="color:#ffd23f;border-bottom:2px solid #ffd23f;padding:0 8px">[ 빈 칸 ]</span>를 실천하고 고객의 신뢰를 완성합니다.'},
+  {w:"되는 방법", q:'안되는 이유보다 <span style="color:#ffd23f;border-bottom:2px solid #ffd23f;padding:0 8px">[ 빈 칸 ]</span>을 제안합니다.'},
+  {w:"원팀", q:'부서 간 경계를 넘어 <span style="color:#ffd23f;border-bottom:2px solid #ffd23f;padding:0 8px">[ 빈 칸 ]</span>으로 움직입니다.'}
+];
+
+var S = null;
+var walking = false;
+var timerId = null;
+var ended = false;
+var MG = null;
+var CHASE = null;
+var kcode = "";
+
+function initState(){
+  S = {
+    roomIndex:0, maxRoom:0, time:900, hints:3, answers:[], chaseDone:false,
+    rooms:{
+      room1:{clues:[],done:{},solved:false,doorPassed:false,tries:3},
+      room2:{score:0,solved:false,doorPassed:false,tries:3},
+      room3:{clues:[],done:{},solved:false,doorPassed:false,tries:3},
+      lobby:{tries:3}
+    }
+  };
+}
+
+function showScreen(id){
+  var scr = document.querySelectorAll(".screen");
+  for(var i=0;i<scr.length;i++) scr[i].classList.remove("active");
+  $("#"+id).classList.add("active");
+}
+
+function fmt(t){
+  var m = Math.floor(t/60), s = t%60;
+  return (m<10?"0":"")+m+":"+(s<10?"0":"")+s;
+}
+
+function startTimer(){
+  if(timerId) clearInterval(timerId);
+  timerId = setInterval(function(){
+    if(ended) return;
+    S.time--;
+    var el = $("#timer");
+    el.textContent = fmt(Math.max(0,S.time));
+    if(S.time<=60) el.classList.add("warn");
+    if(S.time<=0) gameOver("⏰ 시간 초과!", "보안 제한 시간 내에 벙커를 탈출하지 못했습니다.");
+  },1000);
+}
+
+function penalty(){
+  S.time = Math.max(1, S.time-30);
+  var el = $("#timer");
+  el.textContent = fmt(S.time);
+  el.classList.add("shake");
+  setTimeout(function(){ el.classList.remove("shake"); },450);
+}
+
+function gameOver(title, desc){
+  ended = true;
+  clearInterval(timerId);
+  closeModal();
+  if(MG && MG.run) MG.run=false;
+  var sd = $("#sdOverlay");
+  if(sd && sd.parentNode) sd.parentNode.removeChild(sd);
+  $("#overTitle").textContent = title || "보안 락다운 제한시간 초과!";
+  $("#overDesc").innerHTML = desc || "오늘 밤은 결국 벙커에 갇혀 밤샘 야근을 하게 되었습니다… 😭";
+  showScreen("overScr");
+}
+
+function hearts(n){
+  var s="";
+  for(var i=0;i<n;i++) s+="💙";
+  for(var j=n;j<3;j++) s+="🖤";
+  return s;
+}
+
+function updateHUD(){
+  var room = ROOM_ORDER[S.roomIndex];
+  $("#roomName").textContent = ROOM_NAMES[room];
+  $("#timer").textContent = fmt(S.time);
+  $("#btnHint").textContent = "💡 힌트 "+S.hints;
+  var nav = "";
+  for(var r=0;r<ROOM_ORDER.length;r++){
+    if(r<=S.maxRoom){
+      nav += '<button class="navb'+(r===S.roomIndex?' cur':'')+'" data-r="'+r+'">'+NAV_NAMES[ROOM_ORDER[r]]+'</button>';
+    }
+  }
+  $("#roomNav").innerHTML = nav;
+  var slots = "";
+  if(room==="room1"||room==="room3"){
+    var clues = S.rooms[room].clues;
+    for(var i=0;i<3;i++){
+      if(clues[i]) slots += '<div class="slot fill">'+clues[i]+'</div>';
+      else slots += '<div class="slot">?</div>';
+    }
+  } else if(room==="room2"){
+    if(S.rooms.room2.solved) slots = '<div class="slot fill">🎬 DX 원칙 수집 완료!</div>';
+    else slots = '<div class="slot">🎬 원칙 수집 '+S.rooms.room2.score+'/100점</div>';
+  } else {
+    slots = '<div class="slot fill">🔑 정문 암호 = 1+2+3단계 답 순서 조합</div>';
+  }
+  $("#clueSlots").innerHTML = slots;
+  var chips = "";
+  for(var j=0;j<S.answers.length;j++){
+    chips += '<span class="chip">'+(j+1)+'단계 완료✔</span>';
+  }
+  $("#ansChips").innerHTML = chips;
+}
+
+function openMemo(){
+  if(!S) return;
+  var names = {room1:"1단계 · 코어 개발실", room2:"2단계 · DX 혁신 회의실", room3:"3단계 · 애자일 전략실"};
+  var rows = "";
+  var all = true;
+  ["room1","room2","room3"].forEach(function(rm){
+    if(S.rooms[rm].doorPassed){
+      rows += '<div class="memoRow">✏️ '+names[rm]+' 보안문 답 : <b>'+DOOR_Q[rm].a+'</b></div>';
+    } else {
+      all = false;
+      rows += '<div class="memoRow off">🔒 '+names[rm]+' — 아직 통과 전…</div>';
+    }
+  });
+  if(all){
+    rows += '<div class="memoRow" style="color:#0046ff;font-weight:bold">💡 세 답을 1→2→3단계 순서로 조합하면 정문 암호! (5102)</div>';
+  }
+  modal('<h3>📒 신한DS 보안 메모장</h3><p style="font-size:12px;color:#94a3b8">통과한 단계의 보안 코드가 자동으로 메모됩니다.</p><div class="memoPad">'+rows+'</div><div class="mrow"><button class="btn2" data-close="1">닫기</button></div>');
+}
+
+function strategyMapHTML(){
+  return '<div class="sdTitle">📋 신한DS 10대 업무원칙 (Working Rules)</div>'
+  +'<div class="sdSub">미래를 여는 Xtion · 혁신을 향한 DXign ｜ 바르게 · 빠르게 · 즐겁게</div>'
+  +'<div class="sdRuleGrid">'
+    +'<div class="sdRuleItem"><b>1.</b> 과정의 정당성이 결과의 가치를 증명합니다.</div>'
+    +'<div class="sdRuleItem"><b>2.</b> 장애 제로를 실천하고 고객의 신뢰를 완성합니다.</div>'
+    +'<div class="sdRuleItem"><b>3.</b> 보안의 빈틈은 닫고 보안의 습관은 깨웁니다.</div>'
+    +'<div class="sdRuleItem"><b>4.</b> 담대한 도전으로 기술 변화를 선도합니다.</div>'
+    +'<div class="sdRuleItem"><b>5.</b> 기술격차를 해소하는 진짜 혁신을 완성합니다.</div>'
+    +'<div class="sdRuleItem"><b>6.</b> 단단한 원칙 위에 유연한 사고를 더합니다.</div>'
+    +'<div class="sdRuleItem"><b>7.</b> 안되는 이유보다 되는 방법을 제안합니다.</div>'
+    +'<div class="sdRuleItem"><b>8.</b> 주도성을 가지고 결과의 완결성을 책임집니다.</div>'
+    +'<div class="sdRuleItem"><b>9.</b> 비난 없는 문화로 최고의 시너지를 만듭니다.</div>'
+    +'<div class="sdRuleItem"><b>10.</b> 부서 간 경계를 넘어 원팀으로 움직입니다.</div>'
+  +'</div>';
+}
+
+function showHintMap(){
+  if(!S) return;
+  if($("#sdOverlay")) return;
+  if(S.hints<=0){
+    modal('<h3>💡 힌트 소진</h3><p>더 이상 힌트가 없습니다. 10대 원칙의 정신으로 직접 돌파하세요!</p><div class="mrow"><button class="btn2" data-close="1">닫기</button></div>');
+    return;
+  }
+  S.hints--;
+  updateHUD();
+  var room = ROOM_ORDER[S.roomIndex];
+  var ov = document.createElement("div");
+  ov.id = "sdOverlay";
+  ov.innerHTML = '<div id="sdBox">'+strategyMapHTML()
+    +'<div style="margin-top:12px;background:#1e293b;border:2px dashed #f59e0b;color:#fde68a;padding:10px;font-size:13px;border-radius:4px">💡 '+HINTS[room]+'</div>'
+    +'<button class="sdClose" id="sdCloseBtn">✅ 숙지 완료 (닫기)</button></div>';
+  document.body.appendChild(ov);
+  $("#sdCloseBtn").addEventListener("click", function(){
+    if(ov.parentNode) ov.parentNode.removeChild(ov);
+  });
+}
+
+function objHTML(room){
+  var html = "";
+  var data = OBJS[room];
+  for(var id in data){
+    var o = data[id];
+    var icon = o.icon || "🔍";
+    var label = o.label || "";
+    var done = (S.rooms[room].done && S.rooms[room].done[id]) ? " done" : "";
+    html += '<div class="obj'+done+'" data-id="'+id+'" style="left:'+o.x+'%;bottom:'+o.b+'%"><div class="oicon">'+icon+'</div>'
+      + (label? '<div class="olabel">'+label+'</div>' : '')
+      + '<div class="badge">✅</div></div>';
+  }
+  return html;
+}
+
+function doorHTML(room){
+  var open = S.rooms[room].solved ? " open" : "";
+  if(room==="lobby"){
+    return '<div class="door gdoor open" id="doorEl"><div class="dlabel">'+DOOR_LABELS[room]+'</div><div class="knob"></div></div>';
+  }
+  return '<div class="door'+open+'" id="doorEl"><div class="dlabel">'+DOOR_LABELS[room]+'</div><div class="knob"></div></div>';
+}
+
+function charHTML(){
+  return '<div id="char">'+duo(96)+'<div id="bubble"></div></div>';
+}
+
+function buildRoom(room){
+  var h = "";
+  if(room==="room1"){
+    h += '<div class="wall"></div><div class="floor"></div><div class="baseline"></div>';
+    h += '<div class="lamp" style="left:18%"></div><div class="lamp" style="left:60%"></div>';
+    h += '<div class="win" style="left:4%;top:8%;width:180px;height:120px"><div class="bldg" style="left:20px;width:30px;height:70px"><i style="left:8px;top:10px"></i><i style="left:8px;top:30px"></i></div><div class="bldg" style="left:70px;width:40px;height:90px"><i style="left:12px;top:20px"></i></div></div>';
+    h += '<div class="clock" style="left:46%;top:8%"><div class="h hh"></div><div class="h mm"></div></div>';
+    h += '<div class="poster" style="left:58%;top:10%"><b>Shinhan DS</b><br>고객 신뢰의 시작은<br>장애 제로 실천에서!</div>';
+    h += '<div class="furn" style="left:16%;bottom:18%;width:22%;height:10%"></div>';
+    h += '<div class="furn" style="left:62%;bottom:26%;width:16%;height:6%"></div>';
+  } else if(room==="room2"){
+    h += '<div class="wall meet"></div><div class="floor"></div><div class="baseline"></div>';
+    h += '<div class="lamp" style="left:40%"></div>';
+    h += '<div class="pscreen" style="left:28%;top:6%;width:44%;height:32%"><div><span class="pslogo">Shinhan DS</span><span class="pssub">미래를 여는 Xtion</span></div></div>';
+    h += '<div class="furn" style="left:32%;bottom:20%;width:36%;height:8%"></div>';
+    h += '<div class="poster" style="left:14%;top:14%"><b>회의실 행동양식</b><br>안되는 이유보다<br>되는 방법을 제안하라!</div>';
+  } else if(room==="room3"){
+    h += '<div class="wall plan"></div><div class="floor"></div><div class="baseline"></div>';
+    h += '<div class="lamp" style="left:22%"></div><div class="lamp" style="left:64%"></div>';
+    h += '<div class="clock" style="left:50%;top:8%"><div class="h hh"></div><div class="h mm"></div></div>';
+    h += '<div class="poster" style="left:86%;top:10%"><b>혁신을 향한 DXign</b><br>부서 경계를 넘어 원팀으로!</div>';
+    h += '<div class="win" style="left:28%;top:8%;width:150px;height:100px"><div class="bldg" style="left:30px;width:35px;height:65px"><i style="left:10px;top:15px"></i></div></div>';
+    h += '<div class="furn" style="left:58%;bottom:18%;width:12%;height:8%"></div>';
+  } else {
+    h += '<div class="wall lobby"></div><div class="floor marble"></div><div class="baseline"></div>';
+    h += '<div class="lamp" style="left:18%"></div><div class="lamp" style="left:52%"></div>';
+    h += '<div style="position:absolute;right:8%;top:14%;background:#0284c7;color:#fff;padding:4px 12px;border:2px solid #38bdf8;font-size:12px;letter-spacing:2px">EXIT ➔</div>';
+    h += '<div class="furn" style="left:38%;bottom:18%;width:20%;height:10%"></div>';
+  }
+  h += objHTML(room);
+  h += doorHTML(room);
+  h += charHTML();
+  return h;
+}
+
+function renderRoom(greet){
+  var room = ROOM_ORDER[S.roomIndex];
+  var st = $("#stage");
+  st.innerHTML = buildRoom(room);
+  updateHUD();
+  if(greet){
+    setTimeout(function(){ say(GREET[room]); }, 300);
+  }
+}
+
+function say(text){
+  var b = $("#bubble");
+  if(!b) return;
+  b.innerHTML = text;
+  b.style.display = "block";
+  clearTimeout(say._t);
+  say._t = setTimeout(function(){ b.style.display="none"; }, 3200);
+}
+
+function walkTo(xPercent, cb){
+  var c = $("#char");
+  if(!c){ if(cb)cb(); return; }
+  var cur = parseFloat(c.style.left)||10;
+  if(Math.abs(cur-xPercent)<2){ if(cb)cb(); return; }
+  walking = true;
+  c.classList.add("walk");
+  c.style.left = xPercent+"%";
+  setTimeout(function(){
+    c.classList.remove("walk");
+    walking = false;
+    if(cb)cb();
+  }, 750);
+}
+
+function modal(html){
+  $("#modalBox").innerHTML = html;
+  $("#modalBg").style.display = "flex";
+}
+
+function closeModal(){
+  $("#modalBg").style.display = "none";
+}
+
+function handleObj(id){
+  if(walking) return;
+  var room = ROOM_ORDER[S.roomIndex];
+  var o = OBJS[room][id];
+  if(!o) return;
+  var el = document.querySelector('.obj[data-id="'+id+'"]');
+  var x = parseFloat(el.style.left)||10;
+  walkTo(Math.max(2, x-6), function(){
+    if(o.mini){ startMG(); return; }
+    if(o.decoy){ say(o.decoy); return; }
+    if(S.rooms[room].done[id]){ say("이 단서는 이미 메모장에 기록했어! ✅"); return; }
+    openQuiz(room, id, o);
+  });
+}
+
+function openQuiz(room, id, o){
+  var q = o.quiz;
+  var html = '<h3>🔍 '+ (o.label||"조사") +'</h3><p>'+q.q+'</p><div style="margin-top:10px">';
+  for(var i=0;i<q.c.length;i++){
+    html += '<button class="choice" data-i="'+i+'">'+ String.fromCharCode(9312+i) +' '+q.c[i]+'</button>';
+  }
+  html += '</div><div class="mrow"><button class="btn2" data-close="1">닫기</button></div>';
+  modal(html);
+
+  var btns = document.querySelectorAll("#modalBox .choice");
+  for(var j=0;j<btns.length;j++){
+    btns[j].addEventListener("click", function(){
+      var pick = parseInt(this.getAttribute("data-i"),10);
+      if(pick===q.a){
+        S.rooms[room].done[id] = true;
+        S.rooms[room].clues.push(q.clue);
+        var solved = S.rooms[room].clues.length>=3;
+        if(solved) S.rooms[room].solved = true;
+        modal('<h3>✨ 단서 확인 완료!</h3><div class="cluecard">'+q.clue+'</div>'
+          + (solved? '<p style="color:#38bdf8">방의 모든 단서를 확보했다! 게이트 보안시스템을 해제하자!</p>' : '<p>단서 슬롯에 안전하게 기록되었습니다. ('+S.rooms[room].clues.length+'/3)</p>')
+          + '<div class="mrow"><button class="btn" data-close="1" style="margin-top:0;padding:10px 26px;font-size:15px">확인</button></div>');
+        var objEl = document.querySelector('.obj[data-id="'+id+'"]');
+        if(objEl) objEl.classList.add("done");
+        if(solved){
+          var d = $("#doorEl");
+          if(d) d.classList.add("open");
+        }
+        updateHUD();
+      } else {
+        penalty();
+        this.classList.add("shake");
+        this.style.borderColor = "#ef4444";
+        say("원칙에 어긋나는 선택이야! 30초 패널티 차감 ⚠️");
+      }
+    });
+  }
+}
+
+function handleDoor(){
+  if(walking) return;
+  var room = ROOM_ORDER[S.roomIndex];
+  walkTo(room==="lobby"?72:78, function(){
+    if(room==="lobby"){
+      openKeypad();
+      return;
+    }
+    if(!S.rooms[room].solved){
+      if(room==="room2") say("프로젝터의 [원칙 수집 게임]을 100점으로 클리어해야 게이트가 열려!");
+      else say("이 방에 있는 핵심 원칙 단서 3개를 모두 모아야 해!");
+      return;
+    }
+    if(S.rooms[room].doorPassed){
+      var dq = DOOR_Q[room];
+      modal('<h3>🔓 기 승인된 보안 게이트</h3><div class="memoPad"><div class="memoRow">✏️ '+STEP_NUM[room]+'단계 승인 코드 : <b>'+dq.a+'</b></div></div>'
+        +'<div class="mrow"><button class="btn2" data-close="1">닫기</button><button class="btn" id="goNext2" style="margin-top:0;padding:10px 26px;font-size:15px">다음 구역으로 ➔</button></div>');
+      $("#goNext2").addEventListener("click", function(){ closeModal(); gotoNext(); });
+      return;
+    }
+    openDoorQ(room);
+  });
+}
+
+function openDoorQ(room){
+  var dq = DOOR_Q[room];
+  modal('<h3>🔐 보안 게이트 인증</h3><p>'+dq.q+'</p>'
+    +'<div class="tryRow">남은 기회 <span id="tryHearts">'+hearts(S.rooms[room].tries)+'</span></div>'
+    +'<input class="qinput" id="doorAns" inputmode="numeric" maxlength="4" autocomplete="off">'
+    +'<div class="mrow"><button class="btn2" data-close="1">취소</button><button class="btn" id="doorSubmit" style="margin-top:0;padding:10px 26px;font-size:15px">승인 요청</button></div>');
+  var input = $("#doorAns");
+  input.focus();
+
+  function submit(){
+    var v = input.value.trim();
+    if(v===dq.a){
+      S.rooms[room].doorPassed = true;
+      S.answers.push(dq.a);
+      updateHUD();
+      modal('<h3>✅ 인증 성공! 게이트 오픈!</h3>'
+        +'<div class="memoPad"><div class="memoRow">✏️ <b>메모장에 보안 암호가 저장되었습니다.</b><br>「'+STEP_NUM[room]+'단계 답 : <b>'+dq.a+'</b>」</div></div>'
+        +'<p style="font-size:13px;color:#93c5fd">상단 📒 <b>메모장</b>에서 언제든 확인할 수 있습니다.</p>'
+        +'<div class="mrow"><button class="btn" id="goNext" style="margin-top:0;padding:10px 26px;font-size:15px">다음 구역으로 ➔</button></div>');
+      $("#goNext").addEventListener("click", function(){ closeModal(); gotoNext(); });
+    } else {
+      S.rooms[room].tries--;
+      if(S.rooms[room].tries<=0){
+        gameOver("🚨 락다운 승인 3회 실패!", "보안 시스템이 완전 폐쇄되었습니다.<br>신한DS 벙커에 갇혀 밤샘 야근이 확정되었습니다.");
+        return;
+      }
+      penalty();
+      var th = $("#tryHearts");
+      if(th) th.textContent = hearts(S.rooms[room].tries);
+      input.value = "";
+      input.classList.add("shake");
+      setTimeout(function(){ input.classList.remove("shake"); },450);
+      say("틀렸어! 남은 인증 기회 "+S.rooms[room].tries+"회! 신중하게!");
+    }
+  }
+  $("#doorSubmit").addEventListener("click", submit);
+  input.addEventListener("keydown", function(e){ if(e.key==="Enter") submit(); });
+}
+
+function startChase(){
+  CHASE = { idx:0, pos:2 };
+  var ov = document.createElement("div");
+  ov.id = "chase";
+  ov.innerHTML = '<div class="clamp" style="left:15%"></div><div class="clamp" style="left:55%"></div><div class="cfloor"></div>'
+    +'<div id="chaseShadow" style="left:2%"><svg viewBox="0 0 100 130" width="88"><ellipse cx="50" cy="120" rx="30" ry="5" fill="rgba(0,0,0,.5)"/><path d="M50 10 C25 10 20 40 20 70 C20 100 15 120 22 124 L78 124 C85 120 80 100 80 70 C80 40 75 10 50 10 Z" fill="#020617"/><circle cx="40" cy="45" r="5" fill="#38bdf8"/><circle cx="60" cy="45" r="5" fill="#38bdf8"/></svg></div>'
+    +'<div id="chaseHope">'+duo(96)+'</div><div id="chaseCard"></div>';
+  $("#stage").appendChild(ov);
+  $("#chaseCard").innerHTML = '<h3>🚨 보안 드론 접근 경보!</h3><p>로비로 향하는 데이터 복도에서 보안 감시 센서가 작동했습니다!<br>원칙 문장의 빈칸을 신속하게 입력해 음성 인증을 통과하세요!</p>'
+    +'<div class="mrow"><button class="btn" id="chGo" style="margin-top:0;padding:10px 26px;font-size:15px">인증 시작 ➔</button></div>';
+  $("#chGo").addEventListener("click", chaseQ);
+}
+
+function chaseQ(){
+  var cur = CHASE_WORDS[CHASE.idx];
+  $("#chaseCard").innerHTML = '<h3>🏃 원칙 음성 인증 ('+(CHASE.idx+1)+'/'+CHASE_WORDS.length+')</h3>'
+    +'<p style="font-size:15px;color:#fef08a">『'+cur.q+'』</p>'
+    +'<input class="qinput" id="chAns" style="font-size:18px;letter-spacing:2px" autocomplete="off" placeholder="빈칸 단어 입력">'
+    +'<div class="mrow"><button class="btn" id="chSubmit" style="margin-top:0;padding:10px 26px;font-size:15px">전송</button></div>';
+  var input = $("#chAns");
+  input.focus();
+
+  function submit(){
+    var userVal = input.value.trim().replace(/\s/g,"");
+    var targetVal = cur.w.replace(/\s/g,"");
+    if(userVal === targetVal){
+      CHASE.idx++;
+      CHASE.pos = Math.max(2, CHASE.pos - 6);
+      $("#chaseShadow").style.left = CHASE.pos + "%";
+      if(CHASE.idx >= CHASE_WORDS.length){
+        S.chaseDone = true;
+        var ov = $("#chase");
+        if(ov && ov.parentNode) ov.parentNode.removeChild(ov);
+        CHASE = null;
+        modal('<h3>🎯 전 구역 인증 완료!</h3><div class="cluecard">신한DS 10대 업무원칙으로 보안 시스템을 무사히 통과했습니다!</div>'
+          +'<p>마침내 1층 디지털 벙커 로비에 도착했습니다!</p>'
+          +'<div class="mrow"><button class="btn" id="chDone" style="margin-top:0;padding:10px 26px;font-size:15px">로비 진입 ➔</button></div>');
+        $("#chDone").addEventListener("click", function(){ closeModal(); gotoNext(); });
+        return;
+      }
+      chaseQ();
+    } else {
+      penalty();
+      CHASE.pos += 12;
+      $("#chaseShadow").style.left = CHASE.pos + "%";
+      input.value = "";
+      input.classList.add("shake");
+      setTimeout(function(){ input.classList.remove("shake"); },450);
+    }
+  }
+  $("#chSubmit").addEventListener("click", submit);
+  input.addEventListener("keydown", function(e){ if(e.key==="Enter") submit(); });
+}
+
+function gotoNext(){
+  if(ROOM_ORDER[S.roomIndex]==="room3" && !S.chaseDone){
+    startChase();
+    return;
+  }
+  if(S.roomIndex < ROOM_ORDER.length-1){
+    S.roomIndex++;
+    S.maxRoom = Math.max(S.maxRoom, S.roomIndex);
+    renderRoom(true);
+  }
+}
+
+function openKeypad(){
+  kcode = "";
+  modal('<h3>🏢 본사 정문 마스터 키패드</h3>'
+    +'<p>『퇴근 암호 = <b>1단계 답 → 2단계 답 → 3단계 답</b> 순서 연결 숫자』<br><span style="color:#93c5fd;font-size:12px">기억이 안 나면 상단 📒 메모장을 열어보세요!</span></p>'
+    +'<div class="tryRow">남은 기회 <span id="tryHearts">'+hearts(S.rooms.lobby.tries)+'</span></div>'
+    +'<div class="kdisp" id="kdisp">····</div>'
+    +'<div class="kgrid">'
+    +'<button class="kbtn" data-k="1">1</button><button class="kbtn" data-k="2">2</button><button class="kbtn" data-k="3">3</button>'
+    +'<button class="kbtn" data-k="4">4</button><button class="kbtn" data-k="5">5</button><button class="kbtn" data-k="6">6</button>'
+    +'<button class="kbtn" data-k="7">7</button><button class="kbtn" data-k="8">8</button><button class="kbtn" data-k="9">9</button>'
+    +'<button class="kbtn" data-k="del">⌫</button><button class="kbtn" data-k="0">0</button><button class="kbtn" data-k="ok" style="color:#38bdf8;font-weight:bold">OK</button>'
+    +'</div><div class="mrow"><button class="btn2" data-close="1">닫기</button></div>');
+
+  var btns = document.querySelectorAll("#modalBox .kbtn");
+  for(var i=0;i<btns.length;i++){
+    btns[i].addEventListener("click", function(){
+      var k = this.getAttribute("data-k");
+      if(k==="del"){
+        kcode = kcode.slice(0,-1);
+      } else if(k==="ok"){
+        if(kcode==="5102"){
+          win();
+          return;
+        }
+        S.rooms.lobby.tries--;
+        if(S.rooms.lobby.tries<=0){
+          gameOver("🚨 최종 정문 락다운 발동!", "정문 출입 암호 3회 불일치로 시스템이 완전 잠금되었습니다.");
+          return;
+        }
+        penalty();
+        kcode = "";
+        var th = $("#tryHearts");
+        if(th) th.textContent = hearts(S.rooms.lobby.tries);
+        var d = $("#kdisp");
+        d.textContent = "오류!";
+        d.classList.add("shake");
+        setTimeout(function(){ d.classList.remove("shake"); d.textContent="····"; },600);
+        return;
+      } else if(kcode.length<4){
+        kcode += k;
+      }
+      $("#kdisp").textContent = kcode.length? kcode : "····";
+    });
+  }
+}
+
+function startMG(){
+  if(S.rooms.room2.solved){
+    say("원칙 수집 미션은 이미 완수했어! 이제 보안 게이트를 통과하자 🚪");
+    return;
+  }
+  var stage = $("#stage");
+  var ov = document.createElement("div");
+  ov.id = "mg";
+  ov.innerHTML = '<div id="mgTop">🎬 <b>신한DS 올바른 업무원칙을 받아라!</b>&nbsp; <span id="mgScore">0점</span> / 목표 100점'
+    +'<button class="btn2" id="mgExit" style="margin-left:auto">나가기</button></div>'
+    +'<div id="mgArea"><div id="mgGuide">🖱️ 마우스나 터치로 캐릭터를 좌우로 조종하세요!<br>'
+    +'<b style="color:#38bdf8">올바른 원칙 문구</b>를 받으면 <b style="color:#38bdf8">+10점</b><br>'
+    +'<b style="color:#ef4444">잘못된 행동 문구</b>를 받으면 <b style="color:#ef4444">-15점</b>! 빠르게 100점을 달성하세요!</div>'
+    +'<div id="mgChar">'+duo(84)+'</div></div>';
+  stage.appendChild(ov);
+
+  var area = $("#mgArea");
+  var r0 = area.getBoundingClientRect();
+  MG = {run:true, score:S.rooms.room2.score||0, items:[], f:0, px:r0.width/2};
+  $("#mgScore").textContent = MG.score+"점";
+  setTimeout(function(){
+    var g = $("#mgGuide");
+    if(g) g.style.display="none";
+  }, 3200);
+
+  ov.addEventListener("pointermove", function(e){
+    var r = area.getBoundingClientRect();
+    MG.px = Math.max(40, Math.min(r.width-40, e.clientX - r.left));
+  });
+  $("#mgExit").addEventListener("click", function(){ endMG(false); });
+  requestAnimationFrame(mgLoop);
+}
+
+function mgSpawn(){
+  var area = $("#mgArea");
+  if(!area) return;
+  var real = Math.random()<0.62;
+  var pool = real? MG_REAL : MG_FAKE;
+  var word = pool[Math.floor(Math.random()*pool.length)];
+  var emo = MG_EMO[Math.floor(Math.random()*MG_EMO.length)];
+  var pal = MG_PAL[Math.floor(Math.random()*MG_PAL.length)];
+  var el = document.createElement("div");
+  el.className = "mgItem";
+  el.textContent = emo+" "+word;
+  el.style.background = pal[0];
+  el.style.color = pal[1];
+  area.appendChild(el);
+  var w = el.offsetWidth;
+  var x = Math.random()*Math.max(10, (area.clientWidth - w - 20)) + 10;
+  el.style.left = x+"px";
+  el.style.top = "-36px";
+  MG.items.push({el:el, x:x, y:-36, v:1.8+Math.random()*1.2, real:real, w:w});
+}
+
+function mgPop(x,y,text,color){
+  var area = $("#mgArea");
+  if(!area) return;
+  var p = document.createElement("div");
+  p.className = "pop";
+  p.textContent = text;
+  p.style.left = x+"px";
+  p.style.top = y+"px";
+  p.style.color = color;
+  area.appendChild(p);
+  setTimeout(function(){ if(p.parentNode) p.parentNode.removeChild(p); },800);
+}
+
+function mgLoop(){
+  if(!MG || !MG.run) return;
+  var area = $("#mgArea");
+  if(!area){ MG.run=false; return; }
+  var H = area.clientHeight;
+  MG.f++;
+  if(MG.f % 48 === 0) mgSpawn();
+  var mc = $("#mgChar");
+  if(mc) mc.style.left = MG.px+"px";
+
+  for(var i=MG.items.length-1; i>=0; i--){
+    var it = MG.items[i];
+    it.y += it.v;
+    it.el.style.top = it.y+"px";
+    var cx = it.x + it.w/2;
+    if(it.y > H-130 && it.y < H-40 && Math.abs(cx - MG.px) < 70){
+      if(it.real){
+        MG.score += 10;
+        mgPop(cx-14, it.y, "+10", "#38bdf8");
+      } else {
+        MG.score = Math.max(0, MG.score-15);
+        mgPop(cx-14, it.y, "-15", "#ef4444");
+      }
+      if(it.el.parentNode) it.el.parentNode.removeChild(it.el);
+      MG.items.splice(i,1);
+      $("#mgScore").textContent = MG.score+"점";
+      if(MG.score>=100){
+        endMG(true);
+        return;
+      }
+      continue;
+    }
+    if(it.y > H+10){
+      if(it.el.parentNode) it.el.parentNode.removeChild(it.el);
+      MG.items.splice(i,1);
+    }
+  }
+  requestAnimationFrame(mgLoop);
+}
+
+function endMG(success){
+  if(!MG) return;
+  MG.run = false;
+  S.rooms.room2.score = success? 100 : MG.score;
+  var ov = $("#mg");
+  if(ov && ov.parentNode) ov.parentNode.removeChild(ov);
+  MG = null;
+  if(success){
+    S.rooms.room2.solved = true;
+    var d = $("#doorEl");
+    if(d) d.classList.add("open");
+    modal('<h3>🎉 신한DS 10대 원칙 체득 완료!</h3><div class="cluecard">바르고 빠른 의사결정으로 미션을 완수했습니다!</div>'
+      +'<p>보안 게이트가 해제 상태로 전환되었습니다. 문을 클릭하세요!</p>'
+      +'<div class="mrow"><button class="btn" data-close="1" style="margin-top:0;padding:10px 26px;font-size:15px">확인</button></div>');
+  } else {
+    say("현재 획득 점수는 보관되었어! ("+S.rooms.room2.score+"/100) 다시 시도하자!");
+  }
+  updateHUD();
+}
+
+function win(){
+  ended = true;
+  clearInterval(timerId);
+  closeModal();
+  var used = 900 - S.time;
+  $("#statTime").textContent = fmt(used);
+  $("#statHint").textContent = (3 - S.hints) + "회";
+  $("#clearChar").innerHTML = duo(130);
+  showScreen("clearScr");
+  confettiStart();
+}
+
+function confettiStart(){
+  var cv = $("#confetti");
+  var ctx = cv.getContext("2d");
+  cv.width = window.innerWidth;
+  cv.height = window.innerHeight;
+  var colors = ["#0051ff","#38bdf8","#ffd23f","#22c55e","#ffffff"];
+  var ps = [];
+  for(var i=0;i<160;i++){
+    ps.push({
+      x:Math.random()*cv.width, y:Math.random()*-cv.height,
+      w:6+Math.random()*7, h:8+Math.random()*8,
+      v:2+Math.random()*3.5, r:Math.random()*Math.PI,
+      vr:(Math.random()-.5)*.2, c:colors[Math.floor(Math.random()*colors.length)]
+    });
+  }
+  function loop(){
+    if(!$("#clearScr").classList.contains("active")){
+      ctx.clearRect(0,0,cv.width,cv.height);
+      return;
+    }
+    ctx.clearRect(0,0,cv.width,cv.height);
+    for(var i=0;i<ps.length;i++){
+      var p = ps[i];
+      p.y += p.v;
+      p.r += p.vr;
+      if(p.y > cv.height+20){
+        p.y = -20;
+        p.x = Math.random()*cv.width;
+      }
+      ctx.save();
+      ctx.translate(p.x,p.y);
+      ctx.rotate(p.r);
+      ctx.fillStyle = p.c;
+      ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      ctx.restore();
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+function startGame(){
+  initState();
+  ended = false;
+  showScreen("game");
+  renderRoom(true);
+  startTimer();
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  $("#introChar").innerHTML = duo(120);
+  $("#btnStart").addEventListener("click", startGame);
+  $("#btnRetry").addEventListener("click", function(){ location.reload(); });
+  $("#btnForm").addEventListener("click", function(){ window.open(SURVEY_FORM_URL, "_blank"); });
+  
+  $("#roomNav").addEventListener("click", function(e){
+    var b = e.target.closest(".navb");
+    if(!b || !S) return;
+    var r = parseInt(b.getAttribute("data-r"),10);
+    if(r<=S.maxRoom && r!==S.roomIndex){
+      S.roomIndex = r;
+      renderRoom(false);
+      setTimeout(function(){
+        say(r < S.maxRoom ? "이미 통과한 방이야. 문을 누르면 암호를 다시 볼 수 있어 📒" : "돌아왔어! 이어서 단서를 찾아보자!");
+      },300);
+    }
+  });
+
+  $("#btnMemo").addEventListener("click", openMemo);
+  $("#btnHint").addEventListener("click", showHintMap);
+
+  $("#stage").addEventListener("click", function(e){
+    var o = e.target.closest(".obj");
+    if(o){
+      handleObj(o.getAttribute("data-id"));
+      return;
+    }
+    var d = e.target.closest(".door");
+    if(d){
+      handleDoor();
+    }
+  });
+
+  $("#modalBg").addEventListener("click", function(e){
+    if(e.target.getAttribute && e.target.getAttribute("data-close")){
+      closeModal();
+    }
+    if(e.target.id==="modalBg"){
+      closeModal();
+    }
+  });
+});
+</script>
+</body>
+</html>
