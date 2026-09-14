@@ -487,7 +487,6 @@
   var authSaveBtn = document.getElementById("authSaveBtn");
   var authCloseBtn = document.getElementById("authCloseBtn");
 
-  // VIP 카드 클릭 시 정보 변경 모달 열기
   function openAuthModal() {
     if (teamSelect && myTeam) teamSelect.value = myTeam;
     if (sabunInput && mySabun) sabunInput.value = mySabun;
@@ -556,8 +555,9 @@
     });
   });
 
+  // 타임어택형(초 단위)은 소수점 둘째 자리까지 표기
   function formatScore(val, isTime){
-    if (isTime) return Number(val).toFixed(1) + "초";
+    if (isTime) return Number(val).toFixed(2) + "초";
     return Math.round(Number(val)) + "점";
   }
 
@@ -608,7 +608,6 @@
       }
     }
 
-    // [수정 완료] 마스킹을 해제하고 플레이어: 팀명 - 사번 형태로 정밀 표출
     var displayTeam = myTeam || (myIndex !== -1 ? list[myIndex].team : "미등록");
 
     if (mySabun && myIndex !== -1) {
@@ -777,7 +776,6 @@
           cachedData = data;
           isFirstLoadDone = true;
 
-          // 가장 최근에 게임을 플레이한 소속 팀으로 자동 동기화
           if (mySabun && cachedData.games) {
             var latestDate = "";
             var latestTeam = "";
