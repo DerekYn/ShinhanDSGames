@@ -535,7 +535,8 @@
       <li>보드 위에서 드래그하여 직사각형 안의 사과 숫자 합이 <b>10</b>이 되면 사라져요.</li>
       <li>⚡ <b>스피드 콤보</b>: 3.5초 이내에 연속으로 10을 완성하면 <b>콤보 보너스 점수</b> 추가!</li>
       <li>🎲 <b>판 섞기</b>: 게임당 1회, 막히거나 조합이 안 보일 때 남아있는 사과들을 재배치해요.</li>
-      <li>제한시간 안에 최대한 많은 사과를 없애 고득점을 노려보세요!</li>
+      <li>⏱️ <b>실시간 절대 타이머</b>: 공정한 경쟁을 위해 화면을 끄거나 이탈해도 현실의 시간은 멈추지 않고 흘러갑니다.</li>
+      <li>제한시간(1분 50초) 안에 최대한 많은 사과를 없애 고득점을 노려보세요!</li>
     </ol>
     <button class="main" id="ruleCloseBtn">확인</button>
   </div>
@@ -630,12 +631,13 @@
   var GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwXeZ1OMPgMQb-JhW_uOAxQ-w1sTq5kb6XbTa6XF3BjzhVrax6uvPc8LBC0YfTSKiZKEQ/exec";
   var GAME_NAME = "사과게임";
 
-  var COLS = 12, ROWS = 9, GAME_TIME = 110;
+  var COLS = 12, ROWS = 9, GAME_TIME = 110; // 1분 50초
   var COMBO_WINDOW_MS = 3500; // 콤보 유지 시간 (3.5초)
 
   var curLevel = 'medium (12x9)';
   var board, cells, boardEl, selRect, sumTag;
   var timeLeft, score, timerId, gameActive;
+  var gameStartTime = 0; // ⏱️ 절대 시간(Wall-clock) 동기화 타임스탬프
   var dragging = false, startCell = null, curSel = [];
   var currentSabun = "";
   var currentTeam = "";
@@ -770,7 +772,6 @@
     }
   }
 
-  // [찬스 4번] 판 섞기 (남아있는 활성 사과들만 재배치)
   function shuffleBoard(){
     if(!gameActive || shufflesLeft <= 0) return;
 
@@ -787,7 +788,6 @@
 
     if(values.length < 2) return;
 
-    // 최소 1개 이상의 합 10 조합이 나오도록 최대 20회 셔플 시도
     for(var attempt=0; attempt<20; attempt++){
       for(var i = values.length - 1; i > 0; i--){
         var j = Math.floor(Math.random() * (i + 1));
@@ -801,14 +801,13 @@
       if(hasValidMove()) break;
     }
 
-    // DOM 갱신 및 팝업 애니메이션
     for(var idx=0; idx<activeCells.length; idx++){
       var pos = activeCells[idx];
       var val = board[pos.r][pos.c];
       var cellEl = cells[pos.r][pos.c];
       cellEl.textContent = val;
       cellEl.classList.remove('pop');
-      void cellEl.offsetWidth; // reflow 강제 실행
+      void cellEl.offsetWidth;
       cellEl.classList.add('pop');
     }
 
@@ -854,8 +853,20 @@
     return { x: t.clientX - wrapRect.left, y: t.clientY - wrapRect.top };
   }
 
+  // [보안 강화] 터치 시점에 절대 시간 즉시 검증 (어뷰징 차단 1단계)
   function onDown(e){
     if(!gameActive) return;
+
+    if(gameStartTime > 0){
+      var actualElapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+      if(actualElapsed >= GAME_TIME){
+        timeLeft = 0;
+        updateHud();
+        endGame('timeout');
+        return;
+      }
+    }
+
     e.preventDefault();
     dragging = true;
     var p = getPointerPos(e);
@@ -865,7 +876,7 @@
   }
 
   function onMove(e){
-    if(!dragging) return;
+    if(!dragging || !gameActive) return;
     e.preventDefault();
     var p = getPointerPos(e);
     updateDrag(p);
@@ -889,6 +900,12 @@
     if(!dragging) return;
     dragging = false;
     selRect.style.display = 'none';
+
+    if(!gameActive){
+      clearSelectionVisual(); curSel = []; sumTag.textContent = '';
+      return;
+    }
+
     var sum = curSel.reduce(function(a,b){return a+b.val;},0);
     var madeMove = curSel.length > 0 && sum === 10;
     if(madeMove){
@@ -898,14 +915,12 @@
         setTimeout((function(el){ return function(){ el.classList.add('gone'); }; })(item.el), 150);
       });
 
-      // [찬스 3번] 스피드 콤보 판정 & 보너스 점수 가산
       clearTimeout(comboTimeoutId);
       combo++;
       if(combo > maxCombo) maxCombo = combo;
       var comboBonus = (combo > 1) ? (combo - 1) : 0;
       score += (curSel.length + comboBonus);
 
-      // 3.5초 이내에 다음 10 미달성 시 콤보 리셋
       comboTimeoutId = setTimeout(function(){
         combo = 0;
         updateHud();
@@ -917,16 +932,40 @@
     if(madeMove && gameActive && !hasValidMove()){ endGame('nomoves'); }
   }
 
+  // [핵심 엔진] 250ms 주기 절대 시간(Wall-clock) 동기화 타이머 (어뷰징 차단 2단계)
   function startTimer(){
     clearInterval(timerId);
     timerId = setInterval(function(){
-      timeLeft--; updateHud();
-      if(timeLeft <= 0){ endGame('timeout'); }
-    }, 1000);
+      if(!gameActive) return;
+      var elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+      timeLeft = Math.max(0, GAME_TIME - elapsed);
+      updateHud();
+      if(timeLeft <= 0){
+        endGame('timeout');
+      }
+    }, 250);
   }
 
+  // [핵심 엔진] 화면 잠금 해제 / 앱 복귀 즉각 감지 (어뷰징 차단 3단계)
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden && gameActive && gameStartTime > 0) {
+      var elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+      timeLeft = Math.max(0, GAME_TIME - elapsed);
+      updateHud();
+      // 화면 끄고 2분 분석 후 켰을 때 즉시 시간 종료 발동
+      if (timeLeft <= 0) {
+        endGame('timeout');
+      }
+    }
+  });
+
   function endGame(reason){
+    if(!gameActive) return;
     gameActive = false;
+    dragging = false;
+    selRect.style.display = 'none';
+    clearSelectionVisual(); curSel = []; sumTag.textContent = '';
+
     clearInterval(timerId);
     clearTimeout(comboTimeoutId);
     combo = 0;
@@ -957,6 +996,8 @@
     score = 0; 
     timeLeft = GAME_TIME; 
     gameActive = true;
+    gameStartTime = Date.now(); // 게임 시작 절대 시각 기록
+
     buildBoard();
     var attempts = 0;
     while(!hasValidMove() && attempts < 20){ buildBoard(); attempts++; }
