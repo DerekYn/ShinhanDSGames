@@ -583,7 +583,8 @@
 
       <div class="stat-card time">
         <span class="stat-lbl">진행 시간</span>
-        <span class="stat-val" id="timeCount">000</span>
+        <!-- 소수점 둘째 자리 표기 -->
+        <span class="stat-val" id="timeCount">0.00</span>
       </div>
     </div>
   </div>
@@ -596,13 +597,13 @@
     <button class="main" id="restartBtn">다시 시작</button>
     <button class="ghost" id="ruleBtn">규칙 보기</button>
   </div>
-  <div class="hint">💡 이미 열린 숫자를 터치하면 주변 자동 열기(코드)! 숨겨진 행운의 타일(-3초)을 찾아보세요.</div>
+  <div class="hint">💡 이미 열린 숫자를 터치하면 주변 자동 열기(코드)! 숨겨진 행운의 타일(-3.00초)을 찾아보세요.</div>
 </div>
 
 <div id="overlay">
   <div class="modal">
     <h2 id="modalTitle">게임 오버</h2>
-    <div class="bigtime" id="modalTime">00초</div>
+    <div class="bigtime" id="modalTime">0.00초</div>
     <p id="modalDesc">다시 도전해보세요!</p>
     <button class="main" id="modalRestart">다시 시작</button>
   </div>
@@ -613,8 +614,9 @@
     <h2>게임 규칙</h2>
     <ol>
       <li>상단 <b>[⛏️ 찾기 / 🚩 깃발]</b> 버튼으로 모드를 즉시 바꿀 수 있어요.</li>
+      <li>⏱️ <b>소수점 둘째 자리(0.01초) 측정</b>: 정밀한 시간으로 순위를 가릅니다.</li>
       <li>⚡ <b>스피드 자동 열기(코드)</b>: 이미 열린 숫자의 주변에 깃발이 숫자만큼 꽂혀있다면, <b>해당 숫자를 터치해 나머지 안전한 칸을 한 번에 열 수 있어요!</b></li>
-      <li>⏱️ <b>숨겨진 행운의 타일</b>: 보드 속 2개의 보물 타일을 열면 <b>진행 시간 -3초 즉시 단축!</b></li>
+      <li>⏱️ <b>숨겨진 행운의 타일</b>: 보드 속 2개의 보물 타일을 열면 <b>진행 시간 -3.00초 즉시 단축!</b></li>
       <li>🚩 깃발 모드에서는 칸을 가볍게 터치만 해도 깃발이 꽂혀요.</li>
       <li>지뢰가 없는 모든 칸을 열면 승리! 최단 기록을 노려보세요.</li>
     </ol>
@@ -663,7 +665,6 @@
 
     var gpu = getGpuRenderer().toLowerCase();
 
-    // 1순위: 모바일 칩셋 우선 통과
     var mobileGpuKeywords = ['mali', 'adreno', 'apple', 'powervr', 'xclipse'];
     for (var m = 0; m < mobileGpuKeywords.length; m++) {
       if (gpu.indexOf(mobileGpuKeywords[m]) !== -1) {
@@ -671,7 +672,6 @@
       }
     }
 
-    // 2순위: PC 전용 GPU 탐지
     var pcGpuKeywords = [
       'geforce', 'nvidia', 'radeon', 'intel', 
       'direct3d', 'llvmpipe', 'mesa', 'swiftshader', 
@@ -714,7 +714,13 @@
   var rows = 12, cols = 12, mineCount = 24;
   var curLevel = 'medium (12x12, 지뢰 24개)';
   var grid;
-  var firstClick, gameOver, gameWon, timerId, elapsed;
+  var firstClick, gameOver, gameWon, timerId;
+  
+  // [핵심] 밀리초 정밀 타이머 변수
+  var elapsed = 0.00;
+  var timerStartTime = 0;
+  var bonusDeduction = 0;
+
   var currentSabun = "";
   var currentTeam = "";
 
@@ -824,7 +830,6 @@
       placed++;
     }
 
-    // ⏱️ 행운의 타임 보너스 타일 2개 배치 (지뢰가 아닌 안전한 칸)
     var bonusPlaced = 0;
     while(bonusPlaced < 2){
       var br = Math.floor(Math.random()*rows);
@@ -895,19 +900,28 @@
     if(!cellEl) return;
     var tag = document.createElement('div');
     tag.className = 'bonus-pop';
-    tag.textContent = '-3초! ⏱️';
+    tag.textContent = '-3.00초! ⏱️';
     cellEl.appendChild(tag);
     setTimeout(function(){
       if(tag.parentNode) tag.parentNode.removeChild(tag);
     }, 900);
   }
 
+  // [핵심] 타임 보너스 타일 획득 시 정밀 차감 (-3.00초)
   function collectBonus(r, c){
     var cell = grid[r][c];
     if(!cell.bonus) return;
     cell.bonus = false;
-    elapsed = Math.max(0, elapsed - 3);
-    timeCountEl.textContent = String(elapsed).padStart(3, '0');
+    bonusDeduction += 3.0;
+
+    if(!firstClick && timerStartTime > 0){
+      var now = performance.now();
+      elapsed = Math.max(0, (now - timerStartTime) / 1000 - bonusDeduction);
+    } else {
+      elapsed = 0.00;
+    }
+
+    timeCountEl.textContent = elapsed.toFixed(2);
     showBonusPop(r, c);
     if(navigator.vibrate) navigator.vibrate(25);
   }
@@ -963,6 +977,7 @@
       if(hitMine){
         gameOver = true;
         clearInterval(timerId);
+        var failTime = elapsed.toFixed(2);
         revealAllMines(explodedR, explodedC);
         refreshAllCells();
         faceBtn.textContent = '😵';
@@ -970,7 +985,7 @@
 
         logEvent("종료", {
           score: "-",
-          detail: "지뢰 폭발 (코드 자동 열기 실패, 진행: " + elapsed + "초)"
+          detail: "지뢰 폭발 (코드 자동 열기 실패, 진행: " + failTime + "초)"
         });
         return;
       }
@@ -978,12 +993,13 @@
       if(checkWin()){
         gameWon = true;
         clearInterval(timerId);
+        var finalTime = elapsed.toFixed(2);
         faceBtn.textContent = '😎';
         showEnd(true);
 
         logEvent("종료", {
-          score: elapsed,
-          detail: "클리어 성공 (" + elapsed + "초 소요)"
+          score: parseFloat(finalTime),
+          detail: "클리어 성공 (" + finalTime + "초 소요)"
         });
       } else {
         if(navigator.vibrate) navigator.vibrate(10);
@@ -1034,6 +1050,7 @@
       cell.revealed = true;
       gameOver = true;
       clearInterval(timerId);
+      var failTime = elapsed.toFixed(2);
       revealAllMines(r,c);
       refreshAllCells();
       faceBtn.textContent = '😵';
@@ -1041,7 +1058,7 @@
 
       logEvent("종료", {
         score: "-",
-        detail: "지뢰 폭발 (패배, 진행: " + elapsed + "초)"
+        detail: "지뢰 폭발 (패배, 진행: " + failTime + "초)"
       });
       return;
     }
@@ -1052,12 +1069,13 @@
     if(checkWin()){
       gameWon = true;
       clearInterval(timerId);
+      var finalTime = elapsed.toFixed(2);
       faceBtn.textContent = '😎';
       showEnd(true);
 
       logEvent("종료", {
-        score: elapsed,
-        detail: "클리어 성공 (" + elapsed + "초 소요)"
+        score: parseFloat(finalTime),
+        detail: "클리어 성공 (" + finalTime + "초 소요)"
       });
     }
   }
@@ -1071,7 +1089,6 @@
     updateMineCounter();
   }
 
-  // [수정 완료] 음수일 때 '0-3' 대신 '-03'으로 정상 표출하는 함수
   function updateMineCounter(){
     var remaining = mineCount - countFlags();
     if (remaining < 0) {
@@ -1081,19 +1098,25 @@
     }
   }
 
+  // [핵심] 30ms 간격 실시간 소수점 둘째 자리(0.01초) 타이머
   function startTimer(){
-    elapsed = 0;
-    timeCountEl.textContent = '000';
+    timerStartTime = performance.now();
+    bonusDeduction = 0;
+    elapsed = 0.00;
+    timeCountEl.textContent = '0.00';
+    clearInterval(timerId);
+
     timerId = setInterval(function(){
-      elapsed++;
-      if(elapsed > 999) elapsed = 999;
-      timeCountEl.textContent = String(elapsed).padStart(3,'0');
-    }, 1000);
+      var now = performance.now();
+      elapsed = Math.max(0, (now - timerStartTime) / 1000 - bonusDeduction);
+      if(elapsed > 999.99) elapsed = 999.99;
+      timeCountEl.textContent = elapsed.toFixed(2);
+    }, 30);
   }
 
   function showEnd(won){
     modalTitle.textContent = won ? '클리어! 🎉' : '펑! 지뢰를 밟았어요';
-    modalTime.textContent = elapsed + '초';
+    modalTime.textContent = elapsed.toFixed(2) + '초';
     modalDesc.textContent = won ? '모든 안전한 칸을 다 열었어요!' : '다시 도전해보세요!';
     overlay.classList.add('show');
   }
@@ -1181,8 +1204,10 @@
     adPopup.style.display = 'none';
     firstClick = true; gameOver = false; gameWon = false;
     clearInterval(timerId);
-    elapsed = 0;
-    timeCountEl.textContent = '000';
+    elapsed = 0.00;
+    bonusDeduction = 0;
+    timerStartTime = 0;
+    timeCountEl.textContent = '0.00';
     faceBtn.textContent = '🙂';
     setMode("dig");
     buildEmptyGrid();
