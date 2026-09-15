@@ -504,7 +504,7 @@
       <div class="podium" id="overallPodiumArea"></div>
       <div class="rank-list" id="overallRankListArea"></div>
 
-      <!-- 종합 순위 산정 안내 가이드 (완주 조건 & 1시간 주기) -->
+      <!-- 종합 순위 산정 안내 가이드 (완주 조건 & 10분 주기) -->
       <div class="guide-card">
         <div class="guide-title">
           <span>🏅</span>
@@ -513,7 +513,7 @@
         <ul class="guide-list">
           <li><strong>전 종목 완주자 한정 집계</strong>: 공튀기기, 두더지, 사과, 지뢰, 드롭 <b>5개 모든 게임에서 최소 1점(유효 클리어 시간) 이상을 획득한 완주자만 표기</b>됩니다. (1개 종목이라도 미참여 또는 0점/패배인 경우 집계 제외)</li>
           <li><strong>올림픽 순위합산제 (Rank Sum)</strong>: 각 종목별 개인 등수(1등=1점, 2등=2점...)를 합산하여, <b>순위합 점수가 가장 낮은 참가자가 종합 1위</b>를 차지합니다! (동점 시 상위 등수 최다 보유자 우선)</li>
-          <li><strong>1시간 주기 자동 갱신</strong>: 5개 종목의 방대한 기록을 정밀하게 교차 집계하기 위해, 본 종합 순위는 <b>매 1시간마다 자동으로 갱신</b>됩니다.</li>
+          <li><strong>10분 주기 자동 갱신</strong>: 5개 종목의 방대한 기록을 정밀하게 교차 집계하기 위해, 본 종합 순위는 <b>매 10분마다 자동으로 갱신</b>됩니다.</li>
         </ul>
         <div class="guide-example">
           <span class="ex-tag">산정 예시</span>
@@ -723,7 +723,7 @@
     return teamRankArr;
   }
 
-  // 🚀 [폴백 엔진] 백엔드 1시간 집계 전이어도 브라우저에서 5종 완주자 즉시 산출
+  // 🚀 [폴백 엔진] 백엔드 10분 집계 전이어도 브라우저에서 5종 완주자 즉시 산출
   function getOverallRankingsData(){
     if (cachedData.overall && cachedData.overall.length > 0) {
       return cachedData.overall;
