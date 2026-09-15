@@ -954,11 +954,11 @@
     var judgeKind = "";
 
     if(type === "king-mole" || type === "mole"){
-      if(reactionMs <= 350){
+      if(reactionMs <= 400){
         speedBonus = 30;
         judgeText = "PERFECT!";
         judgeKind = "perfect";
-      } else if(reactionMs <= 450){
+      } else if(reactionMs <= 550){
         speedBonus = 15;
         judgeText = "GREAT";
         judgeKind = "great";
