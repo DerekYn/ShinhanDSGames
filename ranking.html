@@ -555,7 +555,6 @@
     });
   });
 
-  // 타임어택형(초 단위)은 소수점 둘째 자리까지 표기
   function formatScore(val, isTime){
     if (isTime) return Number(val).toFixed(2) + "초";
     return Math.round(Number(val)) + "점";
@@ -565,6 +564,50 @@
     var s = String(sabun || "");
     if (s.length <= 3) return s;
     return s.slice(0, 3) + "*".repeat(s.length - 3);
+  }
+
+  // 🚀 [핵심 엔진] 영포스·기타 제외 및 공식 4개 팀 대상 순위 당김 승점 계산 함수
+  function computeOfficialTeamRankings(){
+    var officialTeams = ["증권개발팀", "증권채널팀", "카드개발팀", "라이프개발팀"];
+    var teamScores = {};
+    officialTeams.forEach(function(t){
+      teamScores[t] = { team: t, totalPoints: 0, topRankCount: 0 };
+    });
+
+    var gameList = ["공튀기기", "두더지잡기", "사과게임", "지뢰찾기", "드롭"];
+    gameList.forEach(function(gName){
+      var list = (cachedData.games && cachedData.games[gName]) || [];
+
+      // 영포스, 기타, 미선택 제외하고 공식 4개 팀 기록만 추출
+      var validList = list.filter(function(item){
+        var t = String(item.team || "").trim();
+        return officialTeams.indexOf(t) !== -1;
+      });
+
+      // 당겨진 공식 순위 기준 상위 10명에게 10점~1점 승점 배분
+      var top10 = validList.slice(0, 10);
+      top10.forEach(function(item, idx){
+        var pts = 10 - idx; // 1위: 10점 ~ 10위: 1점
+        if (teamScores[item.team]) {
+          teamScores[item.team].totalPoints += pts;
+          teamScores[item.team].topRankCount += 1;
+        }
+      });
+    });
+
+    var teamRankArr = [];
+    for (var t in teamScores) {
+      teamRankArr.push(teamScores[t]);
+    }
+    teamRankArr.sort(function(a, b){
+      if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
+      return b.topRankCount - a.topRankCount;
+    });
+    teamRankArr.forEach(function(item, idx){
+      item.rank = idx + 1;
+    });
+
+    return teamRankArr;
   }
 
   function render(){
@@ -582,6 +625,7 @@
     }
   }
 
+  // 1. 종목별 개인 순위 (영포스 & 기타 포함 전체 순위 100% 정상 유지)
   function renderPersonalRank(){
     var meta = GAME_META[currentGame] || GAME_META["공튀기기"];
     ruleDesc.textContent = meta.desc;
@@ -700,8 +744,10 @@
     rankListArea.innerHTML = listHtml;
   }
 
+  // 2. 팀별 대항전 순위 (영포스·기타 제외 및 공식 4개 팀만 표출)
   function renderTeamRank(){
-    var list = cachedData.teams || [];
+    var list = computeOfficialTeamRankings();
+
     if (list.length === 0) {
       teamContainer.style.display = "none";
       emptyState.style.display = "block";
@@ -723,16 +769,28 @@
       }
     }
 
+    // 우리 팀 카드 표출 분기: 공식 4개 팀 vs 번외팀(영포스/기타)
     if (myTeamObj) {
       myTeamCard.innerHTML = 
         '<div class="my-rank-left">' +
           '<span class="my-rank-badge">MY TEAM</span>' +
           '<div class="my-rank-info">' +
             '<span class="my-rank-title">우리 팀 순위: <b>' + myTeamRank + '위</b> (' + myTeam + ')</span>' +
-            '<span class="my-rank-sub">TOP 10 진입 횟수: ' + myTeamObj.topRankCount + '회</span>' +
+            '<span class="my-rank-sub">TOP 10 승점 기여: ' + myTeamObj.topRankCount + '회</span>' +
           '</div>' +
         '</div>' +
         '<div class="my-rank-score">' + myTeamObj.totalPoints + ' pts</div>';
+      myTeamCard.style.display = "flex";
+    } else if (myTeam === "영포스" || myTeam === "기타") {
+      myTeamCard.innerHTML = 
+        '<div class="my-rank-left">' +
+          '<span class="my-rank-badge" style="background:rgba(255,255,255,0.18); color:var(--ice);">번외</span>' +
+          '<div class="my-rank-info">' +
+            '<span class="my-rank-title">우리 팀: <b>' + myTeam + ' (번외 참여)</b></span>' +
+            '<span class="my-rank-sub">팀별 대항전 집계 제외 (개인 순위 정상 반영)</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="my-rank-score" style="font-size:12px; color:var(--ice);">-</div>';
       myTeamCard.style.display = "flex";
     } else {
       myTeamCard.style.display = "none";
