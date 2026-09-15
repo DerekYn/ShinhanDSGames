@@ -105,14 +105,15 @@
   }
   .btn-refresh:active { transform: scale(0.96); background: var(--blue); }
 
-  /* 1차 탭 */
+  /* 1차 탭: 3단 분할 레이아웃 */
   .view-tabs {
-    display: flex; gap: 6px; background: rgba(6, 20, 36, 0.6);
+    display: flex; gap: 4px; background: rgba(6, 20, 36, 0.6);
     padding: 3px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);
   }
   .view-tab {
-    flex: 1; padding: 7px 0; text-align: center; font-size: 12.5px; font-weight: 800;
+    flex: 1; padding: 7px 2px; text-align: center; font-size: 11.5px; font-weight: 800;
     color: var(--ice); border-radius: 9px; cursor: pointer; transition: all 0.15s ease;
+    white-space: nowrap; letter-spacing: -0.02em;
   }
   .view-tab.active { background: var(--blue); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
 
@@ -193,7 +194,7 @@
   }
   .podium-card.first .podium-score { font-size: 17px; color: var(--gold); }
 
-  /* 4~10위 리스트 */
+  /* 4위 이하 랭킹 리스트 */
   .rank-list { display: flex; flex-direction: column; gap: 5px; width: 100%; }
   .rank-row {
     display: flex; align-items: center; justify-content: space-between;
@@ -206,7 +207,7 @@
   .rank-row-left { display: flex; align-items: center; gap: 8px; }
   .rank-num {
     font-family: var(--font-num); font-weight: 800; font-size: 12.5px;
-    color: var(--ice); width: 18px; text-align: center;
+    color: var(--ice); width: 22px; text-align: center;
   }
   .rank-team { font-weight: 700; color: #fff; }
   .rank-sabun { font-size: 10.5px; color: var(--ice); opacity: 0.75; }
@@ -239,8 +240,8 @@
   .team-card.rank-1 .team-score { color: var(--gold); }
   .team-score-lbl { font-size: 9.5px; color: var(--ice); opacity: 0.75; }
 
-  /* 4위 하단: 팀별 대항전 승점 산정 안내 가이드 카드 */
-  .team-guide-card {
+  /* 하단 안내 가이드 카드 공통 */
+  .guide-card {
     background: linear-gradient(180deg, rgba(6, 20, 36, 0.85), rgba(11, 31, 58, 0.75));
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 14px;
@@ -253,7 +254,7 @@
     line-height: 1.55;
     color: var(--ice);
   }
-  .team-guide-title {
+  .guide-title {
     font-size: 12.5px;
     font-weight: 800;
     color: #fff;
@@ -263,17 +264,17 @@
     padding-bottom: 6px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
-  .team-guide-title b { color: var(--gold); }
-  .team-guide-list {
+  .guide-title b { color: var(--gold); }
+  .guide-list {
     margin: 0;
     padding-left: 16px;
     display: flex;
     flex-direction: column;
     gap: 6px;
   }
-  .team-guide-list li { color: var(--ice); }
-  .team-guide-list li strong { color: #fff; font-weight: 700; }
-  .team-guide-example {
+  .guide-list li { color: var(--ice); }
+  .guide-list li strong { color: #fff; font-weight: 700; }
+  .guide-example {
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(79, 157, 222, 0.25);
     border-left: 3.5px solid var(--sky);
@@ -284,7 +285,7 @@
     line-height: 1.55;
     color: rgba(234, 244, 252, 0.95);
   }
-  .team-guide-example .ex-tag {
+  .guide-example .ex-tag {
     display: inline-block;
     background: var(--sky);
     color: var(--navy);
@@ -436,10 +437,11 @@
       </div>
     </div>
 
-    <!-- 1차 탭: 개인전 / 팀 대항전 -->
+    <!-- 1차 탭: 3단 분할 (개인순위 / 팀대항전 / 개인종합순위) -->
     <div class="view-tabs">
       <div class="view-tab active" id="tabPersonal">종목별 개인 순위</div>
       <div class="view-tab" id="tabTeam">팀별 대항전 순위</div>
+      <div class="view-tab" id="tabOverall">개인별 종합순위</div>
     </div>
 
     <!-- 2차 종목 선택 (공튀기기, 두더지, 사과, 지뢰, 드롭) -->
@@ -464,39 +466,59 @@
       <div>실시간 순위 집계 중... 잠시만 기다려주세요 🙂</div>
     </div>
 
-    <!-- 개인 순위 컨테이너 -->
+    <!-- 1. 종목별 개인 순위 컨테이너 -->
     <div id="personalContainer" style="display:none; flex-direction:column; gap:8px;">
-      <!-- 내 순위 VIP 카드 (최상단) -->
       <div class="my-rank-card" id="myPersonalCard" title="클릭 시 플레이어 정보 변경"></div>
-      <!-- 포디움 -->
       <div class="podium" id="podiumArea"></div>
-      <!-- 4~10위 리스트 -->
       <div class="rank-list" id="rankListArea"></div>
     </div>
 
-    <!-- 팀 대항전 컨테이너 -->
+    <!-- 2. 팀 대항전 컨테이너 -->
     <div id="teamContainer" style="display:none; flex-direction:column; gap:8px;">
-      <!-- 우리 팀 순위 VIP 카드 -->
       <div class="my-rank-card" id="myTeamCard" title="클릭 시 플레이어 정보 변경"></div>
-      <!-- 팀 순위 리스트 (1~4위) -->
       <div class="team-list" id="teamListArea"></div>
 
-      <!-- 4위 하단: 팀별 대항전 점수 산정 방식 안내 및 실전 예시 -->
-      <div class="team-guide-card">
-        <div class="team-guide-title">
+      <!-- 팀 대항전 산정 안내 가이드 -->
+      <div class="guide-card">
+        <div class="guide-title">
           <span>💡</span>
           <span>팀별 대항전 <b>승점 산정 방식</b> 안내</span>
         </div>
-        <ul class="team-guide-list">
+        <ul class="guide-list">
           <li><strong>번외팀 참가 안내</strong>: <b>영포스</b> 및 <b>기타</b>는 종목별 개인 순위에는 100% 정상 반영되나, 본선 4개 팀 간의 공정한 경쟁을 위해 <b>팀별 대항전 순위 및 승점 집계에서는 제외(번외)</b>됩니다.</li>
           <li><strong>종목별 승점 배분</strong>: 5개 종목마다 번외팀을 제외한 <b>공식 4개 팀 소속 참가자의 순위만 추출</b>하여 <b>1위(10점)부터 10위(1점)까지</b> 차등 승점을 소속 팀에 부여합니다.</li>
         </ul>
-        <div class="team-guide-example">
+        <div class="guide-example">
           <span class="ex-tag">산정 예시</span>
           어떤 종목의 개인 7위가 <b>'기타'</b>이고 8위가 <b>'라이프개발팀'</b>인 경우:<br>
           👉 7위(기타)는 건너뛰고, 8위인 라이프개발팀이 <b>공식 7위(4 pts)</b>로 승계됩니다.<br>
           👉 9위인 팀은 <b>공식 8위(3 pts)</b>, 10위인 팀은 <b>공식 9위(2 pts)</b>로 한 칸씩 당겨지며,<br>
           👉 개인 순위 11위에 위치한 공식 팀 참가자도 <b>공식 10위(1 pt)</b>로 승점을 획득합니다!
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 개인별 종합 순위 컨테이너 -->
+    <div id="overallContainer" style="display:none; flex-direction:column; gap:8px;">
+      <div class="my-rank-card" id="myOverallCard" title="클릭 시 플레이어 정보 변경"></div>
+      <div class="podium" id="overallPodiumArea"></div>
+      <div class="rank-list" id="overallRankListArea"></div>
+
+      <!-- 종합 순위 산정 안내 가이드 (완주 조건 & 1시간 주기) -->
+      <div class="guide-card">
+        <div class="guide-title">
+          <span>🏅</span>
+          <span>개인별 종합순위 <b>산정 기준 & 완주 조건</b> 안내</span>
+        </div>
+        <ul class="guide-list">
+          <li><strong>전 종목 완주자 한정 집계</strong>: 공튀기기, 두더지, 사과, 지뢰, 드롭 <b>5개 모든 게임에서 최소 1점(유효 클리어 시간) 이상을 획득한 완주자만 표기</b>됩니다. (1개 종목이라도 미참여 또는 0점/패배인 경우 집계 제외)</li>
+          <li><strong>올림픽 순위합산제 (Rank Sum)</strong>: 각 종목별 개인 등수(1등=1점, 2등=2점...)를 합산하여, <b>순위합 점수가 가장 낮은 참가자가 종합 1위</b>를 차지합니다! (동점 시 상위 등수 최다 보유자 우선)</li>
+          <li><strong>1시간 주기 자동 갱신</strong>: 5개 종목의 방대한 기록을 정밀하게 교차 집계하기 위해, 본 종합 순위는 <b>매 1시간마다 자동으로 갱신</b>됩니다.</li>
+        </ul>
+        <div class="guide-example">
+          <span class="ex-tag">산정 예시</span>
+          어떤 참가자가 공튀기기 1위(1점), 두더지 3위(3점), 사과 2위(2점), 지뢰 5위(5점), 드롭 4위(4점)를 기록했다면:<br>
+          👉 <b>순위합: 1 + 3 + 2 + 5 + 4 = 15점</b>으로 종합 순위가 결정됩니다.
         </div>
       </div>
     </div>
@@ -532,24 +554,34 @@
     "드롭": { desc: "60초 동안 바구니로 받은 아이템 합산 점수", badge: "높은 점수순", unit: "점", isTime: false }
   };
 
-  var cachedData = { games: {}, teams: [] };
+  var cachedData = { games: {}, teams: [], overall: [] };
   var REFRESH_INTERVAL = 15;
   var countdown = REFRESH_INTERVAL;
   var countdownTimer = null;
 
   var tabPersonal = document.getElementById("tabPersonal");
   var tabTeam = document.getElementById("tabTeam");
+  var tabOverall = document.getElementById("tabOverall");
+
   var gameSelectorSection = document.getElementById("gameSelectorSection");
   var personalContainer = document.getElementById("personalContainer");
   var teamContainer = document.getElementById("teamContainer");
+  var overallContainer = document.getElementById("overallContainer");
+
   var initialLoadingBox = document.getElementById("initialLoadingBox");
   var emptyState = document.getElementById("emptyState");
   var emptyMsg = document.getElementById("emptyMsg");
+
   var myPersonalCard = document.getElementById("myPersonalCard");
   var myTeamCard = document.getElementById("myTeamCard");
+  var myOverallCard = document.getElementById("myOverallCard");
+
   var podiumArea = document.getElementById("podiumArea");
   var rankListArea = document.getElementById("rankListArea");
   var teamListArea = document.getElementById("teamListArea");
+  var overallPodiumArea = document.getElementById("overallPodiumArea");
+  var overallRankListArea = document.getElementById("overallRankListArea");
+
   var ruleBanner = document.getElementById("ruleBanner");
   var ruleDesc = document.getElementById("ruleDesc");
   var ruleType = document.getElementById("ruleType");
@@ -572,6 +604,7 @@
 
   myPersonalCard.addEventListener("click", openAuthModal);
   myTeamCard.addEventListener("click", openAuthModal);
+  myOverallCard.addEventListener("click", openAuthModal);
 
   authCloseBtn.addEventListener("click", function(){
     authOverlay.classList.remove("show");
@@ -608,6 +641,7 @@
     currentView = "personal";
     tabPersonal.classList.add("active");
     tabTeam.classList.remove("active");
+    tabOverall.classList.remove("active");
     gameSelectorSection.style.display = "block";
     ruleBanner.style.display = "flex";
     render();
@@ -617,6 +651,17 @@
     currentView = "team";
     tabTeam.classList.add("active");
     tabPersonal.classList.remove("active");
+    tabOverall.classList.remove("active");
+    gameSelectorSection.style.display = "none";
+    ruleBanner.style.display = "none";
+    render();
+  });
+
+  tabOverall.addEventListener("click", function(){
+    currentView = "overall";
+    tabOverall.classList.add("active");
+    tabPersonal.classList.remove("active");
+    tabTeam.classList.remove("active");
     gameSelectorSection.style.display = "none";
     ruleBanner.style.display = "none";
     render();
@@ -653,17 +698,14 @@
     var gameList = ["공튀기기", "두더지잡기", "사과게임", "지뢰찾기", "드롭"];
     gameList.forEach(function(gName){
       var list = (cachedData.games && cachedData.games[gName]) || [];
-
-      // 영포스, 기타 제외하고 공식 4개 팀 기록만 추출
       var validList = list.filter(function(item){
         var t = String(item.team || "").trim();
         return officialTeams.indexOf(t) !== -1;
       });
 
-      // 당겨진 공식 순위 기준 상위 10명에게 10점~1점 승점 배분
       var top10 = validList.slice(0, 10);
       top10.forEach(function(item, idx){
-        var pts = 10 - idx; // 1위: 10점 ~ 10위: 1점
+        var pts = 10 - idx;
         if (teamScores[item.team]) {
           teamScores[item.team].totalPoints += pts;
           teamScores[item.team].topRankCount += 1;
@@ -672,18 +714,70 @@
     });
 
     var teamRankArr = [];
-    for (var t in teamScores) {
-      teamRankArr.push(teamScores[t]);
-    }
+    for (var t in teamScores) teamRankArr.push(teamScores[t]);
     teamRankArr.sort(function(a, b){
       if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
       return b.topRankCount - a.topRankCount;
     });
-    teamRankArr.forEach(function(item, idx){
-      item.rank = idx + 1;
+    teamRankArr.forEach(function(item, idx){ item.rank = idx + 1; });
+    return teamRankArr;
+  }
+
+  // 🚀 [폴백 엔진] 백엔드 1시간 집계 전이어도 브라우저에서 5종 완주자 즉시 산출
+  function getOverallRankingsData(){
+    if (cachedData.overall && cachedData.overall.length > 0) {
+      return cachedData.overall;
+    }
+
+    if (!cachedData.games) return [];
+    var gameList = ["공튀기기", "두더지잡기", "사과게임", "지뢰찾기", "드롭"];
+    var isTimeAttack = { "공튀기기": true, "지뢰찾기": true, "두더지잡기": false, "사과게임": false, "드롭": false };
+    var userMap = {};
+
+    gameList.forEach(function(gName){
+      var list = cachedData.games[gName] || [];
+      list.forEach(function(item){
+        var sabun = String(item.sabun || "").trim();
+        if (!sabun || sabun === "미기입") return;
+        if (!userMap[sabun]) {
+          userMap[sabun] = { sabun: sabun, team: item.team, games: {} };
+        }
+        userMap[sabun].games[gName] = item.score;
+      });
     });
 
-    return teamRankArr;
+    var validUsers = [];
+    for (var s in userMap) {
+      if (Object.keys(userMap[s].games).length === 5) {
+        validUsers.push(userMap[s]);
+      }
+    }
+    if (validUsers.length === 0) return [];
+
+    gameList.forEach(function(gName){
+      var isTime = isTimeAttack[gName];
+      validUsers.sort(function(a, b){
+        return isTime ? (a.games[gName] - b.games[gName]) : (b.games[gName] - a.games[gName]);
+      });
+      validUsers.forEach(function(u, idx){
+        if (!u.ranks) u.ranks = {};
+        u.ranks[gName] = idx + 1;
+      });
+    });
+
+    validUsers.forEach(function(u){
+      var sum = 0;
+      gameList.forEach(function(gName){ sum += (u.ranks[gName] || 0); });
+      u.rankSum = sum;
+    });
+
+    validUsers.sort(function(a, b){
+      if (a.rankSum !== b.rankSum) return a.rankSum - b.rankSum;
+      return a.sabun.localeCompare(b.sabun);
+    });
+
+    validUsers.forEach(function(u, idx){ u.rank = idx + 1; });
+    return validUsers;
   }
 
   function render(){
@@ -694,14 +788,20 @@
 
     if (currentView === "personal") {
       teamContainer.style.display = "none";
+      overallContainer.style.display = "none";
       renderPersonalRank();
+    } else if (currentView === "team") {
+      personalContainer.style.display = "none";
+      overallContainer.style.display = "none";
+      renderTeamRank();
     } else {
       personalContainer.style.display = "none";
-      renderTeamRank();
+      teamContainer.style.display = "none";
+      renderOverallRank();
     }
   }
 
-  // 1. 종목별 개인 순위 (영포스 & 기타 포함 전체 순위 100% 정상 유지)
+  // 1. 종목별 개인 순위
   function renderPersonalRank(){
     var meta = GAME_META[currentGame] || GAME_META["공튀기기"];
     ruleDesc.textContent = meta.desc;
@@ -820,7 +920,7 @@
     rankListArea.innerHTML = listHtml;
   }
 
-  // 2. 팀별 대항전 순위 (공식 4개 팀 1~4위 표출 및 하단 설명 가이드)
+  // 2. 팀별 대항전 순위
   function renderTeamRank(){
     var list = computeOfficialTeamRankings();
 
@@ -894,6 +994,122 @@
     });
 
     teamListArea.innerHTML = html;
+  }
+
+  // 3. 🚀 개인별 종합 순위 (5종 완주자 한정 순위합산제)
+  function renderOverallRank(){
+    var list = getOverallRankingsData();
+
+    if (list.length === 0) {
+      overallContainer.style.display = "none";
+      emptyState.style.display = "block";
+      emptyMsg.textContent = "아직 5개 전 종목을 완주한 플레이어가 없습니다.\n전 종목 클리어 후 첫 종합 랭커가 되어보세요!";
+      return;
+    }
+
+    overallContainer.style.display = "flex";
+
+    var myIndex = -1;
+    if (mySabun) {
+      for (var i = 0; i < list.length; i++) {
+        if (String(list[i].sabun).trim() === String(mySabun).trim()) {
+          myIndex = i;
+          break;
+        }
+      }
+    }
+
+    var displayTeam = myTeam || (myIndex !== -1 ? list[myIndex].team : "미등록");
+
+    if (mySabun && myIndex !== -1) {
+      var myRecord = list[myIndex];
+      var myRankNum = myRecord.rank || (myIndex + 1);
+      myOverallCard.innerHTML = 
+        '<div class="my-rank-left">' +
+          '<span class="my-rank-badge">MY</span>' +
+          '<div class="my-rank-info">' +
+            '<span class="my-rank-title">내 현재 종합 순위: <b>' + myRankNum + '위</b></span>' +
+            '<span class="my-rank-sub">플레이어: ' + displayTeam + ' - ' + mySabun + ' (5종 완주)</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="my-rank-score">순위합 ' + myRecord.rankSum + '점</div>';
+      myOverallCard.style.display = "flex";
+    } else if (mySabun) {
+      myOverallCard.innerHTML = 
+        '<div class="my-rank-left">' +
+          '<span class="my-rank-badge">MY</span>' +
+          '<div class="my-rank-info">' +
+            '<span class="my-rank-title">내 종합 순위: <b>5종 완주 도전 중!</b></span>' +
+            '<span class="my-rank-sub">플레이어: ' + displayTeam + ' - ' + mySabun + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="my-rank-score" style="font-size:12px; color:var(--ice);">완주 도전 👉</div>';
+      myOverallCard.style.display = "flex";
+    } else {
+      myOverallCard.innerHTML = 
+        '<div class="my-rank-left">' +
+          '<span class="my-rank-badge">MY</span>' +
+          '<div class="my-rank-info">' +
+            '<span class="my-rank-title">내 종합 순위 확인</span>' +
+            '<span class="my-rank-sub">플레이어 등록하기 (터치) 👉</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="my-rank-score" style="font-size:12px; color:var(--ice);">등록</div>';
+      myOverallCard.style.display = "flex";
+    }
+
+    var top3 = list.slice(0, 3);
+    var first = top3[0], second = top3[1], third = top3[2];
+    var podiumHtml = "";
+
+    podiumHtml += second ? (
+      '<div class="podium-card second">' +
+        '<div class="podium-medal">🥈</div>' +
+        '<div class="podium-team">' + second.team + '</div>' +
+        '<div class="podium-sabun">' + maskSabun(second.sabun) + '</div>' +
+        '<div class="podium-score">순위합 ' + second.rankSum + '</div>' +
+      '</div>'
+    ) : '<div class="podium-card second" style="opacity:0.3;"><div class="podium-medal">🥈</div><div class="podium-team">-</div></div>';
+
+    podiumHtml += first ? (
+      '<div class="podium-card first">' +
+        '<div class="podium-medal">🥇</div>' +
+        '<div class="podium-team">' + first.team + '</div>' +
+        '<div class="podium-sabun">' + maskSabun(first.sabun) + '</div>' +
+        '<div class="podium-score">순위합 ' + first.rankSum + '</div>' +
+      '</div>'
+    ) : '<div class="podium-card first" style="opacity:0.3;"><div class="podium-medal">🥇</div><div class="podium-team">-</div></div>';
+
+    podiumHtml += third ? (
+      '<div class="podium-card third">' +
+        '<div class="podium-medal">🥉</div>' +
+        '<div class="podium-team">' + third.team + '</div>' +
+        '<div class="podium-sabun">' + maskSabun(third.sabun) + '</div>' +
+        '<div class="podium-score">순위합 ' + third.rankSum + '</div>' +
+      '</div>'
+    ) : '<div class="podium-card third" style="opacity:0.3;"><div class="podium-medal">🥉</div><div class="podium-team">-</div></div>';
+
+    overallPodiumArea.innerHTML = podiumHtml;
+
+    // 4위부터 꼴찌까지 전체 표시
+    var restList = list.slice(3);
+    var listHtml = "";
+    restList.forEach(function(item, idx){
+      var rank = idx + 4;
+      var isMe = (mySabun && String(item.sabun).trim() === String(mySabun).trim());
+      listHtml += '<div class="rank-row ' + (isMe ? 'is-me' : '') + '">' +
+        '<div class="rank-row-left">' +
+          '<span class="rank-num">' + rank + '</span>' +
+          '<div>' +
+            '<span class="rank-team">' + item.team + '</span> ' +
+            '<span class="rank-sabun">(' + maskSabun(item.sabun) + ')' + (isMe ? ' 👈 나' : '') + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<span class="rank-val">순위합 ' + item.rankSum + '점</span>' +
+      '</div>';
+    });
+
+    overallRankListArea.innerHTML = listHtml;
   }
 
   function fetchRankings(){
