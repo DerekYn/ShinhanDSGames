@@ -946,7 +946,6 @@
     animal.classList.remove("active");
 
     var isFever = (time <= 10);
-    // [핵심] 피버 배율 1.3배 적용 (후반 몰림 현상 해소)
     var multiplier = isFever ? 1.3 : 1.0;
 
     // 반응속도 판정 (PERFECT: 250ms 이하 +30점, GREAT: 450ms 이하 +15점)
@@ -955,7 +954,7 @@
     var judgeKind = "";
 
     if(type === "king-mole" || type === "mole"){
-      if(reactionMs <= 250){
+      if(reactionMs <= 300){
         speedBonus = 30;
         judgeText = "PERFECT!";
         judgeKind = "perfect";
@@ -989,14 +988,12 @@
       if(navigator.vibrate) navigator.vibrate(15);
 
     } else if(type === "rabbit"){
-      // [핵심] 콤보 0 초기화 대신 3개 차감
       score -= 30;
       combo = Math.max(0, combo - 3);
       pop(holes[index], "-30 (콤보-3)", "bad");
       if(navigator.vibrate) navigator.vibrate(40);
 
     } else if(type === "tiger"){
-      // [핵심] 콤보 0 초기화 대신 3개 차감
       score -= 50;
       combo = Math.max(0, combo - 3);
       pop(holes[index], "-50 (콤보-3)", "bad");
