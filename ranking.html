@@ -239,6 +239,63 @@
   .team-card.rank-1 .team-score { color: var(--gold); }
   .team-score-lbl { font-size: 9.5px; color: var(--ice); opacity: 0.75; }
 
+  /* 4위 하단: 팀별 대항전 승점 산정 안내 가이드 카드 */
+  .team-guide-card {
+    background: linear-gradient(180deg, rgba(6, 20, 36, 0.85), rgba(11, 31, 58, 0.75));
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+    font-size: 11.5px;
+    line-height: 1.55;
+    color: var(--ice);
+  }
+  .team-guide-title {
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .team-guide-title b { color: var(--gold); }
+  .team-guide-list {
+    margin: 0;
+    padding-left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .team-guide-list li { color: var(--ice); }
+  .team-guide-list li strong { color: #fff; font-weight: 700; }
+  .team-guide-example {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(79, 157, 222, 0.25);
+    border-left: 3.5px solid var(--sky);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-top: 2px;
+    font-size: 11px;
+    line-height: 1.55;
+    color: rgba(234, 244, 252, 0.95);
+  }
+  .team-guide-example .ex-tag {
+    display: inline-block;
+    background: var(--sky);
+    color: var(--navy);
+    font-size: 9.5px;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 4px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
   /* 모달 레이아웃 */
   #authOverlay {
     position: fixed; inset: 0;
@@ -421,8 +478,27 @@
     <div id="teamContainer" style="display:none; flex-direction:column; gap:8px;">
       <!-- 우리 팀 순위 VIP 카드 -->
       <div class="my-rank-card" id="myTeamCard" title="클릭 시 플레이어 정보 변경"></div>
-      <!-- 팀 순위 리스트 -->
+      <!-- 팀 순위 리스트 (1~4위) -->
       <div class="team-list" id="teamListArea"></div>
+
+      <!-- 4위 하단: 팀별 대항전 점수 산정 방식 안내 및 실전 예시 -->
+      <div class="team-guide-card">
+        <div class="team-guide-title">
+          <span>💡</span>
+          <span>팀별 대항전 <b>승점 산정 방식</b> 안내</span>
+        </div>
+        <ul class="team-guide-list">
+          <li><strong>번외팀 참가 안내</strong>: <b>영포스</b> 및 <b>기타</b>는 종목별 개인 순위에는 100% 정상 반영되나, 본선 4개 팀 간의 공정한 경쟁을 위해 <b>팀별 대항전 순위 및 승점 집계에서는 제외(번외)</b>됩니다.</li>
+          <li><strong>종목별 승점 배분</strong>: 5개 종목마다 번외팀을 제외한 <b>공식 4개 팀 소속 참가자의 순위만 추출</b>하여 <b>1위(10점)부터 10위(1점)까지</b> 차등 승점을 소속 팀에 부여합니다.</li>
+        </ul>
+        <div class="team-guide-example">
+          <span class="ex-tag">산정 예시</span>
+          어떤 종목의 개인 7위가 <b>'기타'</b>이고 8위가 <b>'라이프개발팀'</b>인 경우:<br>
+          👉 7위(기타)는 건너뛰고, 8위인 라이프개발팀이 <b>공식 7위(4 pts)</b>로 승계됩니다.<br>
+          👉 9위인 팀은 <b>공식 8위(3 pts)</b>, 10위인 팀은 <b>공식 9위(2 pts)</b>로 한 칸씩 당겨지며,<br>
+          👉 개인 순위 11위에 위치한 공식 팀 참가자도 <b>공식 10위(1 pt)</b>로 승점을 획득합니다!
+        </div>
+      </div>
     </div>
 
     <!-- 빈 데이터 안내 화면 -->
@@ -566,7 +642,7 @@
     return s.slice(0, 3) + "*".repeat(s.length - 3);
   }
 
-  // 🚀 [핵심 엔진] 영포스·기타 제외 및 공식 4개 팀 대상 순위 당김 승점 계산 함수
+  // 영포스·기타 제외 및 공식 4개 팀 대상 순위 당김 승점 계산 함수
   function computeOfficialTeamRankings(){
     var officialTeams = ["증권개발팀", "증권채널팀", "카드개발팀", "라이프개발팀"];
     var teamScores = {};
@@ -578,7 +654,7 @@
     gameList.forEach(function(gName){
       var list = (cachedData.games && cachedData.games[gName]) || [];
 
-      // 영포스, 기타, 미선택 제외하고 공식 4개 팀 기록만 추출
+      // 영포스, 기타 제외하고 공식 4개 팀 기록만 추출
       var validList = list.filter(function(item){
         var t = String(item.team || "").trim();
         return officialTeams.indexOf(t) !== -1;
@@ -744,7 +820,7 @@
     rankListArea.innerHTML = listHtml;
   }
 
-  // 2. 팀별 대항전 순위 (영포스·기타 제외 및 공식 4개 팀만 표출)
+  // 2. 팀별 대항전 순위 (공식 4개 팀 1~4위 표출 및 하단 설명 가이드)
   function renderTeamRank(){
     var list = computeOfficialTeamRankings();
 
@@ -769,7 +845,6 @@
       }
     }
 
-    // 우리 팀 카드 표출 분기: 공식 4개 팀 vs 번외팀(영포스/기타)
     if (myTeamObj) {
       myTeamCard.innerHTML = 
         '<div class="my-rank-left">' +
