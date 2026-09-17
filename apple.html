@@ -304,7 +304,7 @@
   }
   .sumTag.ok{ background: var(--accent); border-color: var(--accent); color:#04241c;}
 
-  /* 컨트롤 버튼 (다시 시작, 판 섞기, 규칙 보기) */
+  /* 컨트롤 버튼 */
   .controls{ display:flex; gap:8px; margin-top:2px; justify-content:center; flex-wrap:wrap; }
   button.main{
     font-family: var(--font-ui); font-size:13.5px; font-weight:700;
@@ -330,14 +330,14 @@
 
   .hint{ font-size:11.5px; color:var(--ice); opacity:0.65; text-align:center; max-width:480px; }
 
-  /* 모달 */
-  #overlay, #ruleOverlay, #authOverlay{
+  /* 모달 레이아웃 */
+  #overlay, #ruleOverlay, #authOverlay, #easterEggOverlay{
     position:fixed; inset:0;
     background: rgba(4,12,24,0.85);
     display:none; align-items:center; justify-content:center; z-index:100;
     padding:20px;
   }
-  #overlay.show, #ruleOverlay.show, #authOverlay.show{ display:flex; }
+  #overlay.show, #ruleOverlay.show, #authOverlay.show, #easterEggOverlay.show{ display:flex; }
   .modal{
     background: linear-gradient(180deg, #123A63, #0B1F3A);
     border: 1px solid rgba(255,255,255,0.15);
@@ -528,6 +528,16 @@
   </div>
 </div>
 
+<!-- 🎁 이스터에그: 사과 상자 장인 (선착순 2명) 모달 -->
+<div id="easterEggOverlay">
+  <div class="modal" style="border: 2px solid var(--gold); box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4);">
+    <div id="eeIcon" style="font-size: 46px; margin-bottom: 8px;">🍎🍽️</div>
+    <h2 id="eeTitle" style="color: var(--gold); font-size: 20px; margin-bottom: 10px;">식사 지원 이벤트 당첨!</h2>
+    <p id="eeBody" style="color: var(--paper); font-size: 13.5px; line-height: 1.7; margin-bottom: 20px;"></p>
+    <button type="button" class="main" id="eeCloseBtn" style="background: linear-gradient(135deg, #FFD700, #F59E0B); color: #0B1F3A; font-weight: 800; width: 100%; border: none; font-size: 15px; padding: 11px;">확인</button>
+  </div>
+</div>
+
 <div id="ruleOverlay">
   <div class="modal">
     <h2>게임 규칙</h2>
@@ -648,6 +658,10 @@
   var comboTimeoutId = null;
   var shufflesLeft = 1;
 
+  // 🎁 이스터에그 상태 변수
+  var easterEggTriggered = false;
+  var eePauseStart = 0;
+
   boardEl = document.getElementById('board');
   selRect = document.getElementById('selRect');
   sumTag = document.getElementById('sumTag');
@@ -663,6 +677,12 @@
   var modalScore = document.getElementById('modalScore');
   var modalDesc = document.getElementById('modalDesc');
   var ruleOverlay = document.getElementById('ruleOverlay');
+
+  var easterEggOverlay = document.getElementById('easterEggOverlay');
+  var eeIcon = document.getElementById('eeIcon');
+  var eeTitle = document.getElementById('eeTitle');
+  var eeBody = document.getElementById('eeBody');
+  var eeCloseBtn = document.getElementById('eeCloseBtn');
 
   var adPopup = document.getElementById("adPopup");
   var adRestartBtn = document.getElementById("adRestartBtn");
@@ -853,9 +873,87 @@
     return { x: t.clientX - wrapRect.left, y: t.clientY - wrapRect.top };
   }
 
-  // [보안 강화] 터치 시점에 절대 시간 즉시 검증 (어뷰징 차단 1단계)
+  // 🎁 이스터에그 모달 제어 함수
+  function showEasterEggModal(icon, title, html, showClose){
+    eeIcon.textContent = icon || "🍎🍽️";
+    eeTitle.innerHTML = title;
+    eeBody.innerHTML = html;
+    eeCloseBtn.style.display = showClose ? 'block' : 'none';
+    easterEggOverlay.classList.add('show');
+  }
+
+  eeCloseBtn.addEventListener('click', function(){
+    easterEggOverlay.classList.remove('show');
+    // 팝업 확인 후 타이머 보정 완료 (모달 읽는 동안 소모된 시간 복구)
+    if(eePauseStart > 0){
+      gameStartTime += (Date.now() - eePauseStart);
+      eePauseStart = 0;
+    }
+  });
+
+  // 🎁 사과게임 이스터에그 서버 검증 요청
+  function triggerEasterEgg(boxSize){
+    eePauseStart = Date.now(); // 타이머 일시 멈춤
+
+    showEasterEggModal(
+      "⏳",
+      "당첨 확인 중...",
+      "선착순 당첨 여부를 서버와 확인하고 있습니다.<br>잠시만 기다려주세요!",
+      false
+    );
+
+    var targetUrl = GOOGLE_WEBHOOK_URL + "?action=easterEgg&game=" + encodeURIComponent(GAME_NAME) + "&team=" + encodeURIComponent(currentTeam) + "&sabun=" + encodeURIComponent(currentSabun) + "&detail=" + encodeURIComponent("빅 박스 10 완성 (" + boxSize + "칸 크기)");
+
+    fetch(targetUrl, { method: "GET", redirect: "follow" })
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+        if(data && data.result === "win"){
+          var order = data.order || 1; // 1 or 2
+          var rewardTitle = data.reward || (order === 1 ? "상무님 식사비 지원" : "본부장님 식사권 지원");
+          var icon = (order === 1) ? "🍽️" : "🍎🍽️";
+
+          showEasterEggModal(
+            icon,
+            "🎉 " + rewardTitle + " 당첨! 🎉",
+            "축하합니다! 👏<br><br>10칸 이상의 거대한 빅 박스로 합 10을 완성한 사과 상자 장인!<br><b style='color:var(--gold); font-size:16px;'>[사과게임 " + order + "번째 당첨] " + rewardTitle + " 확정!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 운영진 확인 후 개별 안내 예정입니다.</span>",
+            true
+          );
+        } else if(data && data.result === "already"){
+          showEasterEggModal(
+            "🎉",
+            "이미 당첨된 플레이어입니다!",
+            "이미 <b style='color:var(--gold);'>" + (data.game || "다른 종목") + "</b>에서 <b style='color:var(--accent);'>" + (data.reward || "식사 지원") + "</b>에 당첨 등록되었습니다!<br><br>더 많은 팀원들의 참여를 위해 1인 1회만 지급됩니다 🍽️",
+            true
+          );
+        } else if(data && data.result === "closed"){
+          showEasterEggModal(
+            "⏱️",
+            "아쉽습니다! 선착순 마감",
+            "사과 상자 장인(빅 박스 10)을 달성하셨으나,<br><b style='color:var(--danger);'>사과게임 식사 지원(선착순 2명)이 이미 마감</b>되었습니다 😢<br><br>다른 종목의 숨겨진 이스터 에그에 도전해 보세요!",
+            true
+          );
+        } else {
+          showEasterEggModal(
+            "🍎🍽️",
+            "🎉 식사 지원 이벤트 당첨! 🎉",
+            "축하합니다! 👏<br><br>거대 빅 박스로 합 10을 완성한 사과 상자 장인!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
+            true
+          );
+        }
+      })
+      .catch(function(err){
+        logEvent("이스터에그_식사", { detail: "사과게임 빅박스 10 달성 (" + boxSize + "칸)" });
+        showEasterEggModal(
+          "🍎🍽️",
+          "🎉 식사 지원 이벤트 당첨! 🎉",
+          "축하합니다! 👏<br><br>거대 빅 박스로 합 10을 완성한 사과 상자 장인!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
+          true
+        );
+      });
+  }
+
   function onDown(e){
-    if(!gameActive) return;
+    if(!gameActive || eePauseStart > 0) return;
 
     if(gameStartTime > 0){
       var actualElapsed = Math.floor((Date.now() - gameStartTime) / 1000);
@@ -876,7 +974,7 @@
   }
 
   function onMove(e){
-    if(!dragging || !gameActive) return;
+    if(!dragging || !gameActive || eePauseStart > 0) return;
     e.preventDefault();
     var p = getPointerPos(e);
     updateDrag(p);
@@ -901,7 +999,7 @@
     dragging = false;
     selRect.style.display = 'none';
 
-    if(!gameActive){
+    if(!gameActive || eePauseStart > 0){
       clearSelectionVisual(); curSel = []; sumTag.textContent = '';
       return;
     }
@@ -909,6 +1007,23 @@
     var sum = curSel.reduce(function(a,b){return a+b.val;},0);
     var madeMove = curSel.length > 0 && sum === 10;
     if(madeMove){
+      // 🎁 [사과 상자 장인 이스터에그 판정]
+      // 드래그된 직사각형 영역이 10칸 이상의 넓이를 포괄하는지 계산
+      var minR = ROWS, maxR = -1, minC = COLS, maxC = -1;
+      curSel.forEach(function(item){
+        if(item.r < minR) minR = item.r;
+        if(item.r > maxR) maxR = item.r;
+        if(item.c < minC) minC = item.c;
+        if(item.c > maxC) maxC = item.c;
+      });
+      var boxArea = (maxR >= minR && maxC >= minC) ? (maxR - minR + 1) * (maxC - minC + 1) : curSel.length;
+
+      // 영역이 10칸 이상이거나 사과 개수가 10개 이상일 때 이스터에그 발동
+      if((boxArea >= 10 || curSel.length >= 10) && !easterEggTriggered){
+        easterEggTriggered = true;
+        triggerEasterEgg(boxArea);
+      }
+
       curSel.forEach(function(item){
         item.el.classList.add('pop');
         board[item.r][item.c] = -1;
@@ -932,11 +1047,10 @@
     if(madeMove && gameActive && !hasValidMove()){ endGame('nomoves'); }
   }
 
-  // [핵심 엔진] 250ms 주기 절대 시간(Wall-clock) 동기화 타이머 (어뷰징 차단 2단계)
   function startTimer(){
     clearInterval(timerId);
     timerId = setInterval(function(){
-      if(!gameActive) return;
+      if(!gameActive || eePauseStart > 0) return;
       var elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
       timeLeft = Math.max(0, GAME_TIME - elapsed);
       updateHud();
@@ -946,13 +1060,11 @@
     }, 250);
   }
 
-  // [핵심 엔진] 화면 잠금 해제 / 앱 복귀 즉각 감지 (어뷰징 차단 3단계)
   document.addEventListener('visibilitychange', function() {
-    if (!document.hidden && gameActive && gameStartTime > 0) {
+    if (!document.hidden && gameActive && gameStartTime > 0 && eePauseStart === 0) {
       var elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
       timeLeft = Math.max(0, GAME_TIME - elapsed);
       updateHud();
-      // 화면 끄고 2분 분석 후 켰을 때 즉시 시간 종료 발동
       if (timeLeft <= 0) {
         endGame('timeout');
       }
@@ -988,6 +1100,7 @@
 
   function startGame(){
     overlay.classList.remove('show');
+    easterEggOverlay.classList.remove('show');
     adPopup.style.display = 'none';
     clearTimeout(comboTimeoutId);
     combo = 0;
@@ -996,7 +1109,9 @@
     score = 0; 
     timeLeft = GAME_TIME; 
     gameActive = true;
-    gameStartTime = Date.now(); // 게임 시작 절대 시각 기록
+    easterEggTriggered = false;
+    eePauseStart = 0;
+    gameStartTime = Date.now();
 
     buildBoard();
     var attempts = 0;
@@ -1084,7 +1199,7 @@
   sabunInput.addEventListener('input', function() {
     this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8);
     if (this.value.length === 8) {
-      this.classList.remove('error');
+      this.classList.remove('error'); 
       authError.textContent = "";
     }
   });
