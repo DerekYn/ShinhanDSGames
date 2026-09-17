@@ -305,13 +305,13 @@
   .hint { font-size: 11.5px; color: var(--ice); opacity: 0.65; text-align: center; max-width: 480px; }
 
   /* 모달 레이아웃 */
-  #overlay, #ruleOverlay, #authOverlay{
+  #overlay, #ruleOverlay, #authOverlay, #easterEggOverlay {
     position: fixed; inset: 0;
     background: rgba(4,12,24,0.85);
     display: none; align-items: center; justify-content: center; z-index: 100;
     padding: 20px;
   }
-  #overlay.show, #ruleOverlay.show, #authOverlay.show { display: flex; }
+  #overlay.show, #ruleOverlay.show, #authOverlay.show, #easterEggOverlay.show { display: flex; }
   .modal {
     background: linear-gradient(180deg, #123A63, #0B1F3A);
     border: 1px solid rgba(255,255,255,0.15);
@@ -504,6 +504,16 @@
   </div>
 </div>
 
+<!-- 🎁 이스터에그: 매트릭스 회피왕 (선착순 2명) 모달 -->
+<div id="easterEggOverlay">
+  <div class="modal" style="border: 2px solid var(--gold); box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4);">
+    <div id="eeIcon" style="font-size: 46px; margin-bottom: 8px;">🕶️🍽️</div>
+    <h2 id="eeTitle" style="color: var(--gold); font-size: 20px; margin-bottom: 10px;">식사 지원 이벤트 당첨!</h2>
+    <p id="eeBody" style="color: var(--paper); font-size: 13.5px; line-height: 1.7; margin-bottom: 20px;"></p>
+    <button type="button" class="main" id="eeCloseBtn" style="background: linear-gradient(135deg, #FFD700, #F59E0B); color: #0B1F3A; font-weight: 800; width: 100%; border: none; font-size: 15px; padding: 11px;">확인</button>
+  </div>
+</div>
+
 <!-- 규칙 모달 -->
 <div id="ruleOverlay">
   <div class="modal">
@@ -561,7 +571,7 @@
 
     var gpu = getGpuRenderer().toLowerCase();
 
-    // 1순위: 모바일 칩셋 우선 통과 (Android Chrome ANGLE 호환)
+    // 1순위: 모바일 칩셋 우선 통과
     var mobileGpuKeywords = ['mali', 'adreno', 'apple', 'powervr', 'xclipse'];
     for (var m = 0; m < mobileGpuKeywords.length; m++) {
       if (gpu.indexOf(mobileGpuKeywords[m]) !== -1) {
@@ -648,6 +658,12 @@
   const rulesBtn = document.getElementById("rulesBtn");
   const ruleCloseBtn = document.getElementById("ruleCloseBtn");
 
+  const easterEggOverlay = document.getElementById("easterEggOverlay");
+  const eeIcon = document.getElementById("eeIcon");
+  const eeTitle = document.getElementById("eeTitle");
+  const eeBody = document.getElementById("eeBody");
+  const eeCloseBtn = document.getElementById("eeCloseBtn");
+
   const adPopup = document.getElementById("adPopup");
   const adRestartBtn = document.getElementById("adRestartBtn");
 
@@ -704,11 +720,10 @@
     drawFrame(0, true);
   }
 
-  // 콤보에 따른 바구니 크기 실시간 축소 (Risk & Reward)
   function updateBasketWidth(dt) {
     let targetRatio = 1.0;
-    if (combo >= 10) targetRatio = 0.70; // 10콤보 이상: 70% 크기
-    else if (combo >= 5) targetRatio = 0.85; // 5콤보 이상: 85% 크기
+    if (combo >= 10) targetRatio = 0.70;
+    else if (combo >= 5) targetRatio = 0.85;
 
     const targetW = baseBasketW * targetRatio;
     if (dt > 0) {
@@ -742,6 +757,7 @@
     updateBasketWidth(0);
     updateMeters();
     overlay.classList.remove("show");
+    easterEggOverlay.classList.remove("show");
     adPopup.style.display = "none";
 
     sendLog("시작", { score: 0 });
@@ -751,20 +767,99 @@
     rafId = requestAnimationFrame(loop);
   }
 
+  // 🎁 이스터에그 모달 제어 함수
+  function showEasterEggModal(icon, title, html, showClose){
+    eeIcon.textContent = icon || "🕶️🍽️";
+    eeTitle.innerHTML = title;
+    eeBody.innerHTML = html;
+    eeCloseBtn.style.display = showClose ? 'block' : 'none';
+    easterEggOverlay.classList.add('show');
+  }
+
+  eeCloseBtn.addEventListener('click', function(){
+    easterEggOverlay.classList.remove('show');
+    overlay.classList.add('show');
+  });
+
+  // 🎁 [이스터에그: 매트릭스 회피왕 (선착순 2인 검증 요청)]
+  function triggerEasterEgg(){
+    showEasterEggModal(
+      "⏳",
+      "당첨 확인 중...",
+      "선착순 당첨 여부를 서버와 확인하고 있습니다.<br>잠시만 기다려주세요!",
+      false
+    );
+
+    var targetUrl = GOOGLE_WEBHOOK_URL + "?action=easterEgg&game=" + encodeURIComponent(GAME_NAME) + "&team=" + encodeURIComponent(currentTeam) + "&sabun=" + encodeURIComponent(currentSabun) + "&detail=" + encodeURIComponent("0점 완주 (매트릭스 회피왕)");
+
+    fetch(targetUrl, { method: "GET", redirect: "follow" })
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+        if(data && data.result === "win"){
+          var order = data.order || 1; // 1 or 2
+          var rewardTitle = data.reward || (order === 1 ? "상무님 식사비 지원" : "본부장님 식사권 지원");
+          var icon = (order === 1) ? "🍽️" : "🕶️🍽️";
+
+          showEasterEggModal(
+            icon,
+            "🎉 " + rewardTitle + " 당첨! 🎉",
+            "축하합니다! 👏<br><br>60초 동안 모든 낙하물을 완벽히 회피한 매트릭스 회피왕!<br><b style='color:var(--accent); font-size:15px;'>최종 점수: 0점 완주!</b><br><b style='color:var(--gold); font-size:16px;'>[낙하캐치 " + order + "번째 당첨] " + rewardTitle + " 확정!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 운영진 확인 후 개별 안내 예정입니다.</span>",
+            true
+          );
+        } else if(data && data.result === "already"){
+          showEasterEggModal(
+            "🎉",
+            "이미 당첨된 플레이어입니다!",
+            "이미 <b style='color:var(--gold);'>" + (data.game || "다른 종목") + "</b>에서 <b style='color:var(--accent);'>" + (data.reward || "식사 지원") + "</b>에 당첨 등록되었습니다!<br><br>더 많은 팀원들의 참여를 위해 1인 1회만 지급됩니다 🍽️",
+            true
+          );
+        } else if(data && data.result === "closed"){
+          showEasterEggModal(
+            "⏱️",
+            "아쉽습니다! 선착순 마감",
+            "매트릭스 회피왕(0점 완주)을 달성하셨으나,<br><b style='color:var(--danger);'>낙하캐치 식사 지원(선착순 2명)이 이미 마감</b>되었습니다 😢<br><br>다른 종목의 숨겨진 이스터 에그에 도전해 보세요!",
+            true
+          );
+        } else {
+          showEasterEggModal(
+            "🕶️🍽️",
+            "🎉 식사 지원 이벤트 당첨! 🎉",
+            "축하합니다! 👏<br><br>모든 아이템을 피한 매트릭스 회피왕!<br><b style='color:var(--accent); font-size:15px;'>최종 점수: 0점 완주!</b><br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
+            true
+          );
+        }
+      })
+      .catch(function(err){
+        sendLog("이스터에그_식사", { detail: "낙하캐치 0점 완주 달성" });
+        showEasterEggModal(
+          "🕶️🍽️",
+          "🎉 식사 지원 이벤트 당첨! 🎉",
+          "축하합니다! 👏<br><br>모든 아이템을 피한 매트릭스 회피왕!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
+          true
+        );
+      });
+  }
+
   function endGame() {
     running = false;
     cancelAnimationFrame(rafId);
     stageWrap.classList.remove('fever');
     gameDash.classList.remove('fever');
-    setFace(score >= 250 ? "🏆" : score >= 130 ? "😄" : "😅");
+    setFace(score >= 250 ? "🏆" : score >= 130 ? "😄" : (score === 0 ? "🕶️" : "😅"));
 
     modalScore.textContent = score;
-    overlay.classList.add("show");
 
     sendLog("종료", {
       score: score,
       detail: `최종점수: ${score}점, 최대콤보: ${maxCombo}`
     });
+
+    // 🚀 [핵심 이스터에그 판정]: 60초 완주 시 최종 점수가 0점일 때 발동!
+    if(score === 0){
+      triggerEasterEgg();
+    } else {
+      overlay.classList.add("show");
+    }
   }
 
   function showNoticePopup() {
@@ -779,7 +874,6 @@
     const viewH = canvas.clientHeight || 360;
     const speedScale = Math.max(0.7, Math.min(1.15, viewH / 420));
     
-    // 시간 경과에 따른 점진적 속도 증가 (최대 35% 가속)
     const timeProgress = (CONFIG.duration - timeLeft) / CONFIG.duration;
     const speedBoost = 1 + (timeProgress * 0.35);
 
@@ -789,12 +883,12 @@
     let speedMult = 1.0;
 
     if (roll < CONFIG.badChance) {
-      type = "bad"; // 폭탄
+      type = "bad";
     } else if (roll > 0.90) {
-      type = "diamond"; // 💠 초고속 다이아몬드 (찬스 타겟)
+      type = "diamond";
       speedMult = 1.45;
     } else if (roll > 0.72) {
-      type = "great"; // ⭐ 초록 별 (살랑살랑 지그재그 낙하)
+      type = "great";
       isSway = true;
     }
 
@@ -830,7 +924,7 @@
   }
 
   function catchItem(item) {
-    const feverMultiplier = isFever ? 2 : 1; // 피버 타임 점수 2배!
+    const feverMultiplier = isFever ? 2 : 1;
 
     if (item.type === "bad") {
       score = Math.max(0, score - 20);
@@ -865,7 +959,6 @@
       return;
     }
 
-    // 15초 피버 타임 감지
     if (timeLeft <= 15 && !isFever) {
       isFever = true;
       stageWrap.classList.add('fever');
@@ -880,7 +973,6 @@
       basket.x = Math.min(Math.max(basket.x, basket.w / 2 + 8), viewW - basket.w / 2 - 8);
     }
 
-    // 피버 타임에는 스폰 주기 단축
     const currentSpawnEvery = isFever ? CONFIG.feverSpawnEvery : CONFIG.baseSpawnEvery;
     spawnAcc += dt * 1000;
     while (spawnAcc >= currentSpawnEvery) {
@@ -893,7 +985,6 @@
       it.y += it.vy * dt;
       it.rot += it.spin * dt;
 
-      // 궤적 다양화 (Sine Wave 지그재그 낙하)
       if (it.sway) {
         it.swayPhase += dt * it.swaySpeed;
         it.x = it.baseX + Math.sin(it.swayPhase) * it.swayAmp;
@@ -932,7 +1023,6 @@
   function drawBackground(viewW, viewH) {
     const g = ctx.createLinearGradient(0, 0, 0, viewH);
     if (isFever) {
-      // 피버 타임 골드/오렌지 빛 배경 그라데이션
       g.addColorStop(0, "#2a1b04");
       g.addColorStop(1, "#071426");
     } else {
@@ -999,7 +1089,6 @@
       ctx.textBaseline = "middle";
       ctx.fillText("💣", 0, 1);
     } else if (it.type === "diamond") {
-      // 💠 초고속 다이아몬드 (파란 광채)
       ctx.fillStyle = "#0284c7";
       ctx.shadowColor = "#38bdf8";
       ctx.shadowBlur = 10;
@@ -1181,7 +1270,7 @@
   sabunInput.addEventListener('input', function() {
     this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8);
     if (this.value.length === 8) {
-      this.classList.remove('error');
+      this.classList.remove('error'); 
       authError.textContent = "";
     }
   });
