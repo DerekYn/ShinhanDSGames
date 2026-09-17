@@ -268,7 +268,7 @@
     touch-action: none;
   }
 
-  /* 🚀 [글자 잘림 원천 해결] 팝업 텍스트가 구멍 밖으로 시원하게 올라오도록 허용하는 래퍼 */
+  /* 팝업 텍스트가 구멍 밖으로 시원하게 올라오도록 허용하는 래퍼 */
   .hole-wrap{
     position: relative;
     width: 100%;
@@ -397,7 +397,7 @@
   .tiger .eye:after{ content:""; position:absolute; top:1px; right:1px; width:3px; height:3px; background:#fff; border-radius:50%; }
   .tiger .nose{ top:40px; width:13px; height:8px; background:#b91c1c; border-radius:2px 2px 50% 50%; z-index:5; }
 
-  /* 팝업 점수 및 판정 (z-index 및 텍스트 섀도우 강화) */
+  /* 팝업 점수 및 판정 */
   .pop{
     position:absolute; top:4px; left:50%; transform:translateX(-50%);
     font-size:16px; font-weight:900; font-family:var(--font-num); color:var(--accent);
@@ -436,13 +436,13 @@
   .hint{ font-size:11.5px; color:var(--ice); opacity:0.65; text-align:center; max-width:480px; }
 
   /* 모달 레이아웃 */
-  #overlay, #ruleOverlay, #authOverlay{
+  #overlay, #ruleOverlay, #authOverlay, #easterEggOverlay{
     position:fixed; inset:0;
     background: rgba(4,12,24,0.85);
     display:none; align-items:center; justify-content:center; z-index:100;
     padding:20px;
   }
-  #overlay.show, #ruleOverlay.show, #authOverlay.show{ display:flex; }
+  #overlay.show, #ruleOverlay.show, #authOverlay.show, #easterEggOverlay.show{ display:flex; }
   .modal{
     background: linear-gradient(180deg, #123A63, #0B1F3A);
     border: 1px solid rgba(255,255,255,0.15);
@@ -621,7 +621,7 @@
   <div class="hint">⚡빠를수록 PERFECT(+30) 보너스! 실수해도 콤보는 -3만 차감돼요.</div>
 </div>
 
-<!-- 결과 화면 -->
+<!-- 일반 결과 화면 -->
 <div id="overlay">
   <div class="modal">
     <h2 id="modalTitle">게임 종료!</h2>
@@ -631,6 +631,16 @@
       최대 콤보: <b id="maxCombo" style="color:var(--accent);">0</b>
     </p>
     <button class="main" id="retryButton">다시 하기</button>
+  </div>
+</div>
+
+<!-- 🎁 이스터에그: 통합 선착순 8인 (홀수: 상무님 식사비 / 짝수: 본부장님 식사권) 모달 -->
+<div id="easterEggOverlay">
+  <div class="modal" style="border: 2px solid var(--gold); box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4);">
+    <div id="eeIcon" style="font-size: 46px; margin-bottom: 8px;">🐯🍽️</div>
+    <h2 id="eeTitle" style="color: var(--gold); font-size: 20px; margin-bottom: 10px;">식사 지원 이벤트 당첨!</h2>
+    <p id="eeBody" style="color: var(--paper); font-size: 13.5px; line-height: 1.7; margin-bottom: 20px;"></p>
+    <button type="button" class="main" id="eeCloseBtn" style="background: linear-gradient(135deg, #FFD700, #F59E0B); color: #0B1F3A; font-weight: 800; width: 100%; border: none; font-size: 15px; padding: 11px;">확인</button>
   </div>
 </div>
 
@@ -694,7 +704,6 @@
 
     var gpu = getGpuRenderer().toLowerCase();
 
-    // 1순위: 모바일 칩셋 우선 통과
     var mobileGpuKeywords = ['mali', 'adreno', 'apple', 'powervr', 'xclipse'];
     for (var m = 0; m < mobileGpuKeywords.length; m++) {
       if (gpu.indexOf(mobileGpuKeywords[m]) !== -1) {
@@ -702,7 +711,6 @@
       }
     }
 
-    // 2순위: PC 전용 GPU 탐지
     var pcGpuKeywords = [
       'geforce', 'nvidia', 'radeon', 'intel', 
       'direct3d', 'llvmpipe', 'mesa', 'swiftshader', 
@@ -773,6 +781,12 @@
   var ruleOverlay = document.getElementById("ruleOverlay");
   var ruleBtn = document.getElementById("ruleBtn");
   var ruleCloseBtn = document.getElementById("ruleCloseBtn");
+
+  var easterEggOverlay = document.getElementById("easterEggOverlay");
+  var eeIcon = document.getElementById("eeIcon");
+  var eeTitle = document.getElementById("eeTitle");
+  var eeBody = document.getElementById("eeBody");
+  var eeCloseBtn = document.getElementById("eeCloseBtn");
 
   var adPopup = document.getElementById("adPopup");
   var adRestartBtn = document.getElementById("adRestartBtn");
@@ -856,7 +870,6 @@
     spawnTimers.forEach(function(t){ clearTimeout(t); });
     spawnTimers = [];
 
-    // 일반 20초 구간에 70%, 피버 10초 구간에 30% 스폰 배분
     function generateSmartTimes(count){
       var arr = [];
       var normalCount = Math.round(count * 0.7);
@@ -930,7 +943,6 @@
     }, stayTime);
   }
 
-  // 🚀 [글자 잘림 방지] 구멍(hole) 대신 부모 래퍼(hole-wrap)에 추가하여 경계선 밖으로 자유롭게 부유
   function pop(hole, text, kind){
     var el = document.createElement("div");
     el.className = "pop " + (kind || "");
@@ -962,7 +974,6 @@
     var isFever = (time <= 10);
     var multiplier = isFever ? 1.3 : 1.0;
 
-    // 반응속도 판정
     var speedBonus = 0;
     var judgeText = "";
     var judgeKind = "";
@@ -1044,6 +1055,7 @@
     updateFeverState();
 
     overlay.classList.remove("show");
+    easterEggOverlay.classList.remove("show");
     adPopup.style.display = "none";
     hide();
 
@@ -1057,6 +1069,79 @@
     }, 1000);
 
     scheduleSpawns();
+  }
+
+  // 🎁 통합 이스터에그 모달 제어 함수
+  function showEasterEggModal(icon, title, html, showClose){
+    eeIcon.textContent = icon || "🐯🍽️";
+    eeTitle.innerHTML = title;
+    eeBody.innerHTML = html;
+    eeCloseBtn.style.display = showClose ? 'block' : 'none';
+    easterEggOverlay.classList.add('show');
+  }
+
+  eeCloseBtn.addEventListener('click', function(){
+    easterEggOverlay.classList.remove('show');
+    overlay.classList.add('show'); // 일반 결과창 표출
+  });
+
+  // 🎁 종목별 선착순 2인 검증 요청 (1등: 상무님 / 2등: 본부장님)
+  function triggerEasterEgg(){
+    showEasterEggModal(
+      "⏳",
+      "당첨 확인 중...",
+      "선착순 당첨 여부를 서버와 확인하고 있습니다.<br>잠시만 기다려주세요!",
+      false
+    );
+
+    var targetUrl = GOOGLE_WEBHOOK_URL + "?action=easterEgg&game=" + encodeURIComponent(GAME_NAME) + "&team=" + encodeURIComponent(currentTeam) + "&sabun=" + encodeURIComponent(currentSabun) + "&detail=" + encodeURIComponent("최종점수: " + score + "점");
+
+    fetch(targetUrl, { method: "GET", redirect: "follow" })
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+        if(data && data.result === "win"){
+          var order = data.order || 1; // 1 or 2
+          var rewardTitle = data.reward || (order === 1 ? "상무님 식사비 지원" : "본부장님 식사권 지원");
+          var icon = (order === 1) ? "🍽️" : "🐯🍽️";
+
+          showEasterEggModal(
+            icon,
+            "🎉 " + rewardTitle + " 당첨! 🎉",
+            "축하합니다! 👏<br><br>호랑이와 토끼를 제압한 점수 파괴자!<br><b style='color:var(--danger); font-size:15px;'>최종 점수: " + score + "점 달성!</b><br><b style='color:var(--gold); font-size:16px;'>[두더지잡기 " + order + "번째 당첨] " + rewardTitle + " 확정!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 운영진 확인 후 개별 안내 예정입니다.</span>",
+            true
+          );
+        } else if(data && data.result === "already"){
+          showEasterEggModal(
+            "🎉",
+            "이미 당첨된 플레이어입니다!",
+            "이미 <b style='color:var(--gold);'>" + (data.game || "다른 종목") + "</b>에서 <b style='color:var(--accent);'>" + (data.reward || "식사 지원") + "</b>에 당첨 등록되었습니다!<br><br>더 많은 팀원들의 참여를 위해 1인 1회만 지급됩니다 🍽️",
+            true
+          );
+        } else if(data && data.result === "closed"){
+          showEasterEggModal(
+            "⏱️",
+            "아쉽습니다! 선착순 마감",
+            "점수 파괴자(-500점 이하)를 달성하셨으나,<br><b style='color:var(--danger);'>두더지잡기 식사 지원(선착순 2명)이 이미 마감</b>되었습니다 😢<br><br>다른 종목의 숨겨진 이스터 에그에 도전해 보세요!",
+            true
+          );
+        } else {
+          showEasterEggModal(
+            "🐯🍽️",
+            "🎉 식사 지원 이벤트 당첨! 🎉",
+            "축하합니다! 👏<br><br>두더지를 피해 호랑이와 토끼를 제압한 점수 파괴자!<br><b style='color:var(--danger); font-size:15px;'>최종 점수: " + score + "점</b><br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
+            true
+          );
+        }
+      })
+      .catch(function(err){
+        sendLog("이스터에그_식사", { detail: "두더지 -500점 이하 달성 (" + score + "점)" });
+        showEasterEggModal(
+          "🐯🍽️",
+          "🎉 식사 지원 이벤트 당첨! 🎉",
+          "축하합니다! 👏<br><br>두더지를 피해 호랑이와 토끼를 제압한 점수 파괴자!<br><b style='color:var(--danger); font-size:15px;'>최종 점수: " + score + "점</b><br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
+          true
+        );
+      });
   }
 
   function endGame(){
@@ -1075,7 +1160,12 @@
       detail: `잡은수: ${hits}마리, 최대콤보: ${maxCombo}`
     });
 
-    overlay.classList.add("show");
+    // 🚀 [핵심 이스터에그 판정]: 30초 종료 시 최종 점수가 -500점 이하일 때 통합 8인 이스터에그 발동!
+    if(score <= -500){
+      triggerEasterEgg();
+    } else {
+      overlay.classList.add("show");
+    }
   }
 
   function showNoticePopup(){
