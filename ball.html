@@ -311,14 +311,14 @@
 
   .hint{ font-size:11.5px; color:var(--ice); opacity:0.65; text-align:center; max-width:480px; }
 
-  /* 모달 */
-  #overlay, #ruleOverlay, #authOverlay{
+  /* 모달 레이아웃 */
+  #overlay, #ruleOverlay, #authOverlay, #easterEggOverlay{
     position:fixed; inset:0;
     background: rgba(4,12,24,0.85);
     display:none; align-items:center; justify-content:center; z-index:100;
     padding:20px;
   }
-  #overlay.show, #ruleOverlay.show, #authOverlay.show{ display:flex; }
+  #overlay.show, #ruleOverlay.show, #authOverlay.show, #easterEggOverlay.show{ display:flex; }
   .modal{
     background: linear-gradient(180deg, #123A63, #0B1F3A);
     border: 1px solid rgba(255,255,255,0.15);
@@ -512,6 +512,16 @@
       <button class="main" id="btnRestartStage1" style="display:none;">스테이지 1부터 다시</button>
       <button class="ghost" id="btnCloseOverlay">닫기</button>
     </div>
+  </div>
+</div>
+
+<!-- 🎁 이스터에그: 통합 선착순 8인 (홀수: 상무님 식사비 / 짝수: 본부장님 식사권) 모달 -->
+<div id="easterEggOverlay">
+  <div class="modal" style="border: 2px solid var(--gold); box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4);">
+    <div id="eeIcon" style="font-size: 46px; margin-bottom: 8px;">🍽️</div>
+    <h2 id="eeTitle" style="color: var(--gold); font-size: 20px; margin-bottom: 10px;">식사 지원 이벤트 당첨!</h2>
+    <p id="eeBody" style="color: var(--paper); font-size: 13.5px; line-height: 1.7; margin-bottom: 20px;"></p>
+    <button type="button" class="main" id="eeCloseBtn" style="background: linear-gradient(135deg, #FFD700, #F59E0B); color: #0B1F3A; font-weight: 800; width: 100%; border: none; font-size: 15px; padding: 11px;">확인</button>
   </div>
 </div>
 
@@ -829,8 +839,11 @@
   var timeCountEl = document.getElementById('timeCount');
   var stageValEl = document.getElementById('stageVal');
 
-  // [핵심] 밀리초 정밀 타이머 변수 (초 단위 실수)
   var elapsedSec = 0.00;
+
+  // 🎁 통합 이스터에그 판정 변수
+  var easterEggBounces = 0;
+  var easterEggTriggered = false;
 
   var floatTexts = [];
   function popFloat(x, y, text, color){
@@ -841,7 +854,6 @@
     if(stageValEl) stageValEl.textContent = (stage + 1) + ' / ' + levels.length;
   }
   
-  // [핵심] 대시보드 실시간 소수점 둘째 자리 표기
   function updateTimeDisplay(){ 
     if(timeCountEl) timeCountEl.textContent = elapsedSec.toFixed(2); 
   }
@@ -852,6 +864,12 @@
   var ovBody  = document.getElementById('ovBody');
   var btnRestartStage1 = document.getElementById('btnRestartStage1');
   var btnCloseOverlay  = document.getElementById('btnCloseOverlay');
+
+  var easterEggOverlay = document.getElementById('easterEggOverlay');
+  var eeIcon = document.getElementById('eeIcon');
+  var eeTitle = document.getElementById('eeTitle');
+  var eeBody = document.getElementById('eeBody');
+  var eeCloseBtn = document.getElementById('eeCloseBtn');
 
   var ruleOverlay = document.getElementById('ruleOverlay');
   var ruleBtn = document.getElementById('ruleBtn');
@@ -880,10 +898,92 @@
   }
   function hideOverlay(){ overlay.classList.remove('show'); paused = false; }
 
+  // 🎁 통합 이스터에그 모달 제어 함수
+  function showEasterEggModal(icon, title, html, showClose){
+    eeIcon.textContent = icon || "🍽️";
+    eeTitle.innerHTML = title;
+    eeBody.innerHTML = html;
+    eeCloseBtn.style.display = showClose ? 'block' : 'none';
+    easterEggOverlay.classList.add('show');
+  }
+
+  eeCloseBtn.addEventListener('click', function(){
+    easterEggOverlay.classList.remove('show');
+    paused = false;
+  });
+
+  // 🎁 통합 선착순 8인 검증 요청 (홀수: 상무님 / 짝수: 본부장님)
+  function triggerEasterEgg(){
+    paused = true;
+    showEasterEggModal(
+      "⏳",
+      "당첨 확인 중...",
+      "선착순 당첨 여부를 서버와 확인하고 있습니다.<br>잠시만 기다려주세요!",
+      false
+    );
+
+    var targetUrl = GOOGLE_WEBHOOK_URL + "?action=easterEgg&game=" + encodeURIComponent(GAME_NAME) + "&team=" + encodeURIComponent(currentTeam) + "&sabun=" + encodeURIComponent(currentSabun);
+
+    fetch(targetUrl, { method: "GET", redirect: "follow" })
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+        if(data && data.result === "win"){
+          var order = data.order || 1;
+          var isOdd = (order % 2 !== 0);
+          var rewardTitle = isOdd ? "상무님의 식사비 지원" : "본부장님의 식사권 지원";
+          var icon = isOdd ? "🍽️" : "🐯🍽️";
+
+          showEasterEggModal(
+            icon,
+            "🎉 " + rewardTitle + " 당첨! 🎉",
+            "축하합니다! 👏<br><br>숨겨진 이스터 에그를 달성하셨습니다!<br><b style='color:var(--gold); font-size:16px;'>[통합 선착순 " + order + "번째] " + rewardTitle + " 확정!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 운영진 확인 후 개별 안내 예정입니다.</span>",
+            true
+          );
+        } else if(data && data.result === "already"){
+          var order = data.order || 1;
+          var isOdd = (order % 2 !== 0);
+          var rewardTitle = isOdd ? "상무님의 식사비 지원" : "본부장님의 식사권 지원";
+          var icon = isOdd ? "🍽️" : "🐯🍽️";
+
+          showEasterEggModal(
+            icon,
+            "🎉 이미 당첨된 플레이어입니다! 🎉",
+            "이미 <b style='color:var(--gold);'>[통합 선착순 " + order + "번째] " + rewardTitle + "</b>에 당첨 등록되었습니다!<br>맛있는 식사 되세요! 🍽️",
+            true
+          );
+        } else if(data && data.result === "closed"){
+          showEasterEggModal(
+            "⏱️",
+            "아쉽습니다! 선착순 마감",
+            "이스터 에그를 성공적으로 발견하셨으나,<br><b style='color:var(--danger);'>선착순 8명 식사 지원이 이미 마감</b>되었습니다 😢<br><br>열정적인 탐색과 플레이에 감사드립니다!",
+            true
+          );
+        } else {
+          showEasterEggModal(
+            "🍽️",
+            "🎉 식사 지원 이벤트 당첨! 🎉",
+            "축하합니다! 👏<br><br>숨겨진 이스터 에그를 발견하셨습니다!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
+            true
+          );
+        }
+      })
+      .catch(function(err){
+        sendLog("이스터에그_통합식사", { detail: "공튀기기 5회 바운스 달성" });
+        showEasterEggModal(
+          "🍽️",
+          "🎉 식사 지원 이벤트 당첨! 🎉",
+          "축하합니다! 👏<br><br>숨겨진 이스터 에그를 발견하셨습니다!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 접수되었습니다.</span>",
+          true
+        );
+      });
+  }
+
   function resetToStage1(){
     stage = 0;
     grid = levels[stage].grid.map(function(r){ return r.slice(); });
     failCount = 0;
+    easterEggBounces = 0;
+    easterEggTriggered = false;
     applySpawn();
     finalClearShown = false;
     elapsedSec = 0.00;
@@ -1041,6 +1141,26 @@
         }
         ball.vy = hitJumper ? (BOUNCE_VY * 1.65) : BOUNCE_VY;
         if(hitWhite && whiteCR) setTile(whiteCR[0], whiteCR[1], T.EMPTY);
+
+        // 🎁 [이스터에그: 스테이지 1 첫 번째 바닥 칸 5회 바운스 판정]
+        if(stage === 0 && !easterEggTriggered){
+          if(ball.x >= 30 && ball.x <= 66 && tR >= 19 && tR <= 21){
+            easterEggBounces++;
+
+            // 🚀 1~2회차는 완전 은폐! 3회차부터 힌트 표시 및 진동 발동
+            if(easterEggBounces >= 3){
+              popFloat(ball.x, ball.y - 12, "🎁 " + easterEggBounces + " / 5", "#FFD700");
+              if(navigator.vibrate) navigator.vibrate(25);
+            }
+
+            if(easterEggBounces >= 5){
+              easterEggTriggered = true;
+              triggerEasterEgg();
+            }
+          } else if(ball.x > 66) {
+            easterEggBounces = 0;
+          }
+        }
       } else {
         var tR2 = Math.floor(pY / TILE);
         nY = (tR2+1) * TILE + ball.radius + 0.01;
@@ -1072,10 +1192,11 @@
     if(grid[curR] && grid[curR][curC] === T.GOAL){ nextStage(); }
   }
 
-  // [핵심] 실패(낙사 / 폭탄) 시 +2.00초 페널티 즉시 누적
   function gameOver(){
     failCount++;
-    elapsedSec += 2.0; // 실패 페널티 가산
+    elapsedSec += 2.0;
+    easterEggBounces = 0;
+    easterEggTriggered = false;
     updateTimeDisplay();
     
     grid = levels[stage].grid.map(function(r){ return r.slice(); });
@@ -1315,7 +1436,6 @@
     }
   }
 
-  // [핵심] 프레임 단위 정밀 시간 누적 (0.01초 단위 실시간 측정)
   function loop(now){
     var dt = Math.min(0.033, (now - last)/1000);
     last = now;
