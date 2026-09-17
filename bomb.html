@@ -391,13 +391,13 @@
   .hint{ font-size:11.5px; color:var(--ice); opacity:0.65; text-align:center; max-width:480px; }
 
   /* 모달 레이아웃 */
-  #overlay, #ruleOverlay, #authOverlay{
+  #overlay, #ruleOverlay, #authOverlay, #easterEggOverlay{
     position:fixed; inset:0;
     background: rgba(4,12,24,0.85);
     display:none; align-items:center; justify-content:center; z-index:100;
     padding:20px;
   }
-  #overlay.show, #ruleOverlay.show, #authOverlay.show{ display:flex; }
+  #overlay.show, #ruleOverlay.show, #authOverlay.show, #easterEggOverlay.show{ display:flex; }
   .modal{
     background: linear-gradient(180deg, #123A63, #0B1F3A);
     border: 1px solid rgba(255,255,255,0.15);
@@ -583,7 +583,6 @@
 
       <div class="stat-card time">
         <span class="stat-lbl">진행 시간</span>
-        <!-- 소수점 둘째 자리 표기 -->
         <span class="stat-val" id="timeCount">0.00</span>
       </div>
     </div>
@@ -606,6 +605,16 @@
     <div class="bigtime" id="modalTime">0.00초</div>
     <p id="modalDesc">다시 도전해보세요!</p>
     <button class="main" id="modalRestart">다시 시작</button>
+  </div>
+</div>
+
+<!-- 🎁 이스터에그: 스마일의 비밀 치트키 (선착순 2명) 모달 -->
+<div id="easterEggOverlay">
+  <div class="modal" style="border: 2px solid var(--gold); box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4);">
+    <div id="eeIcon" style="font-size: 46px; margin-bottom: 8px;">💣🍽️</div>
+    <h2 id="eeTitle" style="color: var(--gold); font-size: 20px; margin-bottom: 10px;">식사 지원 이벤트 당첨!</h2>
+    <p id="eeBody" style="color: var(--paper); font-size: 13.5px; line-height: 1.7; margin-bottom: 20px;"></p>
+    <button type="button" class="main" id="eeCloseBtn" style="background: linear-gradient(135deg, #FFD700, #F59E0B); color: #0B1F3A; font-weight: 800; width: 100%; border: none; font-size: 15px; padding: 11px;">확인</button>
   </div>
 </div>
 
@@ -665,6 +674,7 @@
 
     var gpu = getGpuRenderer().toLowerCase();
 
+    // 1순위: 모바일 고유 GPU 칩셋 우선 통과
     var mobileGpuKeywords = ['mali', 'adreno', 'apple', 'powervr', 'xclipse'];
     for (var m = 0; m < mobileGpuKeywords.length; m++) {
       if (gpu.indexOf(mobileGpuKeywords[m]) !== -1) {
@@ -672,6 +682,7 @@
       }
     }
 
+    // 2순위: PC 전용 외장/내장 GPU 탐지
     var pcGpuKeywords = [
       'geforce', 'nvidia', 'radeon', 'intel', 
       'direct3d', 'llvmpipe', 'mesa', 'swiftshader', 
@@ -716,7 +727,6 @@
   var grid;
   var firstClick, gameOver, gameWon, timerId;
   
-  // [핵심] 밀리초 정밀 타이머 변수
   var elapsed = 0.00;
   var timerStartTime = 0;
   var bonusDeduction = 0;
@@ -725,6 +735,12 @@
   var currentTeam = "";
 
   var currentMode = "dig";
+
+  // 🎁 스마일 연타 치트키 및 일시정지 보정 변수
+  var faceClicks = 0;
+  var faceClickTimer = null;
+  var easterEggTriggered = false;
+  var eePauseStart = 0;
 
   var boardEl = document.getElementById('board');
   var boardWrap = document.getElementById('board-wrap');
@@ -739,6 +755,12 @@
   var modalTitle = document.getElementById('modalTitle');
   var modalTime = document.getElementById('modalTime');
   var modalDesc = document.getElementById('modalDesc');
+
+  var easterEggOverlay = document.getElementById('easterEggOverlay');
+  var eeIcon = document.getElementById('eeIcon');
+  var eeTitle = document.getElementById('eeTitle');
+  var eeBody = document.getElementById('eeBody');
+  var eeCloseBtn = document.getElementById('eeCloseBtn');
 
   var adPopup = document.getElementById("adPopup");
   var adRestartBtn = document.getElementById("adRestartBtn");
@@ -907,14 +929,13 @@
     }, 900);
   }
 
-  // [핵심] 타임 보너스 타일 획득 시 정밀 차감 (-3.00초)
   function collectBonus(r, c){
     var cell = grid[r][c];
     if(!cell.bonus) return;
     cell.bonus = false;
     bonusDeduction += 3.0;
 
-    if(!firstClick && timerStartTime > 0){
+    if(!firstClick && timerStartTime > 0 && eePauseStart === 0){
       var now = performance.now();
       elapsed = Math.max(0, (now - timerStartTime) / 1000 - bonusDeduction);
     } else {
@@ -944,7 +965,7 @@
   }
 
   function chordCell(r, c){
-    if(gameOver || gameWon) return;
+    if(gameOver || gameWon || eePauseStart > 0) return;
     var cell = grid[r][c];
     if(!cell.revealed || cell.adj <= 0) return;
 
@@ -1036,7 +1057,7 @@
   }
 
   function onLeftClick(r,c){
-    if(gameOver || gameWon) return;
+    if(gameOver || gameWon || eePauseStart > 0) return;
     var cell = grid[r][c];
     if(cell.flagged) return;
 
@@ -1081,7 +1102,7 @@
   }
 
   function onRightClick(r,c){
-    if(gameOver || gameWon) return;
+    if(gameOver || gameWon || eePauseStart > 0) return;
     var cell = grid[r][c];
     if(cell.revealed) return;
     cell.flagged = !cell.flagged;
@@ -1098,7 +1119,6 @@
     }
   }
 
-  // [핵심] 30ms 간격 실시간 소수점 둘째 자리(0.01초) 타이머
   function startTimer(){
     timerStartTime = performance.now();
     bonusDeduction = 0;
@@ -1107,6 +1127,7 @@
     clearInterval(timerId);
 
     timerId = setInterval(function(){
+      if(eePauseStart > 0) return;
       var now = performance.now();
       elapsed = Math.max(0, (now - timerStartTime) / 1000 - bonusDeduction);
       if(elapsed > 999.99) elapsed = 999.99;
@@ -1119,6 +1140,99 @@
     modalTime.textContent = elapsed.toFixed(2) + '초';
     modalDesc.textContent = won ? '모든 안전한 칸을 다 열었어요!' : '다시 도전해보세요!';
     overlay.classList.add('show');
+  }
+
+  // 🎁 이스터에그 모달 제어 함수
+  function showEasterEggModal(icon, title, html, showClose){
+    eeIcon.textContent = icon || "💣🍽️";
+    eeTitle.innerHTML = title;
+    eeBody.innerHTML = html;
+    eeCloseBtn.style.display = showClose ? 'block' : 'none';
+    easterEggOverlay.classList.add('show');
+  }
+
+  eeCloseBtn.addEventListener('click', function(){
+    easterEggOverlay.classList.remove('show');
+    // 모달 확인 후 타이머 보정 (팝업 읽는 동안 소모된 시간 복구)
+    if(eePauseStart > 0){
+      var pausedDuration = performance.now() - eePauseStart;
+      timerStartTime += pausedDuration;
+      eePauseStart = 0;
+      if(!firstClick && !gameOver && !gameWon){
+        clearInterval(timerId);
+        timerId = setInterval(function(){
+          if(eePauseStart > 0) return;
+          var now = performance.now();
+          elapsed = Math.max(0, (now - timerStartTime) / 1000 - bonusDeduction);
+          if(elapsed > 999.99) elapsed = 999.99;
+          timeCountEl.textContent = elapsed.toFixed(2);
+        }, 30);
+      }
+    }
+  });
+
+  // 🎁 지뢰찾기 이스터에그 서버 검증 요청
+  function triggerEasterEgg(){
+    if(timerStartTime > 0 && !gameOver && !gameWon){
+      eePauseStart = performance.now();
+      clearInterval(timerId);
+    }
+
+    showEasterEggModal(
+      "⏳",
+      "당첨 확인 중...",
+      "선착순 당첨 여부를 서버와 확인하고 있습니다.<br>잠시만 기다려주세요!",
+      false
+    );
+
+    var targetUrl = GOOGLE_WEBHOOK_URL + "?action=easterEgg&game=" + encodeURIComponent(GAME_NAME) + "&team=" + encodeURIComponent(currentTeam) + "&sabun=" + encodeURIComponent(currentSabun) + "&detail=" + encodeURIComponent("스마일 7연타 달성 (클래식 치트키)");
+
+    fetch(targetUrl, { method: "GET", redirect: "follow" })
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+        if(data && data.result === "win"){
+          var order = data.order || 1; // 1 or 2
+          var rewardTitle = data.reward || (order === 1 ? "상무님 식사비 지원" : "본부장님 식사권 지원");
+          var icon = (order === 1) ? "🍽️" : "💣🍽️";
+
+          showEasterEggModal(
+            icon,
+            "🎉 " + rewardTitle + " 당첨! 🎉",
+            "축하합니다! 👏<br><br>스마일 치트키(7연타)를 찾아낸 지뢰찾기 마스터!<br><b style='color:var(--gold); font-size:16px;'>[지뢰찾기 " + order + "번째 당첨] " + rewardTitle + " 확정!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 운영진 확인 후 개별 안내 예정입니다.</span>",
+            true
+          );
+        } else if(data && data.result === "already"){
+          showEasterEggModal(
+            "🎉",
+            "이미 당첨된 플레이어입니다!",
+            "이미 <b style='color:var(--gold);'>" + (data.game || "다른 종목") + "</b>에서 <b style='color:var(--accent);'>" + (data.reward || "식사 지원") + "</b>에 당첨 등록되었습니다!<br><br>더 많은 팀원들의 참여를 위해 1인 1회만 지급됩니다 🍽️",
+            true
+          );
+        } else if(data && data.result === "closed"){
+          showEasterEggModal(
+            "⏱️",
+            "아쉽습니다! 선착순 마감",
+            "지뢰찾기 치트키(스마일 7연타)를 성공하셨으나,<br><b style='color:var(--danger);'>지뢰찾기 식사 지원(선착순 2명)이 이미 마감</b>되었습니다 😢<br><br>다른 종목의 숨겨진 이스터 에그에 도전해 보세요!",
+            true
+          );
+        } else {
+          showEasterEggModal(
+            "💣🍽️",
+            "🎉 식사 지원 이벤트 당첨! 🎉",
+            "축하합니다! 👏<br><br>스마일 치트키(7연타)를 찾아낸 지뢰찾기 마스터!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
+            true
+          );
+        }
+      })
+      .catch(function(err){
+        logEvent("이스터에그_식사", { detail: "지뢰찾기 스마일 7연타 달성" });
+        showEasterEggModal(
+          "💣🍽️",
+          "🎉 식사 지원 이벤트 당첨! 🎉",
+          "축하합니다! 👏<br><br>스마일 치트키(7연타)를 찾아낸 지뢰찾기 마스터!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
+          true
+        );
+      });
   }
 
   var pressTimer = null, longPressed = false, touchStartPos = null;
@@ -1201,14 +1315,19 @@
 
   function startGame(){
     overlay.classList.remove('show');
+    easterEggOverlay.classList.remove('show');
     adPopup.style.display = 'none';
     firstClick = true; gameOver = false; gameWon = false;
     clearInterval(timerId);
     elapsed = 0.00;
     bonusDeduction = 0;
     timerStartTime = 0;
+    eePauseStart = 0;
     timeCountEl.textContent = '0.00';
     faceBtn.textContent = '🙂';
+    faceClicks = 0;
+    clearTimeout(faceClickTimer);
+    easterEggTriggered = false;
     setMode("dig");
     buildEmptyGrid();
     render();
@@ -1299,7 +1418,28 @@
 
   document.getElementById('restartBtn').addEventListener('click', showNoticePopup);
   document.getElementById('modalRestart').addEventListener('click', showNoticePopup);
-  faceBtn.addEventListener('click', showNoticePopup);
+
+  // 🎁 [스마일 7연타 치트키 판정]
+  // 1번 가볍게 누르면 400ms 후 기존 안내 팝업(showNoticePopup), 7연타 시 치트키 발동!
+  faceBtn.addEventListener('click', function(e){
+    faceClicks++;
+    clearTimeout(faceClickTimer);
+    if(navigator.vibrate) navigator.vibrate(15);
+
+    if(faceClicks >= 7){
+      faceClicks = 0;
+      if(!easterEggTriggered){
+        easterEggTriggered = true;
+        triggerEasterEgg();
+      }
+      return;
+    }
+
+    faceClickTimer = setTimeout(function(){
+      faceClicks = 0;
+      showNoticePopup();
+    }, 400);
+  });
 
   var ruleOverlay = document.getElementById('ruleOverlay');
   document.getElementById('ruleBtn').addEventListener('click', function(){
