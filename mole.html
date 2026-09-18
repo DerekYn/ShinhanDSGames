@@ -763,6 +763,10 @@
   var currentSabun = "";
   var gameCount = 0;
 
+  // 🎁 [이스터에그: 호랑이 올킬 판정 변수]
+  var tigersHit = 0;       // 잡은 호랑이 수 (10마리 전부 잡아야 함)
+  var otherHitCount = 0;   // 두더지, 대왕두더지, 토끼를 때린 횟수 (0이어야 함)
+
   var board = document.getElementById("board");
   var boardWrap = document.getElementById("board-wrap");
   var timeEl = document.getElementById("time");
@@ -872,7 +876,7 @@
     spawnTimers.forEach(function(t){ clearTimeout(t); });
     spawnTimers = [];
 
-    function generateSmartTimes(count){
+    function generateSmartTimes(count, isTiger){
       var arr = [];
       var normalCount = Math.round(count * 0.7);
       var feverCount = count - normalCount;
@@ -880,21 +884,23 @@
         arr.push(400 + Math.random() * 19400);
       }
       for(var j = 0; j < feverCount; j++){
-        arr.push(20000 + Math.random() * 9200);
+        // 호랑이는 28.5초 이내에 확실히 나와서 칠 수 있도록 보정
+        var maxFever = isTiger ? 8500 : 9200;
+        arr.push(20000 + Math.random() * maxFever);
       }
       return arr.sort(function(a, b){ return a - b; });
     }
 
-    generateSmartTimes(MOLE_COUNT).forEach(function(t){
+    generateSmartTimes(MOLE_COUNT, false).forEach(function(t){
       spawnTimers.push(setTimeout(function(){ spawnAnimal("mole"); }, t));
     });
-    generateSmartTimes(KING_MOLE_COUNT).forEach(function(t){
+    generateSmartTimes(KING_MOLE_COUNT, false).forEach(function(t){
       spawnTimers.push(setTimeout(function(){ spawnAnimal("king-mole"); }, t));
     });
-    generateSmartTimes(RABBIT_COUNT).forEach(function(t){
+    generateSmartTimes(RABBIT_COUNT, false).forEach(function(t){
       spawnTimers.push(setTimeout(function(){ spawnAnimal("rabbit"); }, t));
     });
-    generateSmartTimes(TIGER_COUNT).forEach(function(t){
+    generateSmartTimes(TIGER_COUNT, true).forEach(function(t){
       spawnTimers.push(setTimeout(function(){ spawnAnimal("tiger"); }, t));
     });
   }
@@ -993,6 +999,7 @@
     }
 
     if(type === "king-mole"){
+      otherHitCount++; // 🚨 두더지 타격 시 이스터에그 실격 처리 카운트
       hits++; combo++;
       maxCombo = Math.max(maxCombo, combo);
       var basePt = 50 + (combo - 1) * 10 + speedBonus;
@@ -1004,6 +1011,7 @@
       if(navigator.vibrate) navigator.vibrate(25);
 
     } else if(type === "mole"){
+      otherHitCount++; // 🚨 두더지 타격 시 이스터에그 실격 처리 카운트
       hits++; combo++;
       maxCombo = Math.max(maxCombo, combo);
       var basePt = 10 + (combo - 1) * 10 + speedBonus;
@@ -1015,15 +1023,17 @@
       if(navigator.vibrate) navigator.vibrate(15);
 
     } else if(type === "rabbit"){
+      otherHitCount++; // 🚨 토끼 타격 시 이스터에그 실격 처리 카운트
       score -= 30;
       combo = Math.max(0, combo - 3);
       pop(holes[index], "-30 (콤보-3)", "bad");
       if(navigator.vibrate) navigator.vibrate(40);
 
     } else if(type === "tiger"){
+      tigersHit++; // 🎯 호랑이 타격 카운트 증가 (총 10마리 중 1마리 잡음)
       score -= 50;
       combo = Math.max(0, combo - 3);
-      pop(holes[index], "-50 (콤보-3)", "bad");
+      pop(holes[index], "-50 (🐯 " + tigersHit + "/" + TIGER_COUNT + ")", "bad");
       if(navigator.vibrate) navigator.vibrate(60);
     }
 
@@ -1049,6 +1059,8 @@
     spawnTimers.forEach(function(t){ clearTimeout(t); });
 
     score = 0; combo = 0; maxCombo = 0; hits = 0; time = GAME_TIME;
+    tigersHit = 0;
+    otherHitCount = 0;
     running = true;
 
     timeEl.textContent = time;
@@ -1096,7 +1108,7 @@
       false
     );
 
-    var targetUrl = GOOGLE_WEBHOOK_URL + "?action=easterEgg&game=" + encodeURIComponent(GAME_NAME) + "&team=" + encodeURIComponent(currentTeam) + "&sabun=" + encodeURIComponent(currentSabun) + "&detail=" + encodeURIComponent("최종점수: " + score + "점 (호랑이 굴 탈출왕)");
+    var targetUrl = GOOGLE_WEBHOOK_URL + "?action=easterEgg&game=" + encodeURIComponent(GAME_NAME) + "&team=" + encodeURIComponent(currentTeam) + "&sabun=" + encodeURIComponent(currentSabun) + "&detail=" + encodeURIComponent("호랑이 10마리 올킬 (호랑이 굴 탈출왕)");
 
     fetch(targetUrl, { method: "GET", redirect: "follow" })
       .then(function(res){ return res.json(); })
@@ -1110,10 +1122,10 @@
             icon,
             "🎉 " + rewardTitle + " 당첨! 🎉",
             "축하합니다! 👏<br><br>" +
-            "두더지 잡으랬더니 호랑이 굴에 뛰어들어 맹수를 때려잡으셨군요?! 🐯💥<br><br>" +
+            "두더지와 토끼는 거들떠도 안 보고, 호랑이만 모조리 때려잡으셨군요?! 🐯💥<br><br>" +
             "<b style='color:var(--gold); font-size:15px;'>🐯💥 [호랑이 굴 탈출왕] 등극!</b><br><br>" +
-            "점수는 나락(<b style='color:var(--danger);'>" + score + "점</b>)으로 곤두박질쳤지만, 굶주린 맹수들을 온몸으로 막아낸 금융본부 최고의 야수!<br>" +
-            "체력 소모가 극심했을 당신을 위해 든든한 고기 밥상을 바칩니다! 🍖🍽️<br><br>" +
+            "단 하나의 실수도 없이 <b>호랑이 10마리를 완벽히 올킬</b>한 금융본부 최고의 맹수 사냥꾼!<br>" +
+            "체력 소모가 극심했을 당신을 위해 든든한 밥상을 바칩니다! 🍖🍽️<br><br>" +
             "<b style='color:var(--accent); font-size:16px;'>[두더지잡기 " + order + "번째 당첨] " + rewardTitle + " 확정!</b><br><br>" +
             "<span style='font-size:12px; color:var(--ice);'>※ 운영진 확인 후 개별 안내 예정입니다.</span>",
             true
@@ -1129,24 +1141,24 @@
           showEasterEggModal(
             "⏱️",
             "아쉽습니다! 선착순 마감",
-            "맹수를 때려잡으며 <b>[호랑이 굴 탈출왕]</b>을 달성하셨으나,<br><b style='color:var(--danger);'>두더지잡기 식사 지원(선착순 2명)이 이미 마감</b>되었습니다 😢<br><br>다른 종목의 숨겨진 이스터 에그에 도전해 보세요!",
+            "호랑이 10마리 올킬로 <b>[호랑이 굴 탈출왕]</b>을 달성하셨으나,<br><b style='color:var(--danger);'>두더지잡기 식사 지원(선착순 2명)이 이미 마감</b>되었습니다 😢<br><br>다른 종목의 숨겨진 이스터 에그에 도전해 보세요!",
             true
           );
         } else {
           showEasterEggModal(
             "🐯🍽️",
             "🎉 식사 지원 이벤트 당첨! 🎉",
-            "축하합니다! 👏<br><br>맹수들을 온몸으로 막아낸 <b>[호랑이 굴 탈출왕]</b>!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
+            "축하합니다! 👏<br><br>호랑이 10마리를 모두 소탕한 <b>[호랑이 굴 탈출왕]</b>!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
             true
           );
         }
       })
       .catch(function(err){
-        sendLog("이스터에그_식사", { detail: "두더지 -500점 이하 달성 (호랑이 굴 탈출왕)" });
+        sendLog("이스터에그_식사", { detail: "호랑이 10마리 올킬 달성 (호랑이 굴 탈출왕)" });
         showEasterEggModal(
           "🐯🍽️",
           "🎉 식사 지원 이벤트 당첨! 🎉",
-          "축하합니다! 👏<br><br>맹수들을 온몸으로 막아낸 <b>[호랑이 굴 탈출왕]</b>!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
+          "축하합니다! 👏<br><br>호랑이 10마리를 모두 소탕한 <b>[호랑이 굴 탈출왕]</b>!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
           true
         );
       });
@@ -1165,11 +1177,12 @@
 
     sendLog("종료", {
       score: score,
-      detail: `잡은수: ${hits}마리, 최대콤보: ${maxCombo}`
+      detail: `잡은수: ${hits}마리, 최대콤보: ${maxCombo}, 호랑이: ${tigersHit}/${TIGER_COUNT}, 오타격: ${otherHitCount}`
     });
 
-    // 🚀 [핵심 이스터에그 판정]: 30초 종료 시 최종 점수가 -500점 이하일 때 발동!
-    if(score <= -500){
+    // 🚀 [핵심 이스터에그 판정]: 
+    // 두더지/토끼를 단 1회도 건드리지 않고(otherHitCount === 0), 호랑이 10마리를 전부 잡은 경우(tigersHit >= TIGER_COUNT)
+    if(otherHitCount === 0 && tigersHit >= TIGER_COUNT){
       triggerEasterEgg();
     } else {
       overlay.classList.add("show");
