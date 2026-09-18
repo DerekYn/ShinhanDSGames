@@ -688,6 +688,7 @@
   let timeLeft = 60;
   let combo = 0;
   let maxCombo = 0;
+  let totalCaughtCount = 0; // 🎯 획득한 모든 아이템(보석, 폭탄 포함) 카운트
   let items = [];
   let particles = [];
   let lastTs = 0;
@@ -747,6 +748,7 @@
     timeLeft = CONFIG.duration;
     combo = 0;
     maxCombo = 0;
+    totalCaughtCount = 0; // 🎯 아이템 접촉 카운트 리셋
     items = [];
     particles = [];
     spawnAcc = 0;
@@ -790,7 +792,7 @@
       false
     );
 
-    var targetUrl = GOOGLE_WEBHOOK_URL + "?action=easterEgg&game=" + encodeURIComponent(GAME_NAME) + "&team=" + encodeURIComponent(currentTeam) + "&sabun=" + encodeURIComponent(currentSabun) + "&detail=" + encodeURIComponent("0점 완주 (매트릭스 회피왕)");
+    var targetUrl = GOOGLE_WEBHOOK_URL + "?action=easterEgg&game=" + encodeURIComponent(GAME_NAME) + "&team=" + encodeURIComponent(currentTeam) + "&sabun=" + encodeURIComponent(currentSabun) + "&detail=" + encodeURIComponent("단 1개도 캐치하지 않고 0점 완주 (매트릭스 회피왕)");
 
     fetch(targetUrl, { method: "GET", redirect: "follow" })
       .then(function(res){ return res.json(); })
@@ -804,9 +806,9 @@
             icon,
             "🎉 " + rewardTitle + " 당첨! 🎉",
             "축하합니다! 👏<br><br>" +
-            "하늘에서 보석이 쏟아지는데 매트릭스 네오처럼 60초 동안 싹 다 피하셨군요?! 🕶️💨<br><br>" +
+            "하늘에서 보석과 폭탄이 쏟아지는데 단 하나의 아이템도 건드리지 않고 매트릭스 네오처럼 60초 동안 싹 다 피하셨군요?! 🕶️💨<br><br>" +
             "<b style='color:var(--gold); font-size:15px;'>🕶️💨 [매트릭스 회피왕] 등극!</b><br><br>" +
-            "하늘에서 다이아몬드를 쏟아부어도 '무소유'를 몸소 실천한 청렴결백 끝판왕!<br>" +
+            "보석도 폭탄도 단 1개도 받지 않고(캐치 0회) '무소유'를 몸소 실천한 청렴결백 끝판왕!<br>" +
             "떨어지는 금은보화는 거절하셨어도, 정성껏 준비한 식사권은 절대 못 피하실 겁니다! 🍽️<br><br>" +
             "<b style='color:var(--accent); font-size:16px;'>[낙하캐치 " + order + "번째 당첨] " + rewardTitle + " 확정!</b><br><br>" +
             "<span style='font-size:12px; color:var(--ice);'>※ 운영진 확인 후 개별 안내 예정입니다.</span>",
@@ -830,7 +832,7 @@
           showEasterEggModal(
             "🕶️🍽️",
             "🎉 식사 지원 이벤트 당첨! 🎉",
-            "축하합니다! 👏<br><br>모든 아이템을 피한 <b>[매트릭스 회피왕]</b>!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
+            "축하합니다! 👏<br><br>단 1개의 아이템도 받지 않고 완주한 <b>[매트릭스 회피왕]</b>!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
             true
           );
         }
@@ -840,7 +842,7 @@
         showEasterEggModal(
           "🕶️🍽️",
           "🎉 식사 지원 이벤트 당첨! 🎉",
-          "축하합니다! 👏<br><br>모든 아이템을 피한 <b>[매트릭스 회피왕]</b>!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
+          "축하합니다! 👏<br><br>단 1개의 아이템도 받지 않고 완주한 <b>[매트릭스 회피왕]</b>!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
           true
         );
       });
@@ -851,17 +853,18 @@
     cancelAnimationFrame(rafId);
     stageWrap.classList.remove('fever');
     gameDash.classList.remove('fever');
-    setFace(score >= 250 ? "🏆" : score >= 130 ? "😄" : (score === 0 ? "🕶️" : "😅"));
+    setFace(score >= 250 ? "🏆" : score >= 130 ? "😄" : (score === 0 && totalCaughtCount === 0 ? "🕶️" : "😅"));
 
     modalScore.textContent = score;
 
     sendLog("종료", {
       score: score,
-      detail: `최종점수: ${score}점, 최대콤보: ${maxCombo}`
+      detail: `최종점수: ${score}점, 최대콤보: ${maxCombo}, 획득아이템: ${totalCaughtCount}개`
     });
 
-    // 🚀 [핵심 이스터에그 판정]: 60초 완주 시 최종 점수가 0점일 때 발동!
-    if(score === 0){
+    // 🚀 [핵심 이스터에그 판정]: 
+    // 60초 완주 시 최종 점수가 0점이고, 보석/폭탄 가리지 않고 단 1개의 아이템도 받지 않았을 때만 발동!
+    if (score === 0 && totalCaughtCount === 0) {
       triggerEasterEgg();
     } else {
       overlay.classList.add("show");
@@ -930,6 +933,8 @@
   }
 
   function catchItem(item) {
+    totalCaughtCount++; // 🚨 보석이든 폭탄이든 바구니에 닿는 순간 카운트 증가 (이스터에그 실격 처리)
+
     const feverMultiplier = isFever ? 2 : 1;
 
     if (item.type === "bad") {
