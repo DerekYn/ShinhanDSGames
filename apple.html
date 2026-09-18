@@ -528,10 +528,10 @@
   </div>
 </div>
 
-<!-- 🎁 이스터에그: 사과 상자 장인 (선착순 2명) 모달 -->
+<!-- 🎁 이스터에그: 싹쓸이 압류왕 (선착순 2명) 모달 -->
 <div id="easterEggOverlay">
   <div class="modal" style="border: 2px solid var(--gold); box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4);">
-    <div id="eeIcon" style="font-size: 46px; margin-bottom: 8px;">🍎🍽️</div>
+    <div id="eeIcon" style="font-size: 46px; margin-bottom: 8px;">🍎📦</div>
     <h2 id="eeTitle" style="color: var(--gold); font-size: 20px; margin-bottom: 10px;">식사 지원 이벤트 당첨!</h2>
     <p id="eeBody" style="color: var(--paper); font-size: 13.5px; line-height: 1.7; margin-bottom: 20px;"></p>
     <button type="button" class="main" id="eeCloseBtn" style="background: linear-gradient(135deg, #FFD700, #F59E0B); color: #0B1F3A; font-weight: 800; width: 100%; border: none; font-size: 15px; padding: 11px;">확인</button>
@@ -875,7 +875,7 @@
 
   // 🎁 이스터에그 모달 제어 함수
   function showEasterEggModal(icon, title, html, showClose){
-    eeIcon.textContent = icon || "🍎🍽️";
+    eeIcon.textContent = icon || "🍎📦";
     eeTitle.innerHTML = title;
     eeBody.innerHTML = html;
     eeCloseBtn.style.display = showClose ? 'block' : 'none';
@@ -891,8 +891,8 @@
     }
   });
 
-  // 🎁 사과게임 이스터에그 서버 검증 요청
-  function triggerEasterEgg(boxSize){
+  // 🎁 [이스터에그: 싹쓸이 압류왕 (선착순 2인 검증 요청)]
+  function triggerEasterEgg(){
     eePauseStart = Date.now(); // 타이머 일시 멈춤
 
     showEasterEggModal(
@@ -902,7 +902,7 @@
       false
     );
 
-    var targetUrl = GOOGLE_WEBHOOK_URL + "?action=easterEgg&game=" + encodeURIComponent(GAME_NAME) + "&team=" + encodeURIComponent(currentTeam) + "&sabun=" + encodeURIComponent(currentSabun) + "&detail=" + encodeURIComponent("빅 박스 10 완성 (" + boxSize + "칸 크기)");
+    var targetUrl = GOOGLE_WEBHOOK_URL + "?action=easterEgg&game=" + encodeURIComponent(GAME_NAME) + "&team=" + encodeURIComponent(currentTeam) + "&sabun=" + encodeURIComponent(currentSabun) + "&detail=" + encodeURIComponent("판 전체 싹쓸이 압류왕");
 
     fetch(targetUrl, { method: "GET", redirect: "follow" })
       .then(function(res){ return res.json(); })
@@ -915,7 +915,7 @@
           showEasterEggModal(
             icon,
             "🎉 " + rewardTitle + " 당첨! 🎉",
-            "축하합니다! 👏<br><br>10칸 이상의 거대한 빅 박스로 합 10을 완성한 사과 상자 장인!<br><b style='color:var(--gold); font-size:16px;'>[사과게임 " + order + "번째 당첨] " + rewardTitle + " 확정!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 운영진 확인 후 개별 안내 예정입니다.</span>",
+            "축하합니다! 👏<br><br>사과를 10씩 예쁘게 포장하랬더니 판 전체를 통째로 쓸어가시나요?! 🍎📦<br><b style='color:var(--gold); font-size:15px;'>욕심쟁이 싹쓸이 압류왕 등극!</b><br><b style='color:var(--accent); font-size:16px;'>[사과게임 " + order + "번째 당첨] " + rewardTitle + " 확정!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 운영진 확인 후 개별 안내 예정입니다.</span>",
             true
           );
         } else if(data && data.result === "already"){
@@ -929,24 +929,24 @@
           showEasterEggModal(
             "⏱️",
             "아쉽습니다! 선착순 마감",
-            "사과 상자 장인(빅 박스 10)을 달성하셨으나,<br><b style='color:var(--danger);'>사과게임 식사 지원(선착순 2명)이 이미 마감</b>되었습니다 😢<br><br>다른 종목의 숨겨진 이스터 에그에 도전해 보세요!",
+            "싹쓸이 압류왕(판 전체 드래그)을 달성하셨으나,<br><b style='color:var(--danger);'>사과게임 식사 지원(선착순 2명)이 이미 마감</b>되었습니다 😢<br><br>다른 종목의 숨겨진 이스터 에그에 도전해 보세요!",
             true
           );
         } else {
           showEasterEggModal(
-            "🍎🍽️",
+            "🍎📦",
             "🎉 식사 지원 이벤트 당첨! 🎉",
-            "축하합니다! 👏<br><br>거대 빅 박스로 합 10을 완성한 사과 상자 장인!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
+            "축하합니다! 👏<br><br>판 전체를 통째로 쓸어간 욕심쟁이 싹쓸이 압류왕!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
             true
           );
         }
       })
       .catch(function(err){
-        logEvent("이스터에그_식사", { detail: "사과게임 빅박스 10 달성 (" + boxSize + "칸)" });
+        logEvent("이스터에그_식사", { detail: "사과게임 판 전체 싹쓸이 압류왕 달성" });
         showEasterEggModal(
-          "🍎🍽️",
+          "🍎📦",
           "🎉 식사 지원 이벤트 당첨! 🎉",
-          "축하합니다! 👏<br><br>거대 빅 박스로 합 10을 완성한 사과 상자 장인!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
+          "축하합니다! 👏<br><br>판 전체를 통째로 쓸어간 욕심쟁이 싹쓸이 압류왕!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
           true
         );
       });
@@ -1004,26 +1004,20 @@
       return;
     }
 
+    // 🚀 [핵심 이스터에그 판정: 싹쓸이 압류왕]
+    // 사과를 단 한 개도 맞추지 않은 시작 상태(score === 0)에서 판 전체(108칸 중 102칸 이상)를 한 번에 쫙 긁은 경우!
+    var totalCellsCount = ROWS * COLS; // 108칸
+    if(score === 0 && !easterEggTriggered && curSel.length >= (totalCellsCount - 6)){
+      easterEggTriggered = true;
+      if(navigator.vibrate) navigator.vibrate([30, 40, 50]);
+      triggerEasterEgg();
+      clearSelectionVisual(); curSel = []; sumTag.textContent = '';
+      return;
+    }
+
     var sum = curSel.reduce(function(a,b){return a+b.val;},0);
     var madeMove = curSel.length > 0 && sum === 10;
     if(madeMove){
-      // 🎁 [사과 상자 장인 이스터에그 판정]
-      // 드래그된 직사각형 영역이 10칸 이상의 넓이를 포괄하는지 계산
-      var minR = ROWS, maxR = -1, minC = COLS, maxC = -1;
-      curSel.forEach(function(item){
-        if(item.r < minR) minR = item.r;
-        if(item.r > maxR) maxR = item.r;
-        if(item.c < minC) minC = item.c;
-        if(item.c > maxC) maxC = item.c;
-      });
-      var boxArea = (maxR >= minR && maxC >= minC) ? (maxR - minR + 1) * (maxC - minC + 1) : curSel.length;
-
-      // 영역이 10칸 이상이거나 사과 개수가 10개 이상일 때 이스터에그 발동
-      if((boxArea >= 10 || curSel.length >= 10) && !easterEggTriggered){
-        easterEggTriggered = true;
-        triggerEasterEgg(boxArea);
-      }
-
       curSel.forEach(function(item){
         item.el.classList.add('pop');
         board[item.r][item.c] = -1;
