@@ -1,1170 +1,1252 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>2026 신한DS e스포츠 페스티벌</title>
-<!-- 폰트 및 아이콘 (외부 인터넷 연동) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap" rel="stylesheet">
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>실시간 랭킹 - 금융본부 미니 게임대회</title>
 <style>
-/* ==========================================================================
-   CSS 테마 및 모바일 전용 반응형 리셋 (LCK 스타일 다크 모드)
-========================================================================== */
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{
-  --bg-main:#090d1a;
-  --bg-card:#121a30;
-  --bg-card-sub:#0b1122;
-  --border-color:#1e293b;
-  --shinhan-blue:#0051ff;
-  --accent-cyan:#00f0ff;
-  --accent-pink:#ff0055;
-  --accent-gold:#f59e0b;
-  --text-main:#f8fafc;
-  --text-muted:#94a3b8;
-}
-body{
-  background:var(--bg-main);
-  color:var(--text-main);
-  font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
-  line-height:1.5;
-  padding-bottom:70px;
-  overflow-x:hidden;
-}
-button{font-family:inherit;cursor:pointer;border:none}
+  :root {
+    --navy: #0B1F3A;
+    --ocean: #123A63;
+    --blue: #1B5FA8;
+    --sky: #4F9DDE;
+    --ice: #BFE2F7;
+    --paper: #EAF4FC;
+    --accent: #2FBF9E;
+    --danger: #E0567A;
+    --gold: #FFD700;
+    --silver: #E0E7FF;
+    --bronze: #F59E0B;
+    --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    --font-num: "Segoe UI", "Consolas", "Malgun Gothic", monospace;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0; min-height: 100%;
+    background: radial-gradient(circle at 20% 0%, #163A63 0%, var(--navy) 55%, #071426 100%);
+    font-family: var(--font-ui);
+    color: var(--paper);
+    overflow-x: hidden;
+    user-select: none;
+  }
+  #app {
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; min-height: 100dvh; padding: 8px 12px; gap: 8px;
+    width: 100%;
+  }
 
-/* 상단 고정 헤더 */
-header{
-  background:rgba(13,21,39,0.92);
-  backdrop-filter:blur(10px);
-  border-bottom:1px solid var(--border-color);
-  padding:12px 16px;
-  position:sticky;
-  top:0;
-  z-index:100;
-}
-.header-inner{
-  max-width:800px;
-  margin:0 auto;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.brand{display:flex;align-items:center;gap:8px}
-.brand-logo{
-  font-size:18px;
-  font-weight:900;
-  color:var(--shinhan-blue);
-  letter-spacing:-0.5px;
-}
-.brand-title{
-  font-size:13px;
-  font-weight:700;
-  color:var(--text-muted);
-  border-left:1px solid #334155;
-  padding-left:8px;
-}
-.btn-bracket-pop{
-  background:linear-gradient(135deg,#0284c7,#0051ff);
-  color:#fff;
-  font-size:11px;
-  font-weight:700;
-  padding:6px 12px;
-  border-radius:20px;
-  box-shadow:0 2px 10px rgba(0,81,255,0.4);
-  display:flex;
-  align-items:center;
-  gap:4px;
-}
+  /* 브랜드 헤더 */
+  .brand-bar {
+    width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: 6px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.16); border-radius: 16px; padding: 8px 12px; box-sizing: border-box;
+  }
+  .brand-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; }
+  .brand-left { display: flex; align-items: center; gap: 10px; }
+  .brand-logo { width: 56px; height: 28px; flex-shrink: 0; }
+  .brand-logo svg { width: 100%; height: 100%; display: block; }
+  .brand-text { display: flex; flex-direction: column; line-height: 1.2; }
+  .brand-name { font-size: 13px; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+  .brand-dept {
+    display: inline-block; margin-top: 2px; font-size: 10px; font-weight: 800; color: var(--navy);
+    background: var(--sky); padding: 2px 8px; border-radius: 999px; width: fit-content; letter-spacing: -0.01em;
+  }
+  .event-tag {
+    font-size: 11px; font-weight: 700; color: var(--ice);
+    background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 6px 12px; border-radius: 999px; white-space: nowrap; letter-spacing: -0.01em;
+  }
+  .brand-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 
-/* 생중계 배너 */
-.stream-bar{
-  max-width:800px;
-  margin:10px auto 0;
-  padding:0 16px;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-}
-.btn-stream{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:6px;
-  padding:10px;
-  border-radius:10px;
-  font-weight:700;
-  font-size:12px;
-  text-decoration:none;
-}
-.btn-chzzk{background:#00ffa3;color:#042116;box-shadow:0 2px 8px rgba(0,255,163,0.2)}
-.btn-youtube{background:#ff0000;color:#ffffff;box-shadow:0 2px 8px rgba(255,0,0,0.2)}
+  /* 바로가기 네비게이션 (공튀기기, 두더지, 사과, 지뢰, 드롭) */
+  .nav-games {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 5px; width: 100%; overflow-x: auto; padding-top: 4px; border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .nav-games::-webkit-scrollbar { display: none; }
+  .nav-item {
+    flex: 1; min-width: 50px; display: inline-flex; align-items: center; justify-content: center;
+    gap: 3px; padding: 5px 6px; border-radius: 10px; background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12); color: var(--ice); text-decoration: none;
+    font-size: 11px; font-weight: 700; transition: all 0.15s ease; white-space: nowrap;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.15); color: #fff; transform: translateY(-1px); }
 
-/* 종목 선택 네비게이션 (가로 스크롤) */
-.game-tabs-wrap{
-  max-width:800px;
-  margin:12px auto 0;
-  padding:0 16px;
-  overflow-x:auto;
-  scrollbar-width:none;
-}
-.game-tabs-wrap::-webkit-scrollbar{display:none}
-.game-tabs{
-  display:flex;
-  gap:8px;
-  min-width:max-content;
-}
-.tab-btn{
-  background:var(--bg-card-sub);
-  color:var(--text-muted);
-  padding:8px 16px;
-  border-radius:20px;
-  font-size:12px;
-  font-weight:700;
-  border:1px solid var(--border-color);
-  display:flex;
-  align-items:center;
-  gap:5px;
-}
-.tab-btn.active{
-  background:var(--shinhan-blue);
-  color:#fff;
-  border-color:#38bdf8;
-  box-shadow:0 3px 12px rgba(0,81,255,0.4);
-}
-.tab-lucky{
-  background:linear-gradient(135deg,#be123c,#9d174d)!important;
-  color:#fef08a!important;
-  border-color:#f43f5e!important;
-}
+  /* 🔥 [추가] 헤더 아래 화려한 히든 이스터에그 마감 배너 */
+  .hidden-event-banner {
+    width: 100%; max-width: 640px;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.18), rgba(79, 157, 222, 0.18));
+    border: 1.5px solid var(--gold, #FFD700);
+    border-radius: 14px; padding: 10px 14px; text-align: center;
+    box-shadow: 0 0 24px rgba(255, 215, 0, 0.3);
+    animation: bannerGlow 1.8s infinite alternate; box-sizing: border-box;
+  }
+  @keyframes bannerGlow {
+    from { border-color: rgba(255, 215, 0, 0.4); box-shadow: 0 0 10px rgba(255, 215, 0, 0.15); transform: scale(1); }
+    to { border-color: rgba(255, 215, 0, 1); box-shadow: 0 0 25px rgba(255, 215, 0, 0.5); transform: scale(1.005); }
+  }
 
-/* 스테이지 서브 네비 (예선 vs 본선) */
-.stage-nav-wrap{
-  max-width:800px;
-  margin:12px auto 0;
-  padding:0 16px;
-  display:flex;
-  gap:8px;
-}
-.stage-btn{
-  flex:1;
-  background:#1e293b;
-  color:#94a3b8;
-  padding:8px;
-  border-radius:8px;
-  font-size:12px;
-  font-weight:700;
-  text-align:center;
-}
-.stage-btn.active{
-  background:#0284c7;
-  color:#ffffff;
-}
+  /* 랭킹 대시보드 메인 카드 */
+  .rank-box {
+    width: 100%; max-width: 640px;
+    background: linear-gradient(180deg, rgba(18, 58, 99, 0.8), rgba(11, 31, 58, 0.95));
+    border: 1px solid rgba(255,255,255,0.14); border-radius: 18px; padding: 10px 12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45); display: flex; flex-direction: column; gap: 8px;
+  }
 
-/* 메인 컨테이너 */
-.container{
-  max-width:800px;
-  margin:14px auto 0;
-  padding:0 16px;
-}
+  /* 상단 상태 및 새로고침 바 (마감 카운트다운 포함) */
+  .rank-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .live-badge {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700;
+    color: var(--accent); background: rgba(47, 191, 158, 0.12); border: 1px solid var(--accent);
+    padding: 2.5px 8px; border-radius: 20px;
+  }
+  .live-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+    box-shadow: 0 0 8px var(--accent); animation: pulse 1.2s infinite;
+  }
+  @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
 
-/* ==========================================================================
-   1. [예선 화면] 32강 ~ 16강 전용 컴팩트 모바일 그리드
-========================================================================== */
-.qualifier-group{
-  margin-bottom:20px;
-}
-.group-header{
-  font-size:13px;
-  font-weight:700;
-  color:var(--accent-cyan);
-  margin-bottom:8px;
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-.mini-match-list{display:flex;flex-direction:column;gap:8px}
-.mini-match-card{
-  background:var(--bg-card);
-  border:1px solid var(--border-color);
-  border-radius:10px;
-  padding:10px 12px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-.mini-team-zone{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  flex:1;
-}
-.mini-team-btn{
-  background:transparent;
-  color:#fff;
-  font-size:13px;
-  font-weight:700;
-  text-align:left;
-  display:flex;
-  align-items:center;
-  gap:4px;
-}
-.mini-team-btn:active{color:var(--accent-cyan)}
-.mini-team-dept{font-size:10px;color:var(--text-muted)}
-.mini-score{
-  font-size:14px;
-  font-weight:900;
-  color:#fff;
-  background:var(--bg-card-sub);
-  padding:4px 10px;
-  border-radius:6px;
-  border:1px solid #334155;
-  letter-spacing:2px;
-}
-.info-guide{
-  font-size:11px;
-  color:#60a5fa;
-  background:rgba(56,189,248,0.1);
-  padding:8px 12px;
-  border-radius:8px;
-  margin-bottom:12px;
-}
+  .refresh-group { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--ice); }
+  .btn-refresh {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
+    color: #fff; padding: 3px 9px; border-radius: 8px; font-size: 11px; font-weight: 700;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  .btn-refresh:active { transform: scale(0.96); background: var(--blue); }
 
-/* ==========================================================================
-   2. [본선 화면] 8강 ~ 결승 승부의 신 카드 & 투표
-========================================================================== */
-.match-card{
-  background:var(--bg-card);
-  border:1px solid var(--border-color);
-  border-radius:14px;
-  overflow:hidden;
-  box-shadow:0 4px 16px rgba(0,0,0,0.3);
-  margin-bottom:14px;
-}
-.match-header{
-  background:var(--bg-card-sub);
-  padding:8px 14px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  font-size:11px;
-  border-bottom:1px solid var(--border-color);
-}
-.match-body{padding:14px}
-.teams-grid{
-  display:grid;
-  grid-template-columns:1fr auto 1fr;
-  align-items:center;
-  gap:6px;
-}
-.team-col{text-align:center}
-.team-clickable{
-  font-size:14px;
-  font-weight:700;
-  color:#fff;
-  background:transparent;
-  display:inline-flex;
-  align-items:center;
-  gap:4px;
-}
-.team-clickable:active{color:var(--accent-cyan)}
-.score-badge{
-  font-size:16px;
-  font-weight:900;
-  letter-spacing:3px;
-  background:var(--bg-card-sub);
-  padding:4px 10px;
-  border-radius:8px;
-  border:1px solid #334155;
-}
-.match-time{font-size:10px;color:var(--text-muted);margin-top:4px}
+  /* 1차 탭: 3단 분할 레이아웃 */
+  .view-tabs {
+    display: flex; gap: 4px; background: rgba(6, 20, 36, 0.6);
+    padding: 3px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);
+  }
+  .view-tab {
+    flex: 1; padding: 7px 2px; text-align: center; font-size: 11.5px; font-weight: 800;
+    color: var(--ice); border-radius: 9px; cursor: pointer; transition: all 0.15s ease;
+    white-space: nowrap; letter-spacing: -0.02em;
+  }
+  .view-tab.active { background: var(--blue); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
 
-/* 팀별 코멘트 */
-.quotes-box{
-  background:var(--bg-card-sub);
-  border-radius:8px;
-  padding:8px 10px;
-  margin-top:10px;
-  font-size:11px;
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-}
-.quote-row{display:flex;gap:6px;align-items:flex-start}
-.quote-tag{font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;white-space:nowrap}
-.tag-a{background:#1d4ed8;color:#dbeafe}
-.tag-b{background:#be123c;color:#ffe4e6}
+  /* 2차 종목 선택 탭 */
+  .game-pills { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+  .game-pills::-webkit-scrollbar { display: none; }
+  .game-pill {
+    flex: 1; min-width: 50px; padding: 5px 6px; text-align: center;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px; font-size: 11px; font-weight: 700; color: var(--ice);
+    cursor: pointer; white-space: nowrap; transition: all 0.15s ease;
+  }
+  .game-pill.active {
+    background: linear-gradient(135deg, var(--sky), var(--blue));
+    border-color: var(--sky); color: #fff; box-shadow: 0 2px 8px rgba(79, 157, 222, 0.35);
+  }
 
-/* 승부의 신 투표 게이지 */
-.pickem-area{
-  margin-top:12px;
-  padding-top:10px;
-  border-top:1px dashed var(--border-color);
-}
-.vote-gauge{
-  height:10px;
-  background:#be123c;
-  border-radius:5px;
-  overflow:hidden;
-  display:flex;
-  margin:6px 0 4px;
-}
-.vote-gauge-a{background:var(--shinhan-blue);height:100%;transition:width 0.4s}
-.vote-nums{
-  display:flex;
-  justify-content:space-between;
-  font-size:11px;
-  font-weight:700;
-}
-.vote-btns{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:6px;
-  margin-top:8px;
-}
-.btn-pick{
-  padding:8px;
-  border-radius:6px;
-  font-size:11px;
-  font-weight:700;
-  transition:all 0.15s;
-}
-.btn-pick-a{background:#1e3a8a;color:#bfdbfe;border:1px solid #2563eb}
-.btn-pick-b{background:#881337;color:#fecdd3;border:1px solid #e11d48}
-.btn-pick.voted{background:var(--accent-gold)!important;color:#000!important;border-color:#ca8a04!important}
+  .rule-banner {
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(6, 20, 36, 0.5); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px; padding: 5px 10px; font-size: 11px; color: var(--ice);
+  }
+  .rule-badge { color: var(--sky); font-weight: 700; }
 
-/* ==========================================================================
-   3. [비참가 직원 전용] 럭키드로우 (행운의 뽑기) & 응원톡
-========================================================================== */
-.lucky-draw-view{display:none}
-.gacha-machine{
-  background:linear-gradient(180deg,#1e1b4b 0%,#0f172a 100%);
-  border:2px solid #a855f7;
-  border-radius:18px;
-  padding:24px 16px;
-  text-align:center;
-  box-shadow:0 10px 30px rgba(168,85,247,0.25);
-  position:relative;
-  overflow:hidden;
-}
-.gacha-title{font-size:20px;font-weight:900;color:#fef08a;margin-bottom:4px}
-.gacha-desc{font-size:12px;color:#c084fc;margin-bottom:16px}
-.capsule-slot{
-  width:130px;
-  height:130px;
-  margin:0 auto 16px;
-  background:#090d1a;
-  border:4px solid #a855f7;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:52px;
-  box-shadow:inset 0 0 20px rgba(168,85,247,0.5);
-  transition:transform 0.3s;
-}
-.capsule-slot.shake{animation:shakeSlot 0.5s infinite}
-@keyframes shakeSlot{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg) scale(1.08)}75%{transform:rotate(12deg) scale(1.08)}}
+  /* 내 순위 VIP 카드 (터치 시 정보 수정 가능) */
+  .my-rank-card {
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(135deg, rgba(79, 157, 222, 0.22), rgba(18, 58, 99, 0.85));
+    border: 1.5px solid var(--sky); border-radius: 14px; padding: 8px 12px;
+    box-shadow: 0 4px 15px rgba(79, 157, 222, 0.25);
+    cursor: pointer;
+    transition: transform 0.1s ease, border-color 0.15s ease;
+  }
+  .my-rank-card:active { transform: scale(0.98); }
+  .my-rank-left { display: flex; align-items: center; gap: 10px; }
+  .my-rank-badge {
+    background: var(--sky); color: var(--navy); font-weight: 900;
+    font-size: 11px; padding: 2.5px 6px; border-radius: 6px; letter-spacing: -0.02em;
+  }
+  .my-rank-info { display: flex; flex-direction: column; gap: 2px; }
+  .my-rank-title { font-size: 13px; font-weight: 800; color: #fff; }
+  .my-rank-title b { color: var(--gold); font-size: 14.5px; }
+  .my-rank-sub { font-size: 11px; color: var(--ice); font-weight: 700; opacity: 0.95; }
+  .my-rank-score {
+    font-family: var(--font-num); font-size: 16px; font-weight: 800;
+    color: var(--accent); text-align: right;
+  }
 
-.ticket-status{
-  background:rgba(0,0,0,0.4);
-  padding:6px 14px;
-  border-radius:20px;
-  display:inline-block;
-  font-size:13px;
-  font-weight:700;
-  color:#fef08a;
-  margin-bottom:14px;
-}
-.btn-gacha-spin{
-  background:linear-gradient(135deg,#ec4899,#8b5cf6);
-  color:#fff;
-  font-size:16px;
-  font-weight:900;
-  padding:14px 40px;
-  border-radius:30px;
-  box-shadow:0 4px 18px rgba(236,72,153,0.5);
-  width:80%;
-  max-width:280px;
-}
-.btn-gacha-spin:active{transform:scale(0.96)}
+  /* 포디움 */
+  .podium {
+    display: grid; grid-template-columns: 1fr 1.15fr 1fr; gap: 8px;
+    align-items: flex-end; padding: 6px 4px 4px;
+  }
+  .podium-card {
+    background: rgba(6, 20, 36, 0.75); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px; padding: 8px 6px 8px; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+  }
+  .podium-card.first {
+    border-color: var(--gold);
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.14), rgba(6, 20, 36, 0.85));
+    transform: translateY(-5px);
+  }
+  .podium-card.second {
+    border-color: #cbd5e1;
+    background: linear-gradient(180deg, rgba(203, 213, 225, 0.1), rgba(6, 20, 36, 0.85));
+  }
+  .podium-card.third {
+    border-color: var(--bronze);
+    background: linear-gradient(180deg, rgba(245, 158, 11, 0.1), rgba(6, 20, 36, 0.85));
+  }
+  .podium-medal { font-size: 22px; line-height: 1; }
+  .podium-team { font-size: 11px; font-weight: 700; color: #fff; margin-top: 1px; }
+  .podium-sabun { font-size: 10px; color: var(--ice); opacity: 0.8; }
+  .podium-score {
+    font-family: var(--font-num); font-size: 15px; font-weight: 800;
+    color: var(--accent); margin-top: 3px;
+  }
+  .podium-card.first .podium-score { font-size: 17px; color: var(--gold); }
 
-/* 응원톡 & 티켓 충전 */
-.cheer-box{
-  background:var(--bg-card);
-  border:1px solid var(--border-color);
-  border-radius:14px;
-  padding:14px;
-  margin-top:14px;
-}
-.cheer-input-group{
-  display:flex;
-  gap:6px;
-  margin-top:8px;
-}
-.cheer-input{
-  flex:1;
-  background:var(--bg-card-sub);
-  border:1px solid var(--border-color);
-  padding:10px 12px;
-  border-radius:8px;
-  color:#fff;
-  font-size:13px;
-}
-.btn-cheer-send{
-  background:var(--shinhan-blue);
-  color:#fff;
-  padding:0 16px;
-  border-radius:8px;
-  font-weight:700;
-  font-size:12px;
-}
-.cheer-list{
-  margin-top:12px;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  max-height:160px;
-  overflow-y:auto;
-}
-.cheer-item{
-  font-size:11px;
-  background:var(--bg-card-sub);
-  padding:6px 10px;
-  border-radius:6px;
-  color:#cbd5e1;
-}
+  /* 4위 이하 랭킹 리스트 */
+  .rank-list { display: flex; flex-direction: column; gap: 5px; width: 100%; }
+  .rank-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(6, 20, 36, 0.55); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px; padding: 7px 10px; font-size: 11.5px;
+  }
+  .rank-row.is-me {
+    background: rgba(79, 157, 222, 0.16); border-color: var(--sky);
+  }
+  .rank-row-left { display: flex; align-items: center; gap: 8px; }
+  .rank-num {
+    font-family: var(--font-num); font-weight: 800; font-size: 12.5px;
+    color: var(--ice); width: 22px; text-align: center;
+  }
+  .rank-team { font-weight: 700; color: #fff; }
+  .rank-sabun { font-size: 10.5px; color: var(--ice); opacity: 0.75; }
+  .rank-val { font-family: var(--font-num); font-weight: 800; font-size: 13.5px; color: var(--sky); }
 
-/* ==========================================================================
-   4. [모달 팝업] 팀 로스터 / OP.GG / 전체 대진표 팝업
-========================================================================== */
-.modal-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(3,7,20,0.85);
-  display:none;
-  align-items:flex-end;
-  justify-content:center;
-  z-index:200;
-}
-.modal-sheet{
-  background:#131c35;
-  border:1px solid #334155;
-  border-radius:20px 20px 0 0;
-  width:100%;
-  max-width:600px;
-  max-height:85vh;
-  overflow-y:auto;
-  padding:20px 16px;
-  position:relative;
-  animation:slideUp 0.25s ease-out;
-}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal-close-btn{
-  position:absolute;
-  top:16px;
-  right:16px;
-  background:#1e293b;
-  color:#94a3b8;
-  width:28px;
-  height:28px;
-  border-radius:50%;
-  font-weight:900;
-}
+  /* 팀 대항전 */
+  .team-list { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+  .team-card {
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(6, 20, 36, 0.7); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px; padding: 10px 12px; position: relative;
+  }
+  .team-card.rank-1 {
+    border-color: var(--gold); background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(6, 20, 36, 0.8));
+  }
+  .team-card.is-my-team { border-color: var(--sky); box-shadow: 0 0 10px rgba(79, 157, 222, 0.3); }
+  .team-left { display: flex; align-items: center; gap: 10px; }
+  .team-badge {
+    width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-num); font-weight: 800; font-size: 12px; background: rgba(255,255,255,0.08); color: #fff;
+  }
+  .team-card.rank-1 .team-badge { background: var(--gold); color: #041224; }
+  .team-card.rank-2 .team-badge { background: #cbd5e1; color: #041224; }
+  .team-card.rank-3 .team-badge { background: var(--bronze); color: #041224; }
+  .team-info { display: flex; flex-direction: column; gap: 2px; }
+  .team-title { font-size: 13px; font-weight: 800; color: #fff; }
+  .team-sub { font-size: 10.5px; color: var(--ice); opacity: 0.75; }
+  .team-score-box { text-align: right; }
+  .team-score { font-family: var(--font-num); font-size: 16px; font-weight: 800; color: var(--accent); }
+  .team-card.rank-1 .team-score { color: var(--gold); }
+  .team-score-lbl { font-size: 9.5px; color: var(--ice); opacity: 0.75; }
 
-/* 로스터 모달 스타일 */
-.roster-header{margin-bottom:14px}
-.roster-team-name{font-size:18px;font-weight:900;color:#38bdf8}
-.roster-team-dept{font-size:12px;color:var(--text-muted)}
-.roster-grid{display:flex;flex-direction:column;gap:8px}
-.roster-card{
-  background:#0c1326;
-  border:1px solid #1e293b;
-  border-radius:10px;
-  padding:10px 12px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.player-pos{
-  display:inline-block;
-  font-size:10px;
-  font-weight:900;
-  padding:2px 6px;
-  border-radius:4px;
-  margin-right:6px;
-}
-.pos-top{background:#f97316;color:#fff}
-.pos-jungle{background:#22c55e;color:#fff}
-.pos-mid{background:#06b6d4;color:#fff}
-.pos-adc{background:#a855f7;color:#fff}
-.pos-sup{background:#ec4899;color:#fff}
-.player-name{font-size:13px;font-weight:700}
-.player-rank{font-size:11px;color:#cbd5e1}
-.btn-opgg{
-  background:#5383e8;
-  color:#fff;
-  font-size:11px;
-  font-weight:700;
-  padding:6px 10px;
-  border-radius:6px;
-  text-decoration:none;
-  display:inline-flex;
-  align-items:center;
-  gap:3px;
-}
+  /* 하단 안내 가이드 카드 공통 */
+  .guide-card {
+    background: linear-gradient(180deg, rgba(6, 20, 36, 0.85), rgba(11, 31, 58, 0.75));
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+    font-size: 11.5px;
+    line-height: 1.55;
+    color: var(--ice);
+  }
+  .guide-title {
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .guide-title b { color: var(--gold); }
+  .guide-list {
+    margin: 0;
+    padding-left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .guide-list li { color: var(--ice); }
+  .guide-list li strong { color: #fff; font-weight: 700; }
+  .guide-example {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(79, 157, 222, 0.25);
+    border-left: 3.5px solid var(--sky);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-top: 2px;
+    font-size: 11px;
+    line-height: 1.55;
+    color: rgba(234, 244, 252, 0.95);
+  }
+  .guide-example .ex-tag {
+    display: inline-block;
+    background: var(--sky);
+    color: var(--navy);
+    font-size: 9.5px;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 4px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
 
-/* 전체 대진표 팝업 (Full View) */
-.modal-full{
-  border-radius:14px;
-  max-width:95vw;
-  max-height:90vh;
-  margin:auto;
-}
-.bracket-scroll-zone{
-  overflow-x:auto;
-  padding:10px;
-  background:#090e1c;
-  border-radius:10px;
-  border:1px solid #1e293b;
-}
-.bracket-tree{
-  display:flex;
-  gap:24px;
-  min-width:720px;
-}
-.bracket-col{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-around;
-}
-.bracket-col-title{
-  font-size:11px;
-  font-weight:bold;
-  color:var(--accent-cyan);
-  text-align:center;
-  margin-bottom:8px;
-}
-.b-node{
-  background:#131d38;
-  border:1px solid #334155;
-  border-radius:6px;
-  padding:6px 8px;
-  font-size:11px;
-  margin:6px 0;
-}
-.b-node.win{border-color:var(--accent-gold);color:#fef08a}
+  /* 모달 레이아웃 */
+  #authOverlay {
+    position: fixed; inset: 0;
+    background: rgba(4,12,24,0.85);
+    display: none; align-items: center; justify-content: center; z-index: 100;
+    padding: 20px;
+  }
+  #authOverlay.show { display: flex; }
+  .modal {
+    background: linear-gradient(180deg, #123A63, #0B1F3A);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 18px;
+    padding: 28px 24px;
+    text-align: center;
+    min-width: 260px;
+    max-width: 380px;
+    width: 92%;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  .modal h2 { margin: 0 0 8px; font-size: 19px; color: #fff; }
+  .modal p { margin: 0 0 16px; color: var(--ice); font-size: 12.5px; line-height: 1.6; }
+  .auth-input {
+    width: 100%; padding: 11px 14px;
+    border: 1px solid rgba(255,255,255,0.25); border-radius: 10px;
+    background: rgba(255,255,255,0.08); color: #fff; font-size: 15px;
+    font-family: var(--font-num); text-align: center; margin-bottom: 12px; outline: none;
+  }
+  .auth-input:focus { border-color: var(--sky); background: rgba(255,255,255,0.12); }
+  .auth-input.error { border-color: var(--danger); }
+  select.auth-input {
+    appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23BFE2F7' stroke-width='2'%3e%3cpath d='M6 9l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat; background-position: right 12px center; background-size: 18px;
+    text-align: left; padding-right: 38px; cursor: pointer;
+  }
+  select.auth-input option { background: #123A63; color: #fff; }
+  .auth-error { color: var(--danger); font-size: 12px; margin: -6px 0 12px; height: 14px; display: block; }
+  
+  button.main {
+    font-family: var(--font-ui); font-size: 13.5px; font-weight: 700;
+    background: var(--blue); color: #fff; border: none;
+    padding: 9px 18px; border-radius: 10px; cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  button.main:hover { background: var(--sky); }
+  button.main:active { transform: scale(0.97); }
+  button.ghost {
+    background: transparent; border: 1px solid rgba(255,255,255,0.25);
+    color: var(--ice); font-family: var(--font-ui); font-size: 13.5px; font-weight: 700;
+    padding: 9px 18px; border-radius: 10px; cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  button.ghost:hover { background: rgba(255,255,255,0.08); }
+
+  /* 로딩 스피너 및 에러 상태 */
+  .state-box {
+    text-align: center; padding: 36px 16px; color: var(--ice); font-size: 13px; line-height: 1.6;
+  }
+  .spinner {
+    width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.15);
+    border-top-color: var(--sky); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 10px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
-<!-- 상단 헤더 -->
-<header>
-  <div class="header-inner">
-    <div class="brand">
-      <div class="brand-logo">Shinhan DS</div>
-      <div class="brand-title">2026 e스포츠 축제</div>
-    </div>
-    <button class="btn-bracket-pop" id="btnOpenFullBracket">
-      📊 전체 대진표 뷰
-    </button>
-  </div>
-</header>
-
-<!-- 실시간 중계 바로가기 배너 -->
-<div class="stream-bar">
-  <a href="https://chzzk.naver.com" target="_blank" class="btn-stream btn-chzzk">
-    ⚡ 치지직 생중계
-  </a>
-  <a href="https://youtube.com" target="_blank" class="btn-stream btn-youtube">
-    📺 유튜브 생중계
-  </a>
-</div>
-
-<!-- 종목 및 럭키드로우 네비게이션 -->
-<div class="game-tabs-wrap">
-  <div class="game-tabs" id="gameTabs">
-    <button class="tab-btn active" data-game="lol">⚔️ 롤 (LoL)</button>
-    <button class="tab-btn" data-game="sc">🚀 스타크래프트</button>
-    <button class="tab-btn" data-game="sa">🎯 서든어택</button>
-    <button class="tab-btn" data-game="tetris">🧱 테트리스</button>
-    <button class="tab-btn tab-lucky" data-game="lucky">🎁 행운 럭키드로우</button>
-  </div>
-</div>
-
-<!-- 게임 경기 전용 서브 탭 (32강~16강 예선 vs 8강~결승 본선) -->
-<div class="stage-nav-wrap" id="stageNav">
-  <button class="stage-btn" data-stage="qual">🌱 예선전 (32강 ~ 16강)</button>
-  <button class="stage-btn active" data-stage="finals">🏆 본선 (8강 ~ 결승 & 승부예측)</button>
-</div>
-
-<!-- 메인 컨텐츠 영역 -->
-<main class="container">
-
-  <!-- 1. 게임 매치 뷰 (예선 또는 본선) -->
-  <div id="gameMatchView">
-    <div class="info-guide" id="infoGuide">
-      💡 <b>팀 이름</b>을 클릭하면 팀원 목록과 <b>OP.GG 전적</b>을 바로 볼 수 있습니다!
-    </div>
-    <div id="matchListZone">
-      <!-- 동적 렌더링 -->
-    </div>
-  </div>
-
-  <!-- 2. 비참가 직원 전용 럭키드로우 & 응원 뷰 -->
-  <div id="luckyDrawView" class="lucky-draw-view">
-    <div class="gacha-machine">
-      <div class="gacha-title">🎰 신한DS 행운의 캡슐 뽑기</div>
-      <div class="gacha-desc">현장에 없어도, 게임에 참가하지 않아도 전원 참여 가능!</div>
-      
-      <div class="capsule-slot" id="capsuleSlot">🎁</div>
-      
-      <div>
-        <span class="ticket-status">내 뽑기 티켓: <b id="ticketCount">2</b>장</span>
-      </div>
-      
-      <button class="btn-gacha-spin" id="btnSpin">캡슐 뽑기 START!</button>
-    </div>
-
-    <!-- 응원하고 티켓 받기 섹션 -->
-    <div class="cheer-box">
-      <div style="font-size:13px;font-weight:700;color:#f8fafc">
-        💬 우리 부서 & 팀 응원하고 뽑기 티켓 받기 (+1장)
-      </div>
-      <div class="cheer-input-group">
-        <input type="text" class="cheer-input" id="cheerInput" placeholder="ex) FDS개발팀 전승 우승 가자!">
-        <button class="btn-cheer-send" id="btnSendCheer">등록</button>
-      </div>
-      <div class="cheer-list" id="cheerList">
-        <div class="cheer-item"><b>[인프라운영팀]</b> 시즈탱크 라인 결승까지 뚫어버리자! 🔥</div>
-        <div class="cheer-item"><b>[디지털혁신단]</b> 테트리스 올클리어 마스터 응원합니다! 🧱</div>
-        <div class="cheer-item"><b>[보안운영부]</b> 이상금융탐지 시스템처럼 백도어 칼차단 부탁해요 🛡️</div>
-      </div>
-    </div>
-  </div>
-
-</main>
-
-<!-- ==========================================================================
-   모달 레이어들
-========================================================================== -->
-
-<!-- 모달 1: 팀 로스터 및 OP.GG 전적 연동 바텀시트 -->
-<div class="modal-overlay" id="rosterModal">
-  <div class="modal-sheet">
-    <button class="modal-close-btn" onclick="closeModal('rosterModal')">✕</button>
-    <div class="roster-header">
-      <div class="roster-team-name" id="modalTeamName">팀명</div>
-      <div class="roster-team-dept" id="modalTeamDept">소속 부서</div>
-    </div>
-    <div class="roster-grid" id="modalRosterList">
-      <!-- 선수 명단 및 op.gg 버튼 동적 렌더링 -->
+<!-- 사번/팀 정보 수정 모달 -->
+<div id="authOverlay">
+  <div class="modal">
+    <h2>👤 플레이어 정보 설정</h2>
+    <p>사내 랭킹 집계 및 참여 기록 확인을 위해<br>팀과 사번을 설정해 주세요.</p>
+    <select id="teamSelect" class="auth-input">
+      <option value="" disabled selected>팀 선택</option>
+      <option value="증권개발팀">증권개발팀</option>
+      <option value="증권채널팀">증권채널팀</option>
+      <option value="카드개발팀">카드개발팀</option>
+      <option value="라이프개발팀">라이프개발팀</option>
+      <option value="기타">기타</option>
+      <option value="영포스">영포스</option>
+    </select>
+    <input type="text" id="sabunInput" class="auth-input" placeholder="사번 8자리 (예: 22091019)" maxlength="8" inputmode="numeric" pattern="[0-9]*">
+    <span class="auth-error" id="authError"></span>
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="main" id="authSaveBtn" style="flex:1;">저장</button>
+      <button type="button" class="ghost" id="authCloseBtn" style="flex:1;">닫기</button>
     </div>
   </div>
 </div>
 
-<!-- 모달 2: 전체 대진표 팝업 (32강~결승 가로 스와이프 트리) -->
-<div class="modal-overlay" id="bracketModal" style="align-items:center;">
-  <div class="modal-sheet modal-full">
-    <button class="modal-close-btn" onclick="closeModal('bracketModal')">✕</button>
-    <div style="font-size:16px;font-weight:900;color:var(--accent-cyan);margin-bottom:12px">
-      📊 토너먼트 전체 대진 트리
-    </div>
-    <div class="bracket-scroll-zone">
-      <div class="bracket-tree" id="fullBracketTree">
-        <!-- 트리 동적 렌더링 -->
+<div id="app">
+  <!-- 브랜드 바 -->
+  <div class="brand-bar" id="brandBar">
+    <div class="brand-top">
+      <div class="brand-left">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 68 34" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#4F9DDE"/>
+                <stop offset="1" stop-color="#123A63"/>
+              </linearGradient>
+            </defs>
+            <rect x="1" y="1" width="66" height="32" rx="8" fill="url(#logoGrad)" stroke="rgba(255,255,255,0.25)"/>
+            <text x="34" y="17" text-anchor="middle" dominant-baseline="central" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif" font-weight="800" font-size="14" fill="#fff" letter-spacing="-0.02em">신한DS</text>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">금융본부 🏆 소통 미니게임대회</span>
+          <span class="brand-dept">3분기 리버스 멘토링</span>
+        </div>
+      </div>
+      <div class="brand-right">
+        <div class="event-tag">🏆 실시간 랭킹</div>
       </div>
     </div>
+    
+    <nav class="nav-games" aria-label="게임 종목 바로가기">
+      <a href="ball.html" class="nav-item">⚽ 공튀기기</a>
+      <a href="mole.html" class="nav-item">🐹 두더지</a>
+      <a href="apple.html" class="nav-item">🍎 사과</a>
+      <a href="bomb.html" class="nav-item">💣 지뢰</a>
+      <a href="drop.html" class="nav-item">💧 드롭</a>
+    </nav>
   </div>
-</div>
 
-<!-- 모달 3: 럭키드로우 당첨 결과 팝업 -->
-<div class="modal-overlay" id="gachaResultModal" style="align-items:center;">
-  <div class="modal-sheet" style="text-align:center;border-radius:16px;max-width:360px;">
-    <div style="font-size:48px;margin-bottom:10px" id="prizeIcon">🎉</div>
-    <div style="font-size:18px;font-weight:900;color:#fef08a" id="prizeName">BBQ 황금올리브 기프티콘!</div>
-    <p style="font-size:12px;color:#94a3b8;margin:8px 0 16px" id="prizeDesc">
-      사내 메신저(mOS)로 당첨 쿠폰이 즉시 발송됩니다.
-    </p>
-    <button class="stage-btn active" style="width:100%;padding:10px;" onclick="closeModal('gachaResultModal')">확인</button>
+  <!-- 🔥 [추가] 브랜드 헤더 아래 화려한 히든 이스터에그 마감 배너 -->
+  <div class="hidden-event-banner">
+    <div style="font-size: 13.5px; font-weight: 800; color: var(--gold, #FFD700); letter-spacing: -0.01em; display: flex; align-items: center; justify-content: center; gap: 6px;">
+      <span>✨ [미니게임 히든 상품] 숨겨진 이스터에그 쟁탈전 진행 중!</span>
+    </div>
+    <div id="eventCountdown" style="font-size: 11.5px; color: var(--paper, #EAF4FC); opacity: 0.95; margin-top: 4px; font-family: var(--font-num);">
+      ⏱️ 마감까지 --:--:-- (오늘 23:59:59 종료)
+    </div>
+  </div>
+
+  <!-- 랭킹 메인 패널 -->
+  <div class="rank-box">
+    <div class="rank-header">
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        <span>실시간 순위</span>
+      </div>
+      <div class="refresh-group">
+        <span id="countdownText">15초 후 갱신</span>
+        <button class="btn-refresh" id="btnManualRefresh" type="button">새로고침</button>
+      </div>
+    </div>
+
+    <!-- 1차 탭: 3단 분할 (개인순위 / 팀대항전 / 개인종합순위) -->
+    <div class="view-tabs">
+      <div class="view-tab active" id="tabPersonal">종목별 개인 순위</div>
+      <div class="view-tab" id="tabTeam">팀별 대항전 순위</div>
+      <div class="view-tab" id="tabOverall">개인별 종합순위</div>
+    </div>
+
+    <!-- 2차 종목 선택 (공튀기기, 두더지, 사과, 지뢰, 드롭) -->
+    <div id="gameSelectorSection">
+      <div class="game-pills">
+        <div class="game-pill active" data-game="공튀기기">⚽ 공튀기기</div>
+        <div class="game-pill" data-game="두더지잡기">🐹 두더지</div>
+        <div class="game-pill" data-game="사과게임">🍎 사과</div>
+        <div class="game-pill" data-game="지뢰찾기">💣 지뢰</div>
+        <div class="game-pill" data-game="드롭">💧 드롭</div>
+      </div>
+    </div>
+
+    <div class="rule-banner" id="ruleBanner">
+      <span id="ruleDesc">5개 스테이지 최단 시간 올클리어</span>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span id="ticketCountBadge" style="font-size:10.5px; font-weight:800; color:var(--gold); background:rgba(255,215,0,0.12); border:1px solid rgba(255,215,0,0.3); padding:1px 6px; border-radius:6px;">남은 히든 티켓: 2/2</span>
+        <span class="rule-badge" id="ruleType">최단 시간순</span>
+      </div>
+    </div>
+
+    <!-- 최초 로딩 화면 -->
+    <div class="state-box" id="initialLoadingBox">
+      <div class="spinner"></div>
+      <div>실시간 순위 집계 중... 잠시만 기다려주세요 🙂</div>
+    </div>
+
+    <!-- 1. 종목별 개인 순위 컨테이너 -->
+    <div id="personalContainer" style="display:none; flex-direction:column; gap:8px;">
+      <div class="my-rank-card" id="myPersonalCard" title="클릭 시 플레이어 정보 변경"></div>
+      <div class="podium" id="podiumArea"></div>
+      <div class="rank-list" id="rankListArea"></div>
+    </div>
+
+    <!-- 2. 팀 대항전 컨테이너 -->
+    <div id="teamContainer" style="display:none; flex-direction:column; gap:8px;">
+      <div class="my-rank-card" id="myTeamCard" title="클릭 시 플레이어 정보 변경"></div>
+      <div class="team-list" id="teamListArea"></div>
+
+      <!-- 팀 대항전 산정 안내 가이드 -->
+      <div class="guide-card">
+        <div class="guide-title">
+          <span>💡</span>
+          <span>팀별 대항전 <b>승점 산정 방식</b> 안내</span>
+        </div>
+        <ul class="guide-list">
+          <li><strong>번외팀 참가 안내</strong>: <b>영포스</b> 및 <b>기타</b>는 종목별 개인 순위에는 100% 정상 반영되나, 본선 4개 팀 간의 공정한 경쟁을 위해 <b>팀별 대항전 순위 및 승점 집계에서는 제외(번외)</b>됩니다.</li>
+          <li><strong>종목별 승점 배분</strong>: 5개 종목마다 번외팀을 제외한 <b>공식 4개 팀 소속 참가자의 순위만 추출</b>하여 <b>1위(10점)부터 10위(1점)까지</b> 차등 승점을 소속 팀에 부여합니다.</li>
+        </ul>
+        <div class="guide-example">
+          <span class="ex-tag">산정 예시</span>
+          어떤 종목의 개인 7위가 <b>'기타'</b>이고 8위가 <b>'라이프개발팀'</b>인 경우:<br>
+          👉 7위(기타)는 건너뛰고, 8위인 라이프개발팀이 <b>공식 7위(4 pts)</b>로 승계됩니다.<br>
+          👉 9위인 팀은 <b>공식 8위(3 pts)</b>, 10위인 팀은 <b>공식 9위(2 pts)</b>로 한 칸씩 당겨지며,<br>
+          👉 개인 순위 11위에 위치한 공식 팀 참가자도 <b>공식 10위(1 pt)</b>로 승점을 획득합니다!
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 개인별 종합 순위 컨테이너 -->
+    <div id="overallContainer" style="display:none; flex-direction:column; gap:8px;">
+      <div class="my-rank-card" id="myOverallCard" title="클릭 시 플레이어 정보 변경"></div>
+      <div class="podium" id="overallPodiumArea"></div>
+      <div class="rank-list" id="overallRankListArea"></div>
+
+      <!-- 종합 순위 산정 안내 가이드 (완주 조건 & 10분 주기) -->
+      <div class="guide-card">
+        <div class="guide-title">
+          <span>🏅</span>
+          <span>개인별 종합순위 <b>산정 기준 & 완주 조건</b> 안내</span>
+        </div>
+        <ul class="guide-list">
+          <li><strong>전 종목 완주자 한정 집계</strong>: 공튀기기, 두더지, 사과, 지뢰, 드롭 <b>5개 모든 게임에서 최소 1점(유효 클리어 시간) 이상을 획득한 완주자만 표기</b>됩니다. (1개 종목이라도 미참여 또는 0점/패배인 경우 집계 제외)</li>
+          <li><strong>올림픽 순위합산제 (Rank Sum)</strong>: 각 종목별 개인 등수(1등=1점, 2등=2점...)를 합산하여, <b>순위합 점수가 가장 낮은 참가자가 종합 1위</b>를 차지합니다! (동점 시 상위 등수 최다 보유자 우선)</li>
+          <li><strong>10분 주기 자동 갱신</strong>: 5개 종목의 방대한 기록을 정밀하게 교차 집계하기 위해, 본 종합 순위는 <b>매 10분마다 자동으로 갱신</b>됩니다.</li>
+        </ul>
+        <div class="guide-example">
+          <span class="ex-tag">산정 예시</span>
+          어떤 참가자가 공튀기기 1위(1점), 두더지 3위(3점), 사과 2위(2점), 지뢰 5위(5점), 드롭 4위(4점)를 기록했다면:<br>
+          👉 <b>순위합: 1 + 3 + 2 + 5 + 4 = 15점</b>으로 종합 순위가 결정됩니다.
+        </div>
+      </div>
+    </div>
+
+    <!-- 빈 데이터 안내 화면 -->
+    <div class="state-box" id="emptyState" style="display:none;">
+      <div style="font-size:30px; margin-bottom:6px;">📊</div>
+      <div id="emptyMsg">아직 기록된 랭킹 데이터가 없습니다.</div>
+    </div>
   </div>
 </div>
 
 <script>
-"use strict";
+(function(){
+  var GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwXeZ1OMPgMQb-JhW_uOAxQ-w1sTq5kb6XbTa6XF3BjzhVrax6uvPc8LBC0YfTSKiZKEQ/exec";
 
-/* ==========================================================================
-   종합 데이터셋 (롤 팀별 소환사명 + OP.GG 공식 링크 포맷 완벽 연동)
-========================================================================== */
-var TOURNAMENT_DATA = {
-  lol: {
-    title: "리그 오브 레전드",
-    rosters: {
-      "FDS 결재승인팀": {
-        dept: "금융FDS개발팀",
-        players: [
-          { pos: "TOP", posClass: "pos-top", name: "김탑솔", id: "신한FDS탑-KR1", rank: "다이아 3" },
-          { pos: "JUG", posClass: "pos-jungle", name: "박정글", id: "이상거래차단-KR1", rank: "마스터" },
-          { pos: "MID", posClass: "pos-mid", name: "이페이커", id: "결재승인권자-KR1", rank: "다이아 1" },
-          { pos: "ADC", posClass: "pos-adc", name: "최원딜", id: "칼퇴기원딜러-KR1", rank: "에메랄드 2" },
-          { pos: "SUP", posClass: "pos-sup", name: "정서폿", id: "와드지우개-KR1", rank: "플래티넘 1" }
-        ]
-      },
-      "버그없는세상": {
-        dept: "IT품질보증팀",
-        players: [
-          { pos: "TOP", posClass: "pos-top", name: "한탱커", id: "QA마스터-KR1", rank: "에메랄드 1" },
-          { pos: "JUG", posClass: "pos-jungle", name: "강동선", id: "버그제보봇-KR1", rank: "다이아 4" },
-          { pos: "MID", posClass: "pos-mid", name: "윤미드", id: "배포전체크-KR1", rank: "다이아 2" },
-          { pos: "ADC", posClass: "pos-adc", name: "송카이팅", id: "무결성검증-KR1", rank: "골드 1" },
-          { pos: "SUP", posClass: "pos-sup", name: "임서폿", id: "테스트케이스-KR1", rank: "에메랄드 3" }
-        ]
-      },
-      "클라우드 넥서스": {
-        dept: "클라우드사업팀",
-        players: [
-          { pos: "TOP", posClass: "pos-top", name: "조인프라", id: "AWS마스터-KR1", rank: "다이아 4" },
-          { pos: "JUG", posClass: "pos-jungle", name: "배서버", id: "쿠버네티스-KR1", rank: "플래티넘 2" },
-          { pos: "MID", posClass: "pos-mid", name: "문네트워크", id: "클라우드캐리-KR1", rank: "마스터" },
-          { pos: "ADC", posClass: "pos-adc", name: "황딜러", id: "트래픽폭주-KR1", rank: "다이아 3" },
-          { pos: "SUP", posClass: "pos-sup", name: "안서폿", id: "오토스케일링-KR1", rank: "에메랄드 4" }
-        ]
-      },
-      "코어뱅킹 캐리머신": {
-        dept: "계정계운영팀",
-        players: [
-          { pos: "TOP", posClass: "pos-top", name: "오계정", id: "메인프레임-KR1", rank: "플래티넘 1" },
-          { pos: "JUG", posClass: "pos-jungle", name: "류트랜잭션", id: "원장동기화-KR1", rank: "다이아 2" },
-          { pos: "MID", posClass: "pos-mid", name: "서중앙", id: "코어뱅킹왕-KR1", rank: "마스터" },
-          { pos: "ADC", posClass: "pos-adc", name: "권캐리", id: "실시간배치-KR1", rank: "다이아 1" },
-          { pos: "SUP", posClass: "pos-sup", name: "신보호", id: "무중단운영-KR1", rank: "골드 2" }
-        ]
+  var currentView = "personal";
+  var currentGame = "공튀기기";
+  var isFirstLoadDone = false;
+
+  var myTeam = "";
+  var mySabun = "";
+  try {
+    myTeam = localStorage.getItem("sh_mini_team") || "";
+    mySabun = localStorage.getItem("sh_mini_sabun") || "";
+  } catch(e) {}
+
+  var GAME_META = {
+    "공튀기기": { desc: "5개 스테이지 최단 시간 올클리어", badge: "최단 시간순", unit: "초", isTime: true },
+    "두더지잡기": { desc: "30초 동안 잡은 두더지 콤보 합산 점수", badge: "높은 점수순", unit: "점", isTime: false },
+    "사과게임": { desc: "합 10을 완성해 획득한 사과 개수", badge: "높은 점수순", unit: "점", isTime: false },
+    "지뢰찾기": { desc: "12x12 지뢰 24개를 피해 모든 칸 오픈", badge: "최단 시간순", unit: "초", isTime: true },
+    "드롭": { desc: "60초 동안 바구니로 받은 아이템 합산 점수", badge: "높은 점수순", unit: "점", isTime: false }
+  };
+
+  var cachedData = { games: {}, teams: [], overall: [], remainingTickets: {} };
+  var REFRESH_INTERVAL = 15;
+  var countdown = REFRESH_INTERVAL;
+  var countdownTimer = null;
+
+  var tabPersonal = document.getElementById("tabPersonal");
+  var tabTeam = document.getElementById("tabTeam");
+  var tabOverall = document.getElementById("tabOverall");
+
+  var gameSelectorSection = document.getElementById("gameSelectorSection");
+  var personalContainer = document.getElementById("personalContainer");
+  var teamContainer = document.getElementById("teamContainer");
+  var overallContainer = document.getElementById("overallContainer");
+
+  var initialLoadingBox = document.getElementById("initialLoadingBox");
+  var emptyState = document.getElementById("emptyState");
+  var emptyMsg = document.getElementById("emptyMsg");
+
+  var myPersonalCard = document.getElementById("myPersonalCard");
+  var myTeamCard = document.getElementById("myTeamCard");
+  var myOverallCard = document.getElementById("myOverallCard");
+
+  var podiumArea = document.getElementById("podiumArea");
+  var rankListArea = document.getElementById("rankListArea");
+  var teamListArea = document.getElementById("teamListArea");
+  var overallPodiumArea = document.getElementById("overallPodiumArea");
+  var overallRankListArea = document.getElementById("overallRankListArea");
+
+  var ruleBanner = document.getElementById("ruleBanner");
+  var ruleDesc = document.getElementById("ruleDesc");
+  var ruleType = document.getElementById("ruleType");
+  var ticketCountBadge = document.getElementById("ticketCountBadge");
+  var countdownText = document.getElementById("countdownText");
+  var btnManualRefresh = document.getElementById("btnManualRefresh");
+  var eventCountdown = document.getElementById("eventCountdown");
+
+  // ⏱️ 마감 카운트다운 타이머 (오늘 밤 23:59:59 기준)
+  (function setupEventCountdown() {
+    if (!eventCountdown) return;
+    var now = new Date();
+    var deadline = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).getTime();
+
+    function updateCountdown() {
+      var currentTime = new Date().getTime();
+      var diff = deadline - currentTime;
+
+      if (diff <= 0) {
+        eventCountdown.innerHTML = "🏁 마감 완료 (랭킹 최종 동결)";
+        eventCountdown.style.color = "var(--accent)";
+        return;
       }
-    },
-    // 예선 (32강~16강 데이터)
-    qualifiers: [
-      {
-        group: "16강 A조",
-        matches: [
-          { teamA: "FDS 결재승인팀", deptA: "금융FDS", scoreA: 2, teamB: "DBA 쿼리헌터", deptB: "데이터관리", scoreB: 0, status: "end", time: "14:00" },
-          { teamA: "버그없는세상", deptA: "품질보증", scoreA: 2, teamB: "모바일뱅킹 1팀", deptB: "신한SOL", scoreB: 1, status: "end", time: "14:40" }
-        ]
-      },
-      {
-        group: "16강 B조",
-        matches: [
-          { teamA: "클라우드 넥서스", deptA: "클라우드", scoreA: 2, teamB: "글로벌IT지원", deptB: "해외사업", scoreB: 0, status: "end", time: "15:20" },
-          { teamA: "코어뱅킹 캐리머신", deptA: "계정계", scoreA: 2, teamB: "UI/UX 디자인랩", deptB: "디자인팀", scoreB: 0, status: "end", time: "16:00" }
-        ]
-      },
-      {
-        group: "32강 하이라이트",
-        matches: [
-          { teamA: "정보보호 블루팀", deptA: "정보보안", scoreA: 2, teamB: "경영기획 어벤져스", deptB: "기획부", scoreB: 0, status: "end", time: "11:00" },
-          { teamA: "인재개발 불도저", deptA: "HRD팀", scoreA: 1, teamB: "FDS 결재승인팀", deptB: "금융FDS", scoreB: 2, status: "end", time: "12:00" }
-        ]
-      }
-    ],
-    // 본선 (8강 ~ 결승)
-    finals: [
-      {
-        id: "lol_8_1", round: "8강 1경기", time: "18:00", status: "end", scoreA: 2, scoreB: 0,
-        teamA: "FDS 결재승인팀", deptA: "금융FDS개발팀", quoteA: "이상거래 감지 레이더로 상대 갱킹 100% 차단합니다.",
-        teamB: "버그없는세상", deptB: "IT품질보증팀", quoteB: "버그 없는 무결점 한타가 뭔지 보여드리겠습니다.",
-        votesA: 92, votesB: 41
-      },
-      {
-        id: "lol_8_2", round: "8강 2경기", time: "19:00", status: "live", scoreA: 1, scoreB: 1,
-        teamA: "클라우드 넥서스", deptA: "클라우드사업팀", quoteA: "안정성 99.99% 오토스케일링 딜링 들어갑니다!",
-        teamB: "코어뱅킹 캐리머신", deptB: "계정계운영팀", quoteB: "코어가 버티는 한 역전패는 존재하지 않습니다.",
-        votesA: 67, votesB: 74
-      },
-      {
-        id: "lol_4_1", round: "4강 1경기", time: "20:30", status: "soon", scoreA: "-", scoreB: "-",
-        teamA: "FDS 결재승인팀", deptA: "금융FDS개발팀", quoteA: "기세 올랐습니다. 우승까지 단숨에 직진합니다.",
-        teamB: "8강 2경기 승자", deptB: "-", quoteB: "결승전 티켓은 저희가 가져갑니다.",
-        votesA: 50, votesB: 50
-      },
-      {
-        id: "lol_fin", round: "최종 결승전", time: "22:00", status: "soon", scoreA: "-", scoreB: "-",
-        teamA: "4강 1경기 승자", deptA: "-", quoteA: "우승 상금으로 부서원 전원 한우 회식 쏩니다!",
-        teamB: "4강 2경기 승자", deptB: "-", quoteB: "2026 신한DS 최강의 팀은 바로 우리입니다.",
-        votesA: 50, votesB: 50
-      }
-    ]
-  },
-  sc: {
-    title: "스타크래프트",
-    rosters: {
-      "시즈탱크 라인": { dept: "인프라운영팀", players: [{ pos: "P1", posClass: "pos-top", name: "최탱크", id: "SiegeLine-KR1", rank: "래더 S" }] },
-      "무한 뮤탈리스크": { dept: "플랫폼개발팀", players: [{ pos: "P1", posClass: "pos-jungle", name: "장컨트롤", id: "ZergRush-KR1", rank: "래더 A" }] }
-    },
-    qualifiers: [
-      {
-        group: "16강 A/B조",
-        matches: [
-          { teamA: "시즈탱크 라인", deptA: "인프라", scoreA: 2, teamB: "패스트 질럿", deptB: "총무팀", scoreB: 0, status: "end", time: "16:00" },
-          { teamA: "무한 뮤탈리스크", deptA: "플랫폼", scoreA: 2, teamB: "FD테란", deptB: "금융개발", scoreB: 1, status: "end", time: "16:40" }
-        ]
-      }
-    ],
-    finals: [
-      {
-        id: "sc_4_1", round: "4강 1경기", time: "18:30", status: "end", scoreA: 2, scoreB: 1,
-        teamA: "시즈탱크 라인", deptA: "인프라운영팀", quoteA: "조이기 들어가는 순간 경기 끝납니다.",
-        teamB: "무한 뮤탈리스크", deptB: "플랫폼개발팀", quoteB: "뮤탈 짤짤이로 탱크 라인 허물겠습니다.",
-        votesA: 84, votesB: 45
-      },
-      {
-        id: "sc_fin", round: "결승전", time: "21:00", status: "soon", scoreA: "-", scoreB: "-",
-        teamA: "시즈탱크 라인", deptA: "인프라운영팀", quoteA: "단단한 방어선으로 우승 트로피 수성!",
-        teamB: "4강 2경기 승자", deptB: "-", quoteB: "신한 테란의 전설을 쓰겠습니다.",
-        votesA: 50, votesB: 50
-      }
-    ]
-  },
-  sa: {
-    title: "서든어택",
-    rosters: {
-      "A사이트 폭파반": { dept: "글로벌IT", players: [{ pos: "리더", posClass: "pos-top", name: "김스나", id: "HeadHunter-KR1", rank: "특전사" }] }
-    },
-    qualifiers: [
-      {
-        group: "16강 A조",
-        matches: [
-          { teamA: "A사이트 폭파반", deptA: "글로벌", scoreA: 6, teamB: "B롱 클리어", deptB: "데이터", scoreB: 2, status: "end", time: "15:00" }
-        ]
-      }
-    ],
-    finals: [
-      {
-        id: "sa_fin", round: "결승전", time: "20:00", status: "soon", scoreA: "-", scoreB: "-",
-        teamA: "A사이트 폭파반", deptA: "글로벌IT", quoteA: "헤드샷 명중률 100%, 칼퇴 명중률 100%!",
-        teamB: "보급창고 장악조", deptB: "경영지원", quoteB: "보급창고는 저희가 지킵니다.",
-        votesA: 52, votesB: 48
-      }
-    ]
-  },
-  tetris: {
-    title: "테트리스",
-    rosters: {
-      "빛의 속도 블록": { dept: "모바일뱅킹", players: [{ pos: "선수", posClass: "pos-mid", name: "이테트", id: "BlockGod-KR1", rank: "마스터" }] }
-    },
-    qualifiers: [
-      {
-        group: "8강 풀리그",
-        matches: [
-          { teamA: "빛의 속도 블록", deptA: "모바일", scoreA: 3, teamB: "올클리어", deptB: "정보개발", scoreB: 1, status: "end", time: "16:00" }
-        ]
-      }
-    ],
-    finals: [
-      {
-        id: "tetris_fin", round: "결승전", time: "19:30", status: "live", scoreA: 1, scoreB: 1,
-        teamA: "빛의 속도 블록", deptA: "모바일뱅킹", quoteA: "티스핀 트리플 연속기로 기선제압 완료!",
-        teamB: "벽돌 채우기 장인", deptB: "정보개발", quoteB: "실수 없는 견고함으로 승리하겠습니다.",
-        votesA: 68, votesB: 58
-      }
-    ]
-  }
-};
 
-// 럭키 드로우 상품 풀
-var GACHA_PRIZES = [
-  { icon: "🍗", name: "BBQ 황금올리브치킨 + 콜라", desc: "사내 메신저로 쿠폰 번호가 즉시 전송됩니다!" },
-  { icon: "🍕", name: "도미노피자 포테이토 L", desc: "오늘 야식은 피자로 해결!" },
-  { icon: "☕", name: "스타벅스 아메리카노 T", desc: "내일 출근길 모닝커피 당첨!" },
-  { icon: "💳", name: "네이버페이 10,000원권", desc: "포인트 등록 후 온라인 쇼핑에 사용하세요." },
-  { icon: "🍀", name: "행운의 응원 복권 (다음 기회에)", desc: "응원 댓글을 남기면 티켓 1장이 더 충전됩니다!" }
-];
+      var hours = Math.floor(diff / (1000 * 60 * 60));
+      var mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      var secs = Math.floor((diff % (1000 * 60)) / 1000);
 
-// 상태 관리
-var currentTab = "lol";
-var currentStage = "finals";
-var userVotes = {};
-var myTickets = 2;
+      var hStr = (hours < 10 ? "0" : "") + hours;
+      var mStr = (mins < 10 ? "0" : "") + mins;
+      var sStr = (secs < 10 ? "0" : "") + secs;
 
-/* ==========================================================================
-   화면 렌더링 컨트롤러
-========================================================================== */
-function render(){
-  // 럭키 드로우 탭일 때
-  if(currentTab === "lucky"){
-    document.getElementById("stageNav").style.display = "none";
-    document.getElementById("gameMatchView").style.display = "none";
-    document.getElementById("luckyDrawView").style.display = "block";
-    return;
-  }
-
-  // 일반 게임 탭일 때
-  document.getElementById("stageNav").style.display = "flex";
-  document.getElementById("gameMatchView").style.display = "block";
-  document.getElementById("luckyDrawView").style.display = "none";
-
-  var gameData = TOURNAMENT_DATA[currentTab];
-  var zone = document.getElementById("matchListZone");
-
-  if(currentStage === "qual"){
-    // [예선전 32강~16강 렌더링]
-    var html = "";
-    gameData.qualifiers.forEach(function(g){
-      html += '<div class="qualifier-group">'
-        + '<div class="group-header"><span>📌</span>' + g.group + '</div>'
-        + '<div class="mini-match-list">';
-      g.matches.forEach(function(m){
-        html += '<div class="mini-match-card">'
-          + '  <div class="mini-team-zone">'
-          + '    <div>'
-          + '      <button class="mini-team-btn" onclick="openTeamRoster(\'' + m.teamA + '\')">👉 ' + m.teamA + '</button>'
-          + '      <div class="mini-team-dept">' + m.deptA + '</div>'
-          + '    </div>'
-          + '  </div>'
-          + '  <div class="mini-score">' + m.scoreA + ' : ' + m.scoreB + '</div>'
-          + '  <div class="mini-team-zone" style="justify-content:flex-end;text-align:right">'
-          + '    <div>'
-          + '      <button class="mini-team-btn" onclick="openTeamRoster(\'' + m.teamB + '\')">' + m.teamB + ' 👈</button>'
-          + '      <div class="mini-team-dept">' + m.deptB + '</div>'
-          + '    </div>'
-          + '  </div>'
-          + '</div>';
-      });
-      html += '</div></div>';
-    });
-    zone.innerHTML = html;
-  } else {
-    // [본선 8강~결승 승부의 신 렌더링]
-    var html = "";
-    gameData.finals.forEach(function(m){
-      var total = m.votesA + m.votesB;
-      var rateA = total === 0 ? 50 : Math.round((m.votesA / total) * 100);
-      var rateB = 100 - rateA;
-      var myPick = userVotes[m.id];
-
-      var badge = m.status === 'live' ? '<span style="color:#ef4444;font-weight:700">● LIVE</span>' : (m.status === 'soon' ? '<span style="color:#38bdf8">예정</span>' : '<span style="color:#94a3b8">종료</span>');
-
-      html += '<div class="match-card">'
-        + '<div class="match-header">'
-        + '  <span style="color:#38bdf8;font-weight:700">🏆 ' + m.round + '</span>'
-        + '  <div>' + badge + '</div>'
-        + '</div>'
-        + '<div class="match-body">'
-        + '  <div class="teams-grid">'
-        + '    <div class="team-col">'
-        + '      <button class="team-clickable" onclick="openTeamRoster(\'' + m.teamA + '\')">🔍 ' + m.teamA + '</button>'
-        + '      <div style="font-size:11px;color:#94a3b8">' + m.deptA + '</div>'
-        + '    </div>'
-        + '    <div style="text-align:center">'
-        + '      <div class="score-badge">' + (m.scoreA !== '-' ? m.scoreA + ' : ' + m.scoreB : 'VS') + '</div>'
-        + '      <div class="match-time">🕒 ' + m.time + '</div>'
-        + '    </div>'
-        + '    <div class="team-col">'
-        + '      <button class="team-clickable" onclick="openTeamRoster(\'' + m.teamB + '\')">🔍 ' + m.teamB + '</button>'
-        + '      <div style="font-size:11px;color:#94a3b8">' + m.deptB + '</div>'
-        + '    </div>'
-        + '  </div>'
-        + '  <div class="quotes-box">'
-        + '    <div class="quote-row"><span class="quote-tag tag-a">A팀</span><span>“' + m.quoteA + '”</span></div>'
-        + '    <div class="quote-row"><span class="quote-tag tag-b">B팀</span><span>“' + m.quoteB + '”</span></div>'
-        + '  </div>'
-        + '  <div class="pickem-area">'
-        + '    <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700">'
-        + '      <span style="color:#38bdf8">🔥 승부의 신 예측</span><span>' + total + '명 참여</span>'
-        + '    </div>'
-        + '    <div class="vote-gauge"><div class="vote-gauge-a" style="width:' + rateA + '%"></div></div>'
-        + '    <div class="vote-nums"><span style="color:#60a5fa">' + rateA + '%</span><span style="color:#f43f5e">' + rateB + '%</span></div>'
-        + '    <div class="vote-btns">'
-        + '      <button class="btn-pick btn-pick-a' + (myPick==='A'?' voted':'') + '" onclick="voteMatch(\'' + m.id + '\', \'A\')">' + (myPick==='A'?'✔ A팀 투표완료':'A팀 승리예측') + '</button>'
-        + '      <button class="btn-pick btn-pick-b' + (myPick==='B'?' voted':'') + '" onclick="voteMatch(\'' + m.id + '\', \'B\')">' + (myPick==='B'?'✔ B팀 투표완료':'B팀 승리예측') + '</button>'
-        + '    </div>'
-        + '  </div>'
-        + '</div></div>';
-    });
-    zone.innerHTML = html;
-  }
-}
-
-/* ==========================================================================
-   팀 로스터 모달 & OP.GG 전적 연동 로직
-========================================================================== */
-window.openTeamRoster = function(teamName){
-  var game = TOURNAMENT_DATA[currentTab];
-  if(!game.rosters || !game.rosters[teamName]){
-    alert("[" + teamName + "] 팀의 세부 엔트리 정보는 준비 중입니다.");
-    return;
-  }
-
-  var rData = game.rosters[teamName];
-  document.getElementById("modalTeamName").textContent = teamName;
-  document.getElementById("modalTeamDept").textContent = "소속: " + rData.dept;
-
-  var list = document.getElementById("modalRosterList");
-  var html = "";
-
-  rData.players.forEach(function(p){
-    // OP.GG 링크 인코딩 생성 (ex: https://www.op.gg/summoners/kr/Hide%20on%20bush-KR1)
-    var opggUrl = "https://www.op.gg/summoners/kr/" + encodeURIComponent(p.id);
-
-    html += '<div class="roster-card">'
-      + '  <div>'
-      + '    <span class="player-pos ' + p.posClass + '">' + p.pos + '</span>'
-      + '    <span class="player-name">' + p.name + '</span>'
-      + '    <div class="player-rank">티어: ' + p.rank + ' · ' + p.id + '</div>'
-      + '  </div>'
-      + '  <a href="' + opggUrl + '" target="_blank" class="btn-opgg">'
-      + '    <span>📊 OP.GG</span>'
-      + '  </a>'
-      + '</div>';
-  });
-
-  list.innerHTML = html;
-  document.getElementById("rosterModal").style.display = "flex";
-};
-
-/* ==========================================================================
-   전체 대진표 팝업 (가로 스와이프 트리 생성)
-========================================================================== */
-document.getElementById("btnOpenFullBracket").addEventListener("click", function(){
-  var game = TOURNAMENT_DATA[currentTab];
-  var treeEl = document.getElementById("fullBracketTree");
-  var rounds = ["16강", "8강", "4강", "결승"];
-  var html = "";
-
-  rounds.forEach(function(rnd){
-    html += '<div class="bracket-col">'
-      + '<div class="bracket-col-title">' + rnd + '</div>';
-    
-    // 시뮬레이션 브래킷 노드 생성
-    var sampleNodes = (rnd === "16강") ? 4 : (rnd === "8강" ? 2 : 1);
-    for(var i=1; i<=sampleNodes; i++){
-      html += '<div class="b-node win">👑 승리팀 (2)</div>'
-        + '<div class="b-node">상대팀 (0)</div>';
+      eventCountdown.innerHTML = "⏱️ 마감까지 " + hStr + ":" + mStr + ":" + sStr + " (오늘 23:59:59 종료)";
     }
-    html += '</div>';
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  })();
+
+  var authOverlay = document.getElementById("authOverlay");
+  var teamSelect = document.getElementById("teamSelect");
+  var sabunInput = document.getElementById("sabunInput");
+  var authError = document.getElementById("authError");
+  var authSaveBtn = document.getElementById("authSaveBtn");
+  var authCloseBtn = document.getElementById("authCloseBtn");
+
+  function openAuthModal() {
+    if (teamSelect && myTeam) teamSelect.value = myTeam;
+    if (sabunInput && mySabun) sabunInput.value = mySabun;
+    authError.textContent = "";
+    authOverlay.classList.add("show");
+  }
+
+  myPersonalCard.addEventListener("click", openAuthModal);
+  myTeamCard.addEventListener("click", openAuthModal);
+  myOverallCard.addEventListener("click", openAuthModal);
+
+  authCloseBtn.addEventListener("click", function(){
+    authOverlay.classList.remove("show");
   });
 
-  treeEl.innerHTML = html;
-  document.getElementById("bracketModal").style.display = "flex";
-});
+  authSaveBtn.addEventListener("click", function(e){
+    if (e) e.preventDefault();
+    var tVal = teamSelect.value;
+    var sVal = (sabunInput.value || "").replace(/[^0-9]/g, "").trim();
 
-/* ==========================================================================
-   승부의 신 투표 로직
-========================================================================== */
-window.voteMatch = function(mId, pick){
-  if(userVotes[mId]){
-    alert("이미 승부예측 투표에 참여하셨습니다!");
-    return;
-  }
-  var game = TOURNAMENT_DATA[currentTab];
-  var m = game.finals.find(function(item){ return item.id === mId; });
-  if(!m) return;
+    if (!tVal) {
+      authError.textContent = "팀을 선택해 주세요.";
+      teamSelect.focus();
+      return;
+    }
+    if (sVal.length !== 8) {
+      authError.textContent = "사번은 숫자 8자리여야 합니다. (예: 22091019)";
+      sabunInput.focus();
+      return;
+    }
 
-  if(m.status === 'end'){
-    alert("이미 종료된 경기입니다.");
-    return;
-  }
+    myTeam = tVal;
+    mySabun = sVal;
+    try {
+      localStorage.setItem("sh_mini_team", myTeam);
+      localStorage.setItem("sh_mini_sabun", mySabun);
+    } catch(err) {}
 
-  if(pick === 'A') m.votesA++;
-  else m.votesB++;
+    authOverlay.classList.remove("show");
+    render();
+  });
 
-  userVotes[mId] = pick;
-  render();
-};
+  tabPersonal.addEventListener("click", function(){
+    currentView = "personal";
+    tabPersonal.classList.add("active");
+    tabTeam.classList.remove("active");
+    tabOverall.classList.remove("active");
+    gameSelectorSection.style.display = "block";
+    ruleBanner.style.display = "flex";
+    render();
+  });
 
-/* ==========================================================================
-   럭키 드로우 (캡슐 머신) 스핀 로직
-========================================================================== */
-document.getElementById("btnSpin").addEventListener("click", function(){
-  if(myTickets <= 0){
-    alert("오늘의 뽑기 티켓을 모두 소진했습니다!\n아래 응원 댓글을 작성하여 추가 티켓을 획득하세요.");
-    return;
-  }
+  tabTeam.addEventListener("click", function(){
+    currentView = "team";
+    tabTeam.classList.add("active");
+    tabPersonal.classList.remove("active");
+    tabOverall.classList.remove("active");
+    gameSelectorSection.style.display = "none";
+    ruleBanner.style.display = "none";
+    render();
+  });
 
-  myTickets--;
-  document.getElementById("ticketCount").textContent = myTickets;
+  tabOverall.addEventListener("click", function(){
+    currentView = "overall";
+    tabOverall.classList.add("active");
+    tabPersonal.classList.remove("active");
+    tabTeam.classList.remove("active");
+    gameSelectorSection.style.display = "none";
+    ruleBanner.style.display = "none";
+    render();
+  });
 
-  var slot = document.getElementById("capsuleSlot");
-  slot.classList.add("shake");
-  slot.textContent = "⚡";
-
-  setTimeout(function(){
-    slot.classList.remove("shake");
-    // 랜덤 상품 결정
-    var prize = GACHA_PRIZES[Math.floor(Math.random() * GACHA_PRIZES.length)];
-    slot.textContent = prize.icon;
-
-    document.getElementById("prizeIcon").textContent = prize.icon;
-    document.getElementById("prizeName").textContent = prize.name;
-    document.getElementById("prizeDesc").textContent = prize.desc;
-    document.getElementById("gachaResultModal").style.display = "flex";
-  }, 1200);
-});
-
-// 응원 댓글 작성 및 티켓 충전
-document.getElementById("btnSendCheer").addEventListener("click", function(){
-  var input = document.getElementById("cheerInput");
-  var text = input.value.trim();
-  if(!text){
-    alert("응원 메시지를 입력해주세요!");
-    return;
-  }
-
-  myTickets++;
-  document.getElementById("ticketCount").textContent = myTickets;
-
-  var cheerList = document.getElementById("cheerList");
-  var newDiv = document.createElement("div");
-  newDiv.className = "cheer-item";
-  newDiv.innerHTML = "<b>[방금 등록]</b> " + text;
-  cheerList.prepend(newDiv);
-
-  input.value = "";
-  alert("응원 메시지가 등록되었습니다!\n🎁 럭키드로우 티켓 1장이 추가 충전되었습니다!");
-});
-
-/* ==========================================================================
-   공통 모달 닫기
-========================================================================== */
-window.closeModal = function(id){
-  document.getElementById(id).style.display = "none";
-};
-
-// 바깥 클릭 시 닫기
-window.addEventListener("click", function(e){
-  if(e.target.classList.contains("modal-overlay")){
-    e.target.style.display = "none";
-  }
-});
-
-/* ==========================================================================
-   초기 이벤트 리스너 바인딩
-========================================================================== */
-document.addEventListener("DOMContentLoaded", function(){
-  // 종목 탭
-  document.querySelectorAll("#gameTabs .tab-btn").forEach(function(btn){
-    btn.addEventListener("click", function(){
-      document.querySelectorAll("#gameTabs .tab-btn").forEach(function(b){ b.classList.remove("active"); });
-      this.classList.add("active");
-      currentTab = this.getAttribute("data-game");
+  document.querySelectorAll(".game-pill").forEach(function(pill){
+    pill.addEventListener("click", function(){
+      document.querySelectorAll(".game-pill").forEach(function(p){ p.classList.remove("active"); });
+      pill.classList.add("active");
+      currentGame = pill.getAttribute("data-game");
       render();
     });
   });
 
-  // 스테이지 탭 (예선 vs 본선)
-  document.querySelectorAll("#stageNav .stage-btn").forEach(function(btn){
-    btn.addEventListener("click", function(){
-      document.querySelectorAll("#stageNav .stage-btn").forEach(function(b){ b.classList.remove("active"); });
-      this.classList.add("active");
-      currentStage = this.getAttribute("data-stage");
-      render();
+  function formatScore(val, isTime){
+    if (isTime) return Number(val).toFixed(2) + "초";
+    return Math.round(Number(val)) + "점";
+  }
+
+  function maskSabun(sabun){
+    var s = String(sabun || "");
+    if (s.length <= 3) return s;
+    return s.slice(0, 3) + "*".repeat(s.length - 3);
+  }
+
+  function computeOfficialTeamRankings(){
+    var officialTeams = ["증권개발팀", "증권채널팀", "카드개발팀", "라이프개발팀"];
+    var teamScores = {};
+    officialTeams.forEach(function(t){
+      teamScores[t] = { team: t, totalPoints: 0, topRankCount: 0 };
     });
+
+    var gameList = ["공튀기기", "두더지잡기", "사과게임", "지뢰찾기", "드롭"];
+    gameList.forEach(function(gName){
+      var list = (cachedData.games && cachedData.games[gName]) || [];
+      var validList = list.filter(function(item){
+        var t = String(item.team || "").trim();
+        return officialTeams.indexOf(t) !== -1;
+      });
+
+      var top10 = validList.slice(0, 10);
+      top10.forEach(function(item, idx){
+        var pts = 10 - idx;
+        if (teamScores[item.team]) {
+          teamScores[item.team].totalPoints += pts;
+          teamScores[item.team].topRankCount += 1;
+        }
+      });
+    });
+
+    var teamRankArr = [];
+    for (var t in teamScores) teamRankArr.push(teamScores[t]);
+    teamRankArr.sort(function(a, b){
+      if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
+      return b.topRankCount - a.topRankCount;
+    });
+    teamRankArr.forEach(function(item, idx){ item.rank = idx + 1; });
+    return teamRankArr;
+  }
+
+  function getOverallRankingsData(){
+    if (cachedData.overall && cachedData.overall.length > 0) {
+      return cachedData.overall;
+    }
+
+    if (!cachedData.games) return [];
+    var gameList = ["공튀기기", "두더지잡기", "사과게임", "지뢰찾기", "드롭"];
+    var isTimeAttack = { "공튀기기": true, "지뢰찾기": true, "두더지잡기": false, "사과게임": false, "드롭": false };
+    var userMap = {};
+
+    gameList.forEach(function(gName){
+      var list = cachedData.games[gName] || [];
+      list.forEach(function(item){
+        var sabun = String(item.sabun || "").trim();
+        if (!sabun || sabun === "미기입") return;
+        if (!userMap[sabun]) {
+          userMap[sabun] = { sabun: sabun, team: item.team, games: {} };
+        }
+        userMap[sabun].games[gName] = item.score;
+      });
+    });
+
+    var validUsers = [];
+    for (var s in userMap) {
+      if (Object.keys(userMap[s].games).length === 5) {
+        validUsers.push(userMap[s]);
+      }
+    }
+    if (validUsers.length === 0) return [];
+
+    gameList.forEach(function(gName){
+      var isTime = isTimeAttack[gName];
+      validUsers.sort(function(a, b){
+        return isTime ? (a.games[gName] - b.games[gName]) : (b.games[gName] - a.games[gName]);
+      });
+      validUsers.forEach(function(u, idx){
+        if (!u.ranks) u.ranks = {};
+        u.ranks[gName] = idx + 1;
+      });
+    });
+
+    validUsers.forEach(function(u){
+      var sum = 0;
+      gameList.forEach(function(gName){ sum += (u.ranks[gName] || 0); });
+      u.rankSum = sum;
+    });
+
+    validUsers.sort(function(a, b){
+      if (a.rankSum !== b.rankSum) return a.rankSum - b.rankSum;
+      return a.sabun.localeCompare(b.sabun);
+    });
+
+    validUsers.forEach(function(u, idx){ u.rank = idx + 1; });
+    return validUsers;
+  }
+
+  function render(){
+    if (!isFirstLoadDone) return;
+
+    initialLoadingBox.style.display = "none";
+    emptyState.style.display = "none";
+
+    if (currentView === "personal") {
+      teamContainer.style.display = "none";
+      overallContainer.style.display = "none";
+      renderPersonalRank();
+    } else if (currentView === "team") {
+      personalContainer.style.display = "none";
+      overallContainer.style.display = "none";
+      renderTeamRank();
+    } else {
+      personalContainer.style.display = "none";
+      teamContainer.style.display = "none";
+      renderOverallRank();
+    }
+  }
+
+  function renderPersonalRank(){
+    var meta = GAME_META[currentGame] || GAME_META["공튀기기"];
+    ruleDesc.textContent = meta.desc;
+    ruleType.textContent = meta.badge;
+
+    // 🎁 남은 히든 티켓 표출 갱신 (기본값 2장 중 남은 수량)
+    var remMap = cachedData.remainingTickets || {};
+    var remCount = remMap[currentGame] !== undefined ? remMap[currentGame] : 2;
+    if (ticketCountBadge) {
+      ticketCountBadge.textContent = "남은 히든 티켓: " + remCount + "/2";
+      ticketCountBadge.style.color = remCount === 0 ? "var(--danger)" : "var(--gold)";
+      ticketCountBadge.style.borderColor = remCount === 0 ? "rgba(224,86,122,0.4)" : "rgba(255,215,0,0.3)";
+    }
+
+    var list = (cachedData.games && cachedData.games[currentGame]) || [];
+
+    if (list.length === 0) {
+      personalContainer.style.display = "none";
+      emptyState.style.display = "block";
+      emptyMsg.textContent = "아직 등록된 기록이 없습니다.\n첫 번째 랭커에 도전해 보세요!";
+      return;
+    }
+
+    personalContainer.style.display = "flex";
+
+    var myIndex = -1;
+    if (mySabun) {
+      for (var i = 0; i < list.length; i++) {
+        if (String(list[i].sabun).trim() === String(mySabun).trim()) {
+          myIndex = i;
+          break;
+        }
+      }
+    }
+
+    var displayTeam = myTeam || (myIndex !== -1 ? list[myIndex].team : "미등록");
+
+    if (mySabun && myIndex !== -1) {
+      var myRecord = list[myIndex];
+      var myRankNum = myRecord.rank || (myIndex + 1);
+      myPersonalCard.innerHTML = 
+        '<div class="my-rank-left">' +
+          '<span class="my-rank-badge">MY</span>' +
+          '<div class="my-rank-info">' +
+            '<span class="my-rank-title">내 현재 순위: <b>' + myRankNum + '위</b></span>' +
+            '<span class="my-rank-sub">플레이어: ' + displayTeam + ' - ' + mySabun + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="my-rank-score">' + formatScore(myRecord.score, meta.isTime) + '</div>';
+      myPersonalCard.style.display = "flex";
+    } else if (mySabun) {
+      myPersonalCard.innerHTML = 
+        '<div class="my-rank-left">' +
+          '<span class="my-rank-badge">MY</span>' +
+          '<div class="my-rank-info">' +
+            '<span class="my-rank-title">내 현재 순위: <b>순위권 진입 도전!</b></span>' +
+            '<span class="my-rank-sub">플레이어: ' + displayTeam + ' - ' + mySabun + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="my-rank-score" style="font-size:12px; color:var(--ice);">도전하기 👉</div>';
+      myPersonalCard.style.display = "flex";
+    } else {
+      myPersonalCard.innerHTML = 
+        '<div class="my-rank-left">' +
+          '<span class="my-rank-badge">MY</span>' +
+          '<div class="my-rank-info">' +
+            '<span class="my-rank-title">내 순위 확인</span>' +
+            '<span class="my-rank-sub">플레이어 등록하기 (터치) 👉</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="my-rank-score" style="font-size:12px; color:var(--ice);">등록</div>';
+      myPersonalCard.style.display = "flex";
+    }
+
+    var top3 = list.slice(0, 3);
+    var first = top3[0], second = top3[1], third = top3[2];
+    var podiumHtml = "";
+
+    podiumHtml += second ? (
+      '<div class="podium-card second">' +
+        '<div class="podium-medal">🥈</div>' +
+        '<div class="podium-team">' + second.team + '</div>' +
+        '<div class="podium-sabun">' + maskSabun(second.sabun) + '</div>' +
+        '<div class="podium-score">' + formatScore(second.score, meta.isTime) + '</div>' +
+      '</div>'
+    ) : '<div class="podium-card second" style="opacity:0.3;"><div class="podium-medal">🥈</div><div class="podium-team">-</div></div>';
+
+    podiumHtml += first ? (
+      '<div class="podium-card first">' +
+        '<div class="podium-medal">🥇</div>' +
+        '<div class="podium-team">' + first.team + '</div>' +
+        '<div class="podium-sabun">' + maskSabun(first.sabun) + '</div>' +
+        '<div class="podium-score">' + formatScore(first.score, meta.isTime) + '</div>' +
+      '</div>'
+    ) : '<div class="podium-card first" style="opacity:0.3;"><div class="podium-medal">🥇</div><div class="podium-team">-</div></div>';
+
+    podiumHtml += third ? (
+      '<div class="podium-card third">' +
+        '<div class="podium-medal">🥉</div>' +
+        '<div class="podium-team">' + third.team + '</div>' +
+        '<div class="podium-sabun">' + maskSabun(third.sabun) + '</div>' +
+        '<div class="podium-score">' + formatScore(third.score, meta.isTime) + '</div>' +
+      '</div>'
+    ) : '<div class="podium-card third" style="opacity:0.3;"><div class="podium-medal">🥉</div><div class="podium-team">-</div></div>';
+
+    podiumArea.innerHTML = podiumHtml;
+
+    var restList = list.slice(3, 10);
+    var listHtml = "";
+    restList.forEach(function(item, idx){
+      var rank = idx + 4;
+      var isMe = (mySabun && String(item.sabun).trim() === String(mySabun).trim());
+      listHtml += '<div class="rank-row ' + (isMe ? 'is-me' : '') + '">' +
+        '<div class="rank-row-left">' +
+          '<span class="rank-num">' + rank + '</span>' +
+          '<div>' +
+            '<span class="rank-team">' + item.team + '</span> ' +
+            '<span class="rank-sabun">(' + maskSabun(item.sabun) + ')' + (isMe ? ' 👈 나' : '') + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<span class="rank-val">' + formatScore(item.score, meta.isTime) + '</span>' +
+      '</div>';
+    });
+
+    rankListArea.innerHTML = listHtml;
+  }
+
+  function renderTeamRank(){
+    var list = computeOfficialTeamRankings();
+
+    if (list.length === 0) {
+      teamContainer.style.display = "none";
+      emptyState.style.display = "block";
+      emptyMsg.textContent = "팀별 참여 기록을 집계 중입니다.";
+      return;
+    }
+
+    teamContainer.style.display = "flex";
+
+    var myTeamObj = null;
+    var myTeamRank = -1;
+    if (myTeam) {
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].team === myTeam) {
+          myTeamObj = list[i];
+          myTeamRank = i + 1;
+          break;
+        }
+      }
+    }
+
+    if (myTeamObj) {
+      myTeamCard.innerHTML = 
+        '<div class="my-rank-left">' +
+          '<span class="my-rank-badge">MY TEAM</span>' +
+          '<div class="my-rank-info">' +
+            '<span class="my-rank-title">우리 팀 순위: <b>' + myTeamRank + '위</b> (' + myTeam + ')</span>' +
+            '<span class="my-rank-sub">TOP 10 승점 기여: ' + myTeamObj.topRankCount + '회</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="my-rank-score">' + myTeamObj.totalPoints + ' pts</div>';
+      myTeamCard.style.display = "flex";
+    } else if (myTeam === "영포스" || myTeam === "기타") {
+      myTeamCard.innerHTML = 
+        '<div class="my-rank-left">' +
+          '<span class="my-rank-badge" style="background:rgba(255,255,255,0.18); color:var(--ice);">번외</span>' +
+          '<div class="my-rank-info">' +
+            '<span class="my-rank-title">우리 팀: <b>' + myTeam + ' (번외 참여)</b></span>' +
+            '<span class="my-rank-sub">팀별 대항전 집계 제외 (개인 순위 정상 반영)</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="my-rank-score" style="font-size:12px; color:var(--ice);">-</div>';
+      myTeamCard.style.display = "flex";
+    } else {
+      myTeamCard.style.display = "none";
+    }
+
+    var html = "";
+    list.forEach(function(item, idx){
+      var rank = idx + 1;
+      var rankClass = rank <= 3 ? ("rank-" + rank) : "";
+      var isMyTeam = (myTeam && item.team === myTeam);
+      var medal = rank === 1 ? "🥇 " : (rank === 2 ? "🥈 " : (rank === 3 ? "🥉 " : ""));
+
+      html += '<div class="team-card ' + rankClass + ' ' + (isMyTeam ? 'is-my-team' : '') + '">' +
+        '<div class="team-left">' +
+          '<div class="team-badge">' + rank + '</div>' +
+          '<div class="team-info">' +
+            '<div class="team-title">' + medal + item.team + (isMyTeam ? ' (우리팀)' : '') + '</div>' +
+            '<div class="team-sub">TOP 10 진입: ' + item.topRankCount + '회</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="team-score-box">' +
+          '<div class="team-score">' + item.totalPoints + ' pts</div>' +
+          '<div class="team-score-lbl">종합 승점</div>' +
+        '</div>' +
+      '</div>';
+    });
+
+    teamListArea.innerHTML = html;
+  }
+
+  function renderOverallRank(){
+    var list = getOverallRankingsData();
+
+    if (list.length === 0) {
+      overallContainer.style.display = "none";
+      emptyState.style.display = "block";
+      emptyMsg.textContent = "아직 5개 전 종목을 완주한 플레이어가 없습니다.\n전 종목 클리어 후 첫 종합 랭커가 되어보세요!";
+      return;
+    }
+
+    overallContainer.style.display = "flex";
+
+    var myIndex = -1;
+    if (mySabun) {
+      for (var i = 0; i < list.length; i++) {
+        if (String(list[i].sabun).trim() === String(mySabun).trim()) {
+          myIndex = i;
+          break;
+        }
+      }
+    }
+
+    var displayTeam = myTeam || (myIndex !== -1 ? list[myIndex].team : "미등록");
+
+    if (mySabun && myIndex !== -1) {
+      var myRecord = list[myIndex];
+      var myRankNum = myRecord.rank || (myIndex + 1);
+      myOverallCard.innerHTML = 
+        '<div class="my-rank-left">' +
+          '<span class="my-rank-badge">MY</span>' +
+          '<div class="my-rank-info">' +
+            '<span class="my-rank-title">내 현재 종합 순위: <b>' + myRankNum + '위</b></span>' +
+            '<span class="my-rank-sub">플레이어: ' + displayTeam + ' - ' + mySabun + ' (5종 완주)</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="my-rank-score">순위합 ' + myRecord.rankSum + '점</div>';
+      myOverallCard.style.display = "flex";
+    } else if (mySabun) {
+      myOverallCard.innerHTML = 
+        '<div class="my-rank-left">' +
+          '<span class="my-rank-badge">MY</span>' +
+          '<div class="my-rank-info">' +
+            '<span class="my-rank-title">내 종합 순위: <b>5종 완주 도전 중!</b></span>' +
+            '<span class="my-rank-sub">플레이어: ' + displayTeam + ' - ' + mySabun + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="my-rank-score" style="font-size:12px; color:var(--ice);">완주 도전 👉</div>';
+      myOverallCard.style.display = "flex";
+    } else {
+      myOverallCard.innerHTML = 
+        '<div class="my-rank-left">' +
+          '<span class="my-rank-badge">MY</span>' +
+          '<div class="my-rank-info">' +
+            '<span class="my-rank-title">내 종합 순위 확인</span>' +
+            '<span class="my-rank-sub">플레이어 등록하기 (터치) 👉</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="my-rank-score" style="font-size:12px; color:var(--ice);">등록</div>';
+      myOverallCard.style.display = "flex";
+    }
+
+    var top3 = list.slice(0, 3);
+    var first = top3[0], second = top3[1], third = top3[2];
+    var podiumHtml = "";
+
+    podiumHtml += second ? (
+      '<div class="podium-card second">' +
+        '<div class="podium-medal">🥈</div>' +
+        '<div class="podium-team">' + second.team + '</div>' +
+        '<div class="podium-sabun">' + maskSabun(second.sabun) + '</div>' +
+        '<div class="podium-score">순위합 ' + second.rankSum + '</div>' +
+      '</div>'
+    ) : '<div class="podium-card second" style="opacity:0.3;"><div class="podium-medal">🥈</div><div class="podium-team">-</div></div>';
+
+    podiumHtml += first ? (
+      '<div class="podium-card first">' +
+        '<div class="podium-medal">🥇</div>' +
+        '<div class="podium-team">' + first.team + '</div>' +
+        '<div class="podium-sabun">' + maskSabun(first.sabun) + '</div>' +
+        '<div class="podium-score">순위합 ' + first.rankSum + '</div>' +
+      '</div>'
+    ) : '<div class="podium-card first" style="opacity:0.3;"><div class="podium-medal">🥇</div><div class="podium-team">-</div></div>';
+
+    podiumHtml += third ? (
+      '<div class="podium-card third">' +
+        '<div class="podium-medal">🥉</div>' +
+        '<div class="podium-team">' + third.team + '</div>' +
+        '<div class="podium-sabun">' + maskSabun(third.sabun) + '</div>' +
+        '<div class="podium-score">순위합 ' + third.rankSum + '</div>' +
+      '</div>'
+    ) : '<div class="podium-card third" style="opacity:0.3;"><div class="podium-medal">🥉</div><div class="podium-team">-</div></div>';
+
+    overallPodiumArea.innerHTML = podiumHtml;
+
+    var restList = list.slice(3);
+    var listHtml = "";
+    restList.forEach(function(item, idx){
+      var rank = idx + 4;
+      var isMe = (mySabun && String(item.sabun).trim() === String(mySabun).trim());
+      listHtml += '<div class="rank-row ' + (isMe ? 'is-me' : '') + '">' +
+        '<div class="rank-row-left">' +
+          '<span class="rank-num">' + rank + '</span>' +
+          '<div>' +
+            '<span class="rank-team">' + item.team + '</span> ' +
+            '<span class="rank-sabun">(' + maskSabun(item.sabun) + ')' + (isMe ? ' 👈 나' : '') + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<span class="rank-val">순위합 ' + item.rankSum + '점</span>' +
+      '</div>';
+    });
+
+    overallRankListArea.innerHTML = listHtml;
+  }
+
+  function fetchRankings(){
+    if (!GOOGLE_WEBHOOK_URL) return;
+
+    fetch(GOOGLE_WEBHOOK_URL, { method: "GET", redirect: "follow" })
+      .then(function(res){
+        if (!res.ok) throw new Error("HTTP error " + res.status);
+        return res.json();
+      })
+      .then(function(data){
+        if (data && data.status === "success") {
+          cachedData = data;
+          isFirstLoadDone = true;
+
+          if (mySabun && cachedData.games) {
+            var latestDate = "";
+            var latestTeam = "";
+            for (var gName in cachedData.games) {
+              var gList = cachedData.games[gName] || [];
+              for (var i = 0; i < gList.length; i++) {
+                if (String(gList[i].sabun).trim() === String(mySabun).trim()) {
+                  var rDate = gList[i].date || "";
+                  if (!latestDate || rDate >= latestDate) {
+                    latestDate = rDate;
+                    latestTeam = gList[i].team;
+                  }
+                }
+              }
+            }
+            if (latestTeam && latestTeam !== "미선택" && latestTeam !== myTeam) {
+              myTeam = latestTeam;
+              try { localStorage.setItem("sh_mini_team", myTeam); } catch(e) {}
+            }
+          }
+
+          render();
+        }
+      })
+      .catch(function(err){
+        console.warn("순위 갱신 지연/오류:", err);
+        if (!isFirstLoadDone) {
+          initialLoadingBox.innerHTML = 
+            '<div style="font-size:28px; margin-bottom:8px;">⚠️</div>' +
+            '<div>순위 데이터를 불러오지 못했습니다.<br><span style="font-size:11px; opacity:0.7;">잠시 후 다시 새로고침 버튼을 눌러주세요.</span></div>';
+        }
+      });
+  }
+
+  function startAutoRefresh(){
+    clearInterval(countdownTimer);
+    countdown = REFRESH_INTERVAL;
+    countdownTimer = setInterval(function(){
+      countdown--;
+      countdownText.textContent = countdown + "초 후 갱신";
+      if (countdown <= 0) {
+        countdown = REFRESH_INTERVAL;
+        fetchRankings();
+      }
+    }, 1000);
+  }
+
+  btnManualRefresh.addEventListener("click", function(){
+    btnManualRefresh.textContent = "갱신 중...";
+    fetchRankings();
+    setTimeout(function(){
+      btnManualRefresh.textContent = "새로고침";
+      countdown = REFRESH_INTERVAL;
+    }, 600);
   });
 
-  render();
-});
+  fetchRankings();
+  startAutoRefresh();
+})();
 </script>
 </body>
 </html>
