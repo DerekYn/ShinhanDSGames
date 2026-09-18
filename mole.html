@@ -268,7 +268,7 @@
     touch-action: none;
   }
 
-  /* 팝업 텍스트가 구멍 밖으로 시원하게 올라오도록 허용하는 래퍼 */
+  /* 팝업 텍스트 래퍼 */
   .hole-wrap{
     position: relative;
     width: 100%;
@@ -305,7 +305,7 @@
   .mole .eye{ top:26px; width:8px; height:8px; }
   .mole .nose{ top:41px; width:13px; height:9px; background:#e88d9d; }
 
-  /* 2. 👑 대왕 두더지 */
+  /* 2. 대왕 두더지 */
   .king-mole{ 
     background:#7c4a27; 
     border:3px solid #542d12; 
@@ -346,7 +346,7 @@
     border-radius:0 0 4px 4px; z-index:3;
   }
 
-  /* 4. 🐯 호랑이 */
+  /* 4. 호랑이 */
   .tiger{ 
     background:#ea580c; 
     background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
@@ -634,7 +634,7 @@
   </div>
 </div>
 
-<!-- 🎁 이스터에그: 호랑이 굴 탈출왕 (선착순 2명) 모달 -->
+<!-- 🎁 이스터에그 모달 (당첨자 / 집념의 탐색꾼 / 원조 당첨자 공용) -->
 <div id="easterEggOverlay">
   <div class="modal" style="border: 2px solid var(--gold); box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4);">
     <div id="eeIcon" style="font-size: 46px; margin-bottom: 8px;">🐯💥</div>
@@ -752,6 +752,9 @@
   var GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwXeZ1OMPgMQb-JhW_uOAxQ-w1sTq5kb6XbTa6XF3BjzhVrax6uvPc8LBC0YfTSKiZKEQ/exec";
   var GAME_NAME = "두더지잡기";
 
+  // 👑 두더지잡기 기존 명예의 전당 당첨 사번
+  var PREV_CHAMPIONS = ["20031004", "24072002"];
+
   var GAME_TIME = 30;
 
   var MOLE_COUNT = 30;
@@ -764,8 +767,8 @@
   var gameCount = 0;
 
   // 🎁 [이스터에그: 호랑이 올킬 판정 변수]
-  var tigersHit = 0;       // 잡은 호랑이 수 (10마리 전부 잡아야 함)
-  var otherHitCount = 0;   // 두더지, 대왕두더지, 토끼를 때린 횟수 (0이어야 함)
+  var tigersHit = 0;
+  var otherHitCount = 0;
 
   var board = document.getElementById("board");
   var boardWrap = document.getElementById("board-wrap");
@@ -820,7 +823,7 @@
     }).catch(function(err){ console.warn("로그 실패:", err); });
   }
 
-  // 9개 구멍 생성 (래퍼 구조를 적용하여 글자 잘림 방지)
+  // 9개 구멍 생성
   for(var i = 0; i < 9; i++){
     (function(idx){
       var wrap = document.createElement("div");
@@ -884,7 +887,6 @@
         arr.push(400 + Math.random() * 19400);
       }
       for(var j = 0; j < feverCount; j++){
-        // 호랑이는 28.5초 이내에 확실히 나와서 칠 수 있도록 보정
         var maxFever = isTiger ? 8500 : 9200;
         arr.push(20000 + Math.random() * maxFever);
       }
@@ -999,7 +1001,7 @@
     }
 
     if(type === "king-mole"){
-      otherHitCount++; // 🚨 두더지 타격 시 이스터에그 실격 처리 카운트
+      otherHitCount++;
       hits++; combo++;
       maxCombo = Math.max(maxCombo, combo);
       var basePt = 50 + (combo - 1) * 10 + speedBonus;
@@ -1011,7 +1013,7 @@
       if(navigator.vibrate) navigator.vibrate(25);
 
     } else if(type === "mole"){
-      otherHitCount++; // 🚨 두더지 타격 시 이스터에그 실격 처리 카운트
+      otherHitCount++;
       hits++; combo++;
       maxCombo = Math.max(maxCombo, combo);
       var basePt = 10 + (combo - 1) * 10 + speedBonus;
@@ -1023,14 +1025,14 @@
       if(navigator.vibrate) navigator.vibrate(15);
 
     } else if(type === "rabbit"){
-      otherHitCount++; // 🚨 토끼 타격 시 이스터에그 실격 처리 카운트
+      otherHitCount++;
       score -= 30;
       combo = Math.max(0, combo - 3);
       pop(holes[index], "-30 (콤보-3)", "bad");
       if(navigator.vibrate) navigator.vibrate(40);
 
     } else if(type === "tiger"){
-      tigersHit++; // 🎯 호랑이 타격 카운트 증가 (총 10마리 중 1마리 잡음)
+      tigersHit++;
       score -= 50;
       combo = Math.max(0, combo - 3);
       pop(holes[index], "-50 (🐯 " + tigersHit + "/" + TIGER_COUNT + ")", "bad");
@@ -1099,12 +1101,14 @@
     overlay.classList.add('show');
   });
 
-  // 🎁 종목별 선착순 2인 검증 요청 (1등: 상무님 / 2등: 본부장님)
+  // 🎁 [이스터에그 판정]: 기 당첨 사번 예우 & 마감 후 집념의 탐색꾼 쿠폰 업그레이드 분기
   function triggerEasterEgg(){
+    var isChampion = (PREV_CHAMPIONS.indexOf(String(currentSabun).trim()) !== -1);
+
     showEasterEggModal(
       "⏳",
-      "당첨 확인 중...",
-      "선착순 당첨 여부를 서버와 확인하고 있습니다.<br>잠시만 기다려주세요!",
+      "달성 확인 중...",
+      "기록을 서버에 전송하고 확인하고 있습니다.<br>잠시만 기다려주세요!",
       false
     );
 
@@ -1113,54 +1117,56 @@
     fetch(targetUrl, { method: "GET", redirect: "follow" })
       .then(function(res){ return res.json(); })
       .then(function(data){
-        if(data && data.result === "win"){
-          var order = data.order || 1; // 1 or 2
-          var rewardTitle = data.reward || (order === 1 ? "상무님 식사비 지원" : "본부장님 식사권 지원");
-          var icon = (order === 1) ? "🐯🍽️" : "🐯👑";
+        // 1. 기존 명예의 전당 당첨자인 경우: 전용 예우 팝업
+        if(isChampion){
+          showEasterEggModal(
+            "👑",
+            "👑 위대한 [호랑이 굴 탈출왕]의 귀환!",
+            "이미 전설을 쓰셨던 위대한 <b>[호랑이 굴 탈출왕]</b> 님이시군요! 👏<br><br>" +
+            "명예의 전당에 오르고도 몸이 기억하는 그 피지컬은 여전하십니다.<br>" +
+            "호랑이 10마리를 완벽히 소탕했던 당신의 전설적인 사냥을 다시 한번 인정합니다! 🐯💥",
+            true
+          );
+          return;
+        }
 
+        // 2. 신규 달성자 (마감 후 탐색꾼)
+        showEasterEggModal(
+          "🕵️‍♂️",
+          "🎁 [히든 보너스] 집념의 탐색꾼 발견!",
+          "이벤트 종료 알림에도 끝까지 비밀을 탐구하는 당신은 진정한 탐색꾼! 🕵️‍♂️✨<br><br>" +
+          "선착순 식사 지원은 아쉽게 마감되었으나, 당신의 놀라운 집념과 탐구열에 감동했습니다.<br><br>" +
+          "<b style='color:var(--gold); font-size:15px;'>🎉 [특별 혜택] 편의점 참가 선물 업그레이드!</b><br><br>" +
+          "<b style='color:var(--accent); font-size:14px;'>5개 모든 게임을 클리어(완주)</b>하시면,<br>" +
+          "기존 참가 선물을 <b>[업그레이드된 특급 편의점 교환쿠폰]</b>으로 상향 지급해 드립니다! 🥪☕<br><br>" +
+          "<span style='font-size:11.5px; color:var(--ice); opacity:0.85;'>※ 전 종목 통틀어 1인 1회 한정 적용 (중복 지급 불가)</span>",
+          true
+        );
+      })
+      .catch(function(err){
+        sendLog("이스터에그_시도", { detail: "호랑이 10마리 올킬 달성 (호랑이 굴 탈출왕)" });
+        if(isChampion){
           showEasterEggModal(
-            icon,
-            "🎉 " + rewardTitle + " 당첨! 🎉",
-            "축하합니다! 👏<br><br>" +
-            "두더지와 토끼는 거들떠도 안 보고, 호랑이만 모조리 때려잡으셨군요?! 🐯💥<br><br>" +
-            "<b style='color:var(--gold); font-size:15px;'>🐯💥 [호랑이 굴 탈출왕] 등극!</b><br><br>" +
-            "단 하나의 실수도 없이 <b>호랑이 10마리를 완벽히 올킬</b>한 금융본부 최고의 맹수 사냥꾼!<br>" +
-            "체력 소모가 극심했을 당신을 위해 든든한 밥상을 바칩니다! 🍖🍽️<br><br>" +
-            "<b style='color:var(--accent); font-size:16px;'>[두더지잡기 " + order + "번째 당첨] " + rewardTitle + " 확정!</b><br><br>" +
-            "<span style='font-size:12px; color:var(--ice);'>※ 운영진 확인 후 개별 안내 예정입니다.</span>",
-            true
-          );
-        } else if(data && data.result === "already"){
-          showEasterEggModal(
-            "🎉",
-            "이미 당첨된 플레이어입니다!",
-            "이미 <b style='color:var(--gold);'>" + (data.game || "다른 종목") + "</b>에서 <b style='color:var(--accent);'>" + (data.reward || "식사 지원") + "</b>에 당첨 등록되었습니다!<br><br>더 많은 팀원들의 참여를 위해 1인 1회만 지급됩니다 🍽️",
-            true
-          );
-        } else if(data && data.result === "closed"){
-          showEasterEggModal(
-            "⏱️",
-            "아쉽습니다! 선착순 마감",
-            "호랑이 10마리 올킬로 <b>[호랑이 굴 탈출왕]</b>을 달성하셨으나,<br><b style='color:var(--danger);'>두더지잡기 식사 지원(선착순 2명)이 이미 마감</b>되었습니다 😢<br><br>다른 종목의 숨겨진 이스터 에그에 도전해 보세요!",
+            "👑",
+            "👑 위대한 [호랑이 굴 탈출왕]의 귀환!",
+            "이미 전설을 쓰셨던 위대한 <b>[호랑이 굴 탈출왕]</b> 님이시군요! 👏<br><br>" +
+            "명예의 전당에 오르고도 몸이 기억하는 그 피지컬은 여전하십니다.<br>" +
+            "호랑이 10마리를 완벽히 소탕했던 당신의 전설적인 사냥을 다시 한번 인정합니다! 🐯💥",
             true
           );
         } else {
           showEasterEggModal(
-            "🐯🍽️",
-            "🎉 식사 지원 이벤트 당첨! 🎉",
-            "축하합니다! 👏<br><br>호랑이 10마리를 모두 소탕한 <b>[호랑이 굴 탈출왕]</b>!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
+            "🕵️‍♂️",
+            "🎁 [히든 보너스] 집념의 탐색꾼 발견!",
+            "이벤트 종료 알림에도 끝까지 비밀을 탐구하는 당신은 진정한 탐색꾼! 🕵️‍♂️✨<br><br>" +
+            "선착순 식사 지원은 아쉽게 마감되었으나, 당신의 놀라운 집념과 탐구열에 감동했습니다.<br><br>" +
+            "<b style='color:var(--gold); font-size:15px;'>🎉 [특별 혜택] 편의점 참가 선물 업그레이드!</b><br><br>" +
+            "<b style='color:var(--accent); font-size:14px;'>5개 모든 게임을 클리어(완주)</b>하시면,<br>" +
+            "기존 참가 선물을 <b>[업그레이드된 특급 편의점 교환쿠폰]</b>으로 상향 지급해 드립니다! 🥪☕<br><br>" +
+            "<span style='font-size:11.5px; color:var(--ice); opacity:0.85;'>※ 전 종목 통틀어 1인 1회 한정 적용 (중복 지급 불가)</span>",
             true
           );
         }
-      })
-      .catch(function(err){
-        sendLog("이스터에그_식사", { detail: "호랑이 10마리 올킬 달성 (호랑이 굴 탈출왕)" });
-        showEasterEggModal(
-          "🐯🍽️",
-          "🎉 식사 지원 이벤트 당첨! 🎉",
-          "축하합니다! 👏<br><br>호랑이 10마리를 모두 소탕한 <b>[호랑이 굴 탈출왕]</b>!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
-          true
-        );
       });
   }
 
@@ -1180,8 +1186,7 @@
       detail: `잡은수: ${hits}마리, 최대콤보: ${maxCombo}, 호랑이: ${tigersHit}/${TIGER_COUNT}, 오타격: ${otherHitCount}`
     });
 
-    // 🚀 [핵심 이스터에그 판정]: 
-    // 두더지/토끼를 단 1회도 건드리지 않고(otherHitCount === 0), 호랑이 10마리를 전부 잡은 경우(tigersHit >= TIGER_COUNT)
+    // 🚀 [핵심 이스터에그 판정]: 오직 호랑이 10마리만 잡고 다른 동물 타격 0회
     if(otherHitCount === 0 && tigersHit >= TIGER_COUNT){
       triggerEasterEgg();
     } else {
