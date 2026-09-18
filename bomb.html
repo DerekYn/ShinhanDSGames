@@ -611,7 +611,7 @@
 <!-- 🎁 이스터에그: 스마일 5연타 치트키 (선착순 2명) 모달 -->
 <div id="easterEggOverlay">
   <div class="modal" style="border: 2px solid var(--gold); box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4);">
-    <div id="eeIcon" style="font-size: 46px; margin-bottom: 8px;">💣🍽️</div>
+    <div id="eeIcon" style="font-size: 46px; margin-bottom: 8px;">🙂💣</div>
     <h2 id="eeTitle" style="color: var(--gold); font-size: 20px; margin-bottom: 10px;">식사 지원 이벤트 당첨!</h2>
     <p id="eeBody" style="color: var(--paper); font-size: 13.5px; line-height: 1.7; margin-bottom: 20px;"></p>
     <button type="button" class="main" id="eeCloseBtn" style="background: linear-gradient(135deg, #FFD700, #F59E0B); color: #0B1F3A; font-weight: 800; width: 100%; border: none; font-size: 15px; padding: 11px;">확인</button>
@@ -1144,7 +1144,7 @@
 
   // 🎁 이스터에그 모달 제어 함수
   function showEasterEggModal(icon, title, html, showClose){
-    eeIcon.textContent = icon || "💣🍽️";
+    eeIcon.textContent = icon || "🙂💣";
     eeTitle.innerHTML = title;
     eeBody.innerHTML = html;
     eeCloseBtn.style.display = showClose ? 'block' : 'none';
@@ -1184,7 +1184,7 @@
       false
     );
 
-    var targetUrl = GOOGLE_WEBHOOK_URL + "?action=easterEgg&game=" + encodeURIComponent(GAME_NAME) + "&team=" + encodeURIComponent(currentTeam) + "&sabun=" + encodeURIComponent(currentSabun) + "&detail=" + encodeURIComponent("스마일 5연타 달성 (클래식 치트키)");
+    var targetUrl = GOOGLE_WEBHOOK_URL + "?action=easterEgg&game=" + encodeURIComponent(GAME_NAME) + "&team=" + encodeURIComponent(currentTeam) + "&sabun=" + encodeURIComponent(currentSabun) + "&detail=" + encodeURIComponent("스마일 5연타 달성 (스마일 볼따구 폭행범)");
 
     fetch(targetUrl, { method: "GET", redirect: "follow" })
       .then(function(res){ return res.json(); })
@@ -1192,12 +1192,18 @@
         if(data && data.result === "win"){
           var order = data.order || 1; // 1 or 2
           var rewardTitle = data.reward || (order === 1 ? "상무님 식사비 지원" : "본부장님 식사권 지원");
-          var icon = (order === 1) ? "🍽️" : "💣🍽️";
+          var icon = (order === 1) ? "🙂🍽️" : "🙂🐯";
 
           showEasterEggModal(
             icon,
             "🎉 " + rewardTitle + " 당첨! 🎉",
-            "축하합니다! 👏<br><br>스마일 치트키(5연타)를 찾아낸 지뢰찾기 마스터!<br><b style='color:var(--gold); font-size:16px;'>[지뢰찾기 " + order + "번째 당첨] " + rewardTitle + " 확정!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 운영진 확인 후 개별 안내 예정입니다.</span>",
+            "축하합니다! 👏<br><br>" +
+            "지뢰밭에서 지뢰는 안 찾고, 스마일 볼따구만 5번 꼬집으셨군요?! 🙂💣<br><br>" +
+            "<b style='color:var(--gold); font-size:15px;'>🙂💣 [스마일 볼따구 폭행범] 등극!</b><br><br>" +
+            "폭탄이 터지든 말든 태평하게 웃는 얼굴만 두들긴 냉혈한 포커페이스의 달인!<br>" +
+            "'웃는 얼굴에 침 못 뱉고 복 온다'더니 진짜로 특급 식사권 복이 굴러들어왔습니다! 🍽️<br><br>" +
+            "<b style='color:var(--accent); font-size:16px;'>[지뢰찾기 " + order + "번째 당첨] " + rewardTitle + " 확정!</b><br><br>" +
+            "<span style='font-size:12px; color:var(--ice);'>※ 운영진 확인 후 개별 안내 예정입니다.</span>",
             true
           );
         } else if(data && data.result === "already"){
@@ -1211,24 +1217,24 @@
           showEasterEggModal(
             "⏱️",
             "아쉽습니다! 선착순 마감",
-            "지뢰찾기 치트키(스마일 5연타)를 성공하셨으나,<br><b style='color:var(--danger);'>지뢰찾기 식사 지원(선착순 2명)이 이미 마감</b>되었습니다 😢<br><br>다른 종목의 숨겨진 이스터 에그에 도전해 보세요!",
+            "스마일 볼따구를 꼬집으며 <b>[스마일 볼따구 폭행범]</b>을 달성하셨으나,<br><b style='color:var(--danger);'>지뢰찾기 식사 지원(선착순 2명)이 이미 마감</b>되었습니다 😢<br><br>다른 종목의 숨겨진 이스터 에그에 도전해 보세요!",
             true
           );
         } else {
           showEasterEggModal(
-            "💣🍽️",
+            "🙂💣",
             "🎉 식사 지원 이벤트 당첨! 🎉",
-            "축하합니다! 👏<br><br>스마일 치트키(5연타)를 찾아낸 지뢰찾기 마스터!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
+            "축하합니다! 👏<br><br>스마일 볼따구를 꼬집어 이스터에그를 찾아낸 <b>[스마일 볼따구 폭행범]</b>!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
             true
           );
         }
       })
       .catch(function(err){
-        logEvent("이스터에그_식사", { detail: "지뢰찾기 스마일 5연타 달성" });
+        logEvent("이스터에그_식사", { detail: "지뢰찾기 스마일 5연타 달성 (스마일 볼따구 폭행범)" });
         showEasterEggModal(
-          "💣🍽️",
+          "🙂💣",
           "🎉 식사 지원 이벤트 당첨! 🎉",
-          "축하합니다! 👏<br><br>스마일 치트키(5연타)를 찾아낸 지뢰찾기 마스터!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
+          "축하합니다! 👏<br><br>스마일 볼따구를 꼬집어 이스터에그를 찾아낸 <b>[스마일 볼따구 폭행범]</b>!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
           true
         );
       });
