@@ -864,7 +864,7 @@
     ruleDesc.textContent = meta.desc;
     ruleType.textContent = meta.badge;
 
-    // 🎁 남은 히든 티켓 표출 갱신 (기본값 2장 중 남은 수량)
+    // 🎁 남은 히든 티켓 표출 갱신 (구글 시트 연동)
     var remMap = cachedData.remainingTickets || {};
     var remCount = remMap[currentGame] !== undefined ? remMap[currentGame] : 2;
     if (ticketCountBadge) {
