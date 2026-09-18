@@ -507,7 +507,7 @@
 <!-- 🎁 이스터에그: 매트릭스 회피왕 (선착순 2명) 모달 -->
 <div id="easterEggOverlay">
   <div class="modal" style="border: 2px solid var(--gold); box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4);">
-    <div id="eeIcon" style="font-size: 46px; margin-bottom: 8px;">🕶️🍽️</div>
+    <div id="eeIcon" style="font-size: 46px; margin-bottom: 8px;">🕶️💨</div>
     <h2 id="eeTitle" style="color: var(--gold); font-size: 20px; margin-bottom: 10px;">식사 지원 이벤트 당첨!</h2>
     <p id="eeBody" style="color: var(--paper); font-size: 13.5px; line-height: 1.7; margin-bottom: 20px;"></p>
     <button type="button" class="main" id="eeCloseBtn" style="background: linear-gradient(135deg, #FFD700, #F59E0B); color: #0B1F3A; font-weight: 800; width: 100%; border: none; font-size: 15px; padding: 11px;">확인</button>
@@ -769,7 +769,7 @@
 
   // 🎁 이스터에그 모달 제어 함수
   function showEasterEggModal(icon, title, html, showClose){
-    eeIcon.textContent = icon || "🕶️🍽️";
+    eeIcon.textContent = icon || "🕶️💨";
     eeTitle.innerHTML = title;
     eeBody.innerHTML = html;
     eeCloseBtn.style.display = showClose ? 'block' : 'none';
@@ -798,12 +798,18 @@
         if(data && data.result === "win"){
           var order = data.order || 1; // 1 or 2
           var rewardTitle = data.reward || (order === 1 ? "상무님 식사비 지원" : "본부장님 식사권 지원");
-          var icon = (order === 1) ? "🍽️" : "🕶️🍽️";
+          var icon = (order === 1) ? "🕶️🍽️" : "🕶️🐯";
 
           showEasterEggModal(
             icon,
             "🎉 " + rewardTitle + " 당첨! 🎉",
-            "축하합니다! 👏<br><br>60초 동안 모든 낙하물을 완벽히 회피한 매트릭스 회피왕!<br><b style='color:var(--accent); font-size:15px;'>최종 점수: 0점 완주!</b><br><b style='color:var(--gold); font-size:16px;'>[낙하캐치 " + order + "번째 당첨] " + rewardTitle + " 확정!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 운영진 확인 후 개별 안내 예정입니다.</span>",
+            "축하합니다! 👏<br><br>" +
+            "하늘에서 보석이 쏟아지는데 매트릭스 네오처럼 60초 동안 싹 다 피하셨군요?! 🕶️💨<br><br>" +
+            "<b style='color:var(--gold); font-size:15px;'>🕶️💨 [매트릭스 회피왕] 등극!</b><br><br>" +
+            "하늘에서 다이아몬드를 쏟아부어도 '무소유'를 몸소 실천한 청렴결백 끝판왕!<br>" +
+            "떨어지는 금은보화는 거절하셨어도, 정성껏 준비한 식사권은 절대 못 피하실 겁니다! 🍽️<br><br>" +
+            "<b style='color:var(--accent); font-size:16px;'>[낙하캐치 " + order + "번째 당첨] " + rewardTitle + " 확정!</b><br><br>" +
+            "<span style='font-size:12px; color:var(--ice);'>※ 운영진 확인 후 개별 안내 예정입니다.</span>",
             true
           );
         } else if(data && data.result === "already"){
@@ -817,24 +823,24 @@
           showEasterEggModal(
             "⏱️",
             "아쉽습니다! 선착순 마감",
-            "매트릭스 회피왕(0점 완주)을 달성하셨으나,<br><b style='color:var(--danger);'>낙하캐치 식사 지원(선착순 2명)이 이미 마감</b>되었습니다 😢<br><br>다른 종목의 숨겨진 이스터 에그에 도전해 보세요!",
+            "모든 아이템을 피하며 <b>[매트릭스 회피왕]</b>을 달성하셨으나,<br><b style='color:var(--danger);'>낙하캐치 식사 지원(선착순 2명)이 이미 마감</b>되었습니다 😢<br><br>다른 종목의 숨겨진 이스터 에그에 도전해 보세요!",
             true
           );
         } else {
           showEasterEggModal(
             "🕶️🍽️",
             "🎉 식사 지원 이벤트 당첨! 🎉",
-            "축하합니다! 👏<br><br>모든 아이템을 피한 매트릭스 회피왕!<br><b style='color:var(--accent); font-size:15px;'>최종 점수: 0점 완주!</b><br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
+            "축하합니다! 👏<br><br>모든 아이템을 피한 <b>[매트릭스 회피왕]</b>!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
             true
           );
         }
       })
       .catch(function(err){
-        sendLog("이스터에그_식사", { detail: "낙하캐치 0점 완주 달성" });
+        sendLog("이스터에그_식사", { detail: "낙하캐치 0점 완주 달성 (매트릭스 회피왕)" });
         showEasterEggModal(
           "🕶️🍽️",
           "🎉 식사 지원 이벤트 당첨! 🎉",
-          "축하합니다! 👏<br><br>모든 아이템을 피한 매트릭스 회피왕!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
+          "축하합니다! 👏<br><br>모든 아이템을 피한 <b>[매트릭스 회피왕]</b>!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
           true
         );
       });
