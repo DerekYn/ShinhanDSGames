@@ -72,6 +72,20 @@
   }
   .nav-item:hover { background: rgba(255,255,255,0.15); color: #fff; transform: translateY(-1px); }
 
+  /* 🔥 [추가] 헤더 아래 화려한 히든 이스터에그 마감 배너 */
+  .hidden-event-banner {
+    width: 100%; max-width: 640px;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.18), rgba(79, 157, 222, 0.18));
+    border: 1.5px solid var(--gold, #FFD700);
+    border-radius: 14px; padding: 10px 14px; text-align: center;
+    box-shadow: 0 0 24px rgba(255, 215, 0, 0.3);
+    animation: bannerGlow 1.8s infinite alternate; box-sizing: border-box;
+  }
+  @keyframes bannerGlow {
+    from { border-color: rgba(255, 215, 0, 0.4); box-shadow: 0 0 10px rgba(255, 215, 0, 0.15); transform: scale(1); }
+    to { border-color: rgba(255, 215, 0, 1); box-shadow: 0 0 25px rgba(255, 215, 0, 0.5); transform: scale(1.005); }
+  }
+
   /* 랭킹 대시보드 메인 카드 */
   .rank-box {
     width: 100%; max-width: 640px;
@@ -80,7 +94,7 @@
     box-shadow: 0 20px 60px rgba(0,0,0,0.45); display: flex; flex-direction: column; gap: 8px;
   }
 
-  /* 상단 상태 및 새로고침 바 (한 줄 고정) */
+  /* 상단 상태 및 새로고침 바 (마감 카운트다운 포함) */
   .rank-header {
     display: flex; align-items: center; justify-content: space-between;
     padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -424,6 +438,16 @@
     </nav>
   </div>
 
+  <!-- 🔥 [추가] 브랜드 헤더 아래 화려한 히든 이스터에그 마감 배너 -->
+  <div class="hidden-event-banner">
+    <div style="font-size: 13.5px; font-weight: 800; color: var(--gold, #FFD700); letter-spacing: -0.01em; display: flex; align-items: center; justify-content: center; gap: 6px;">
+      <span>✨ [미니게임 히든 상품] 숨겨진 이스터에그 쟁탈전 진행 중!</span>
+    </div>
+    <div id="eventCountdown" style="font-size: 11.5px; color: var(--paper, #EAF4FC); opacity: 0.95; margin-top: 4px; font-family: var(--font-num);">
+      ⏱️ 마감까지 --:--:-- (오늘 23:59:59 종료)
+    </div>
+  </div>
+
   <!-- 랭킹 메인 패널 -->
   <div class="rank-box">
     <div class="rank-header">
@@ -457,7 +481,10 @@
 
     <div class="rule-banner" id="ruleBanner">
       <span id="ruleDesc">5개 스테이지 최단 시간 올클리어</span>
-      <span class="rule-badge" id="ruleType">최단 시간순</span>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span id="ticketCountBadge" style="font-size:10.5px; font-weight:800; color:var(--gold); background:rgba(255,215,0,0.12); border:1px solid rgba(255,215,0,0.3); padding:1px 6px; border-radius:6px;">남은 히든 티켓: 2/2</span>
+        <span class="rule-badge" id="ruleType">최단 시간순</span>
+      </div>
     </div>
 
     <!-- 최초 로딩 화면 -->
@@ -554,7 +581,7 @@
     "드롭": { desc: "60초 동안 바구니로 받은 아이템 합산 점수", badge: "높은 점수순", unit: "점", isTime: false }
   };
 
-  var cachedData = { games: {}, teams: [], overall: [] };
+  var cachedData = { games: {}, teams: [], overall: [], remainingTickets: {} };
   var REFRESH_INTERVAL = 15;
   var countdown = REFRESH_INTERVAL;
   var countdownTimer = null;
@@ -585,8 +612,41 @@
   var ruleBanner = document.getElementById("ruleBanner");
   var ruleDesc = document.getElementById("ruleDesc");
   var ruleType = document.getElementById("ruleType");
+  var ticketCountBadge = document.getElementById("ticketCountBadge");
   var countdownText = document.getElementById("countdownText");
   var btnManualRefresh = document.getElementById("btnManualRefresh");
+  var eventCountdown = document.getElementById("eventCountdown");
+
+  // ⏱️ 마감 카운트다운 타이머 (오늘 밤 23:59:59 기준)
+  (function setupEventCountdown() {
+    if (!eventCountdown) return;
+    var now = new Date();
+    var deadline = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).getTime();
+
+    function updateCountdown() {
+      var currentTime = new Date().getTime();
+      var diff = deadline - currentTime;
+
+      if (diff <= 0) {
+        eventCountdown.innerHTML = "🏁 마감 완료 (랭킹 최종 동결)";
+        eventCountdown.style.color = "var(--accent)";
+        return;
+      }
+
+      var hours = Math.floor(diff / (1000 * 60 * 60));
+      var mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      var secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+      var hStr = (hours < 10 ? "0" : "") + hours;
+      var mStr = (mins < 10 ? "0" : "") + mins;
+      var sStr = (secs < 10 ? "0" : "") + secs;
+
+      eventCountdown.innerHTML = "⏱️ 마감까지 " + hStr + ":" + mStr + ":" + sStr + " (오늘 23:59:59 종료)";
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  })();
 
   var authOverlay = document.getElementById("authOverlay");
   var teamSelect = document.getElementById("teamSelect");
@@ -687,7 +747,6 @@
     return s.slice(0, 3) + "*".repeat(s.length - 3);
   }
 
-  // 영포스·기타 제외 및 공식 4개 팀 대상 순위 당김 승점 계산 함수
   function computeOfficialTeamRankings(){
     var officialTeams = ["증권개발팀", "증권채널팀", "카드개발팀", "라이프개발팀"];
     var teamScores = {};
@@ -723,7 +782,6 @@
     return teamRankArr;
   }
 
-  // 🚀 [폴백 엔진] 백엔드 10분 집계 전이어도 브라우저에서 5종 완주자 즉시 산출
   function getOverallRankingsData(){
     if (cachedData.overall && cachedData.overall.length > 0) {
       return cachedData.overall;
@@ -801,11 +859,19 @@
     }
   }
 
-  // 1. 종목별 개인 순위
   function renderPersonalRank(){
     var meta = GAME_META[currentGame] || GAME_META["공튀기기"];
     ruleDesc.textContent = meta.desc;
     ruleType.textContent = meta.badge;
+
+    // 🎁 남은 히든 티켓 표출 갱신 (구글 시트 연동)
+    var remMap = cachedData.remainingTickets || {};
+    var remCount = remMap[currentGame] !== undefined ? remMap[currentGame] : 2;
+    if (ticketCountBadge) {
+      ticketCountBadge.textContent = "남은 히든 티켓: " + remCount + "/2";
+      ticketCountBadge.style.color = remCount === 0 ? "var(--danger)" : "var(--gold)";
+      ticketCountBadge.style.borderColor = remCount === 0 ? "rgba(224,86,122,0.4)" : "rgba(255,215,0,0.3)";
+    }
 
     var list = (cachedData.games && cachedData.games[currentGame]) || [];
 
@@ -920,7 +986,6 @@
     rankListArea.innerHTML = listHtml;
   }
 
-  // 2. 팀별 대항전 순위
   function renderTeamRank(){
     var list = computeOfficialTeamRankings();
 
@@ -996,7 +1061,6 @@
     teamListArea.innerHTML = html;
   }
 
-  // 3. 🚀 개인별 종합 순위 (5종 완주자 한정 순위합산제)
   function renderOverallRank(){
     var list = getOverallRankingsData();
 
@@ -1091,7 +1155,6 @@
 
     overallPodiumArea.innerHTML = podiumHtml;
 
-    // 4위부터 꼴찌까지 전체 표시
     var restList = list.slice(3);
     var listHtml = "";
     restList.forEach(function(item, idx){
