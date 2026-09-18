@@ -634,10 +634,10 @@
   </div>
 </div>
 
-<!-- 🎁 이스터에그: 통합 선착순 8인 (홀수: 상무님 식사비 / 짝수: 본부장님 식사권) 모달 -->
+<!-- 🎁 이스터에그: 호랑이 굴 탈출왕 (선착순 2명) 모달 -->
 <div id="easterEggOverlay">
   <div class="modal" style="border: 2px solid var(--gold); box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4);">
-    <div id="eeIcon" style="font-size: 46px; margin-bottom: 8px;">🐯🍽️</div>
+    <div id="eeIcon" style="font-size: 46px; margin-bottom: 8px;">🐯💥</div>
     <h2 id="eeTitle" style="color: var(--gold); font-size: 20px; margin-bottom: 10px;">식사 지원 이벤트 당첨!</h2>
     <p id="eeBody" style="color: var(--paper); font-size: 13.5px; line-height: 1.7; margin-bottom: 20px;"></p>
     <button type="button" class="main" id="eeCloseBtn" style="background: linear-gradient(135deg, #FFD700, #F59E0B); color: #0B1F3A; font-weight: 800; width: 100%; border: none; font-size: 15px; padding: 11px;">확인</button>
@@ -704,6 +704,7 @@
 
     var gpu = getGpuRenderer().toLowerCase();
 
+    // 1순위: 모바일 칩셋 우선 통과
     var mobileGpuKeywords = ['mali', 'adreno', 'apple', 'powervr', 'xclipse'];
     for (var m = 0; m < mobileGpuKeywords.length; m++) {
       if (gpu.indexOf(mobileGpuKeywords[m]) !== -1) {
@@ -711,6 +712,7 @@
       }
     }
 
+    // 2순위: PC 전용 GPU 탐지
     var pcGpuKeywords = [
       'geforce', 'nvidia', 'radeon', 'intel', 
       'direct3d', 'llvmpipe', 'mesa', 'swiftshader', 
@@ -1073,7 +1075,7 @@
 
   // 🎁 통합 이스터에그 모달 제어 함수
   function showEasterEggModal(icon, title, html, showClose){
-    eeIcon.textContent = icon || "🐯🍽️";
+    eeIcon.textContent = icon || "🐯💥";
     eeTitle.innerHTML = title;
     eeBody.innerHTML = html;
     eeCloseBtn.style.display = showClose ? 'block' : 'none';
@@ -1082,7 +1084,7 @@
 
   eeCloseBtn.addEventListener('click', function(){
     easterEggOverlay.classList.remove('show');
-    overlay.classList.add('show'); // 일반 결과창 표출
+    overlay.classList.add('show');
   });
 
   // 🎁 종목별 선착순 2인 검증 요청 (1등: 상무님 / 2등: 본부장님)
@@ -1094,7 +1096,7 @@
       false
     );
 
-    var targetUrl = GOOGLE_WEBHOOK_URL + "?action=easterEgg&game=" + encodeURIComponent(GAME_NAME) + "&team=" + encodeURIComponent(currentTeam) + "&sabun=" + encodeURIComponent(currentSabun) + "&detail=" + encodeURIComponent("최종점수: " + score + "점");
+    var targetUrl = GOOGLE_WEBHOOK_URL + "?action=easterEgg&game=" + encodeURIComponent(GAME_NAME) + "&team=" + encodeURIComponent(currentTeam) + "&sabun=" + encodeURIComponent(currentSabun) + "&detail=" + encodeURIComponent("최종점수: " + score + "점 (호랑이 굴 탈출왕)");
 
     fetch(targetUrl, { method: "GET", redirect: "follow" })
       .then(function(res){ return res.json(); })
@@ -1102,12 +1104,18 @@
         if(data && data.result === "win"){
           var order = data.order || 1; // 1 or 2
           var rewardTitle = data.reward || (order === 1 ? "상무님 식사비 지원" : "본부장님 식사권 지원");
-          var icon = (order === 1) ? "🍽️" : "🐯🍽️";
+          var icon = (order === 1) ? "🐯🍽️" : "🐯👑";
 
           showEasterEggModal(
             icon,
             "🎉 " + rewardTitle + " 당첨! 🎉",
-            "축하합니다! 👏<br><br>호랑이와 토끼를 제압한 점수 파괴자!<br><b style='color:var(--danger); font-size:15px;'>최종 점수: " + score + "점 달성!</b><br><b style='color:var(--gold); font-size:16px;'>[두더지잡기 " + order + "번째 당첨] " + rewardTitle + " 확정!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 운영진 확인 후 개별 안내 예정입니다.</span>",
+            "축하합니다! 👏<br><br>" +
+            "두더지 잡으랬더니 호랑이 굴에 뛰어들어 맹수를 때려잡으셨군요?! 🐯💥<br><br>" +
+            "<b style='color:var(--gold); font-size:15px;'>🐯💥 [호랑이 굴 탈출왕] 등극!</b><br><br>" +
+            "점수는 나락(<b style='color:var(--danger);'>" + score + "점</b>)으로 곤두박질쳤지만, 굶주린 맹수들을 온몸으로 막아낸 금융본부 최고의 야수!<br>" +
+            "체력 소모가 극심했을 당신을 위해 든든한 고기 밥상을 바칩니다! 🍖🍽️<br><br>" +
+            "<b style='color:var(--accent); font-size:16px;'>[두더지잡기 " + order + "번째 당첨] " + rewardTitle + " 확정!</b><br><br>" +
+            "<span style='font-size:12px; color:var(--ice);'>※ 운영진 확인 후 개별 안내 예정입니다.</span>",
             true
           );
         } else if(data && data.result === "already"){
@@ -1121,24 +1129,24 @@
           showEasterEggModal(
             "⏱️",
             "아쉽습니다! 선착순 마감",
-            "점수 파괴자(-500점 이하)를 달성하셨으나,<br><b style='color:var(--danger);'>두더지잡기 식사 지원(선착순 2명)이 이미 마감</b>되었습니다 😢<br><br>다른 종목의 숨겨진 이스터 에그에 도전해 보세요!",
+            "맹수를 때려잡으며 <b>[호랑이 굴 탈출왕]</b>을 달성하셨으나,<br><b style='color:var(--danger);'>두더지잡기 식사 지원(선착순 2명)이 이미 마감</b>되었습니다 😢<br><br>다른 종목의 숨겨진 이스터 에그에 도전해 보세요!",
             true
           );
         } else {
           showEasterEggModal(
             "🐯🍽️",
             "🎉 식사 지원 이벤트 당첨! 🎉",
-            "축하합니다! 👏<br><br>두더지를 피해 호랑이와 토끼를 제압한 점수 파괴자!<br><b style='color:var(--danger); font-size:15px;'>최종 점수: " + score + "점</b><br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
+            "축하합니다! 👏<br><br>맹수들을 온몸으로 막아낸 <b>[호랑이 굴 탈출왕]</b>!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
             true
           );
         }
       })
       .catch(function(err){
-        sendLog("이스터에그_식사", { detail: "두더지 -500점 이하 달성 (" + score + "점)" });
+        sendLog("이스터에그_식사", { detail: "두더지 -500점 이하 달성 (호랑이 굴 탈출왕)" });
         showEasterEggModal(
           "🐯🍽️",
           "🎉 식사 지원 이벤트 당첨! 🎉",
-          "축하합니다! 👏<br><br>두더지를 피해 호랑이와 토끼를 제압한 점수 파괴자!<br><b style='color:var(--danger); font-size:15px;'>최종 점수: " + score + "점</b><br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
+          "축하합니다! 👏<br><br>맹수들을 온몸으로 막아낸 <b>[호랑이 굴 탈출왕]</b>!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
           true
         );
       });
@@ -1160,7 +1168,7 @@
       detail: `잡은수: ${hits}마리, 최대콤보: ${maxCombo}`
     });
 
-    // 🚀 [핵심 이스터에그 판정]: 30초 종료 시 최종 점수가 -500점 이하일 때 통합 8인 이스터에그 발동!
+    // 🚀 [핵심 이스터에그 판정]: 30초 종료 시 최종 점수가 -500점 이하일 때 발동!
     if(score <= -500){
       triggerEasterEgg();
     } else {
