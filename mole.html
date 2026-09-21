@@ -268,7 +268,6 @@
     touch-action: none;
   }
 
-  /* 팝업 텍스트가 구멍 밖으로 시원하게 올라오도록 허용하는 래퍼 */
   .hole-wrap{
     position: relative;
     width: 100%;
@@ -520,7 +519,7 @@
       <b>'불미스러운 초고득점 사태'</b>를 미연에 방지하고자<br>
       본 게임은 <b style="color: var(--sky);">모바일 스마트폰</b>에서만 진행됩니다.<br><br>
       F12는 잠시 봉인해 주세요! 🙂<br>
-	  콘솔창 대신 <b>순수 피지컬과 터치</b>로 승부해 주세요!<br>
+      콘솔창 대신 <b>순수 피지컬과 터치</b>로 승부해 주세요!<br>
       <span style="font-size: 12px; color: var(--accent); display: inline-block; margin-top: 10px;">
         👉 사내 메신저 링크를 스마트폰으로 열어 접속해 주세요.
       </span>
@@ -634,7 +633,7 @@
   </div>
 </div>
 
-<!-- 🎁 이스터에그: 호랑이 굴 탈출왕 (선착순 2명) 모달 -->
+<!-- 🎁 이스터에그: 호랑이 굴 탈출왕 모달 -->
 <div id="easterEggOverlay">
   <div class="modal" style="border: 2px solid var(--gold); box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4);">
     <div id="eeIcon" style="font-size: 46px; margin-bottom: 8px;">🐯💥</div>
@@ -704,7 +703,6 @@
 
     var gpu = getGpuRenderer().toLowerCase();
 
-    // 1순위: 모바일 칩셋 우선 통과
     var mobileGpuKeywords = ['mali', 'adreno', 'apple', 'powervr', 'xclipse'];
     for (var m = 0; m < mobileGpuKeywords.length; m++) {
       if (gpu.indexOf(mobileGpuKeywords[m]) !== -1) {
@@ -712,7 +710,6 @@
       }
     }
 
-    // 2순위: PC 전용 GPU 탐지
     var pcGpuKeywords = [
       'geforce', 'nvidia', 'radeon', 'intel', 
       'direct3d', 'llvmpipe', 'mesa', 'swiftshader', 
@@ -763,9 +760,8 @@
   var currentSabun = "";
   var gameCount = 0;
 
-  // 🎁 [이스터에그: 호랑이 올킬 판정 변수]
-  var tigersHit = 0;       // 잡은 호랑이 수 (10마리 전부 잡아야 함)
-  var otherHitCount = 0;   // 두더지, 대왕두더지, 토끼를 때린 횟수 (0이어야 함)
+  // 🎁 [이스터에그 변수]
+  var tigersHit = 0; // 잡은 호랑이 수 (3마리 달성 시 즉시 이스터에그)
 
   var board = document.getElementById("board");
   var boardWrap = document.getElementById("board-wrap");
@@ -820,7 +816,7 @@
     }).catch(function(err){ console.warn("로그 실패:", err); });
   }
 
-  // 9개 구멍 생성 (래퍼 구조를 적용하여 글자 잘림 방지)
+  // 9개 구멍 생성
   for(var i = 0; i < 9; i++){
     (function(idx){
       var wrap = document.createElement("div");
@@ -884,7 +880,6 @@
         arr.push(400 + Math.random() * 19400);
       }
       for(var j = 0; j < feverCount; j++){
-        // 호랑이는 28.5초 이내에 확실히 나와서 칠 수 있도록 보정
         var maxFever = isTiger ? 8500 : 9200;
         arr.push(20000 + Math.random() * maxFever);
       }
@@ -925,394 +920,277 @@
     }
 
     var index = availableHoles[Math.floor(Math.random() * availableHoles.length)];
-    var animal = holes[index].querySelector("." + type);
-    if(!animal) return;
+    var hole = holes[index];
+    var animal = hole.querySelector("." + type);
 
-    if(animal._hideTimer) clearTimeout(animal._hideTimer);
-    if(animal._graceTimer) clearTimeout(animal._graceTimer);
-
+    hole._hittableAnimal = animal;
+    hole._animalType = type;
+    hole._spawnTime = performance.now();
     animal.classList.add("active");
-    holes[index]._hittableAnimal = animal;
-    holes[index]._animalType = type;
-    holes[index]._spawnTime = performance.now();
 
-    var stayTime = (time <= 10) ? 520 : 680;
-    if(type === "king-mole") stayTime = (time <= 10) ? 460 : 540;
-
+    var duration = (type === "king-mole") ? 900 : (type === "tiger" ? 1100 : 1000);
     animal._hideTimer = setTimeout(function(){
       animal.classList.remove("active");
       animal._graceTimer = setTimeout(function(){
-        if(holes[index]._hittableAnimal === animal){
-          holes[index]._hittableAnimal = null;
-          holes[index]._animalType = null;
-          holes[index]._spawnTime = 0;
-        }
-      }, 140);
-    }, stayTime);
+        hole._hittableAnimal = null;
+        hole._animalType = null;
+      }, 100);
+    }, duration);
   }
 
-  function pop(hole, text, kind){
-    var el = document.createElement("div");
-    el.className = "pop " + (kind || "");
-    el.textContent = text;
-    var targetParent = hole.parentElement || hole;
-    targetParent.appendChild(el);
-    setTimeout(function(){ el.remove(); }, 700);
+  function showPop(hole, text, popClass){
+    var pop = document.createElement("div");
+    pop.className = "pop " + (popClass || "");
+    pop.textContent = text;
+    var wrap = hole.parentElement;
+    wrap.appendChild(pop);
+    setTimeout(function(){ pop.remove(); }, 700);
   }
 
-  function hit(index){
+  // 🎯 피격 판정 및 이스터에그 즉시 트리거 로직
+  function hit(idx){
     if(!running) return;
+    var hole = holes[idx];
+    var type = hole._animalType;
+    var animal = hole._hittableAnimal;
 
-    var animal = holes[index]._hittableAnimal;
-    if(!animal) return;
+    if(!type || !animal || !animal.classList.contains("active")) return;
 
-    var type = holes[index]._animalType;
-    var now = performance.now();
-    var reactionMs = holes[index]._spawnTime ? (now - holes[index]._spawnTime) : 999;
-
-    holes[index]._hittableAnimal = null;
-    holes[index]._animalType = null;
-    holes[index]._spawnTime = 0;
-
-    if(animal._hideTimer) clearTimeout(animal._hideTimer);
-    if(animal._graceTimer) clearTimeout(animal._graceTimer);
-
+    clearTimeout(animal._hideTimer);
+    clearTimeout(animal._graceTimer);
     animal.classList.remove("active");
+    hole._hittableAnimal = null;
+    hole._animalType = null;
 
-    var isFever = (time <= 10);
-    var multiplier = isFever ? 1.3 : 1.0;
+    var reactionTime = (performance.now() - hole._spawnTime) / 1000;
+    var isFever = time <= 10;
+    var mult = isFever ? 1.3 : 1;
 
-    var speedBonus = 0;
-    var judgeText = "";
-    var judgeKind = "";
+    if(type === "tiger"){
+      tigersHit++;
+      combo = Math.max(0, combo - 3);
+      var pts = Math.round(-50 * mult);
+      score = Math.max(0, score + pts);
+      showPop(hole, "BAD -50", "bad");
 
-    if(type === "king-mole" || type === "mole"){
-      if(reactionMs <= 400){
-        speedBonus = 30;
-        judgeText = "PERFECT!";
-        judgeKind = "perfect";
-      } else if(reactionMs <= 550){
-        speedBonus = 15;
-        judgeText = "GREAT";
-        judgeKind = "great";
+      // 🐯 [핵심 변경] 호랑이 3마리 포획 즉시 이스터에그 발동!
+      if(tigersHit >= 3){
+        triggerEasterEgg();
+        return;
       }
-    }
-
-    if(type === "king-mole"){
-      otherHitCount++; // 🚨 두더지 타격 시 이스터에그 실격 처리 카운트
-      hits++; combo++;
-      maxCombo = Math.max(maxCombo, combo);
-      var basePt = 50 + (combo - 1) * 10 + speedBonus;
-      var finalPt = Math.round(basePt * multiplier);
-      score += finalPt;
-
-      var tag = "+" + finalPt + (judgeText ? " " + judgeText : "👑");
-      pop(holes[index], tag, isFever ? "fever" : (judgeKind || "gold"));
-      if(navigator.vibrate) navigator.vibrate(25);
-
-    } else if(type === "mole"){
-      otherHitCount++; // 🚨 두더지 타격 시 이스터에그 실격 처리 카운트
-      hits++; combo++;
-      maxCombo = Math.max(maxCombo, combo);
-      var basePt = 10 + (combo - 1) * 10 + speedBonus;
-      var finalPt = Math.round(basePt * multiplier);
-      score += finalPt;
-
-      var tag = "+" + finalPt + (judgeText ? " " + judgeText : "");
-      pop(holes[index], tag, isFever ? "fever" : judgeKind);
-      if(navigator.vibrate) navigator.vibrate(15);
-
-    } else if(type === "rabbit"){
-      otherHitCount++; // 🚨 토끼 타격 시 이스터에그 실격 처리 카운트
-      score -= 30;
-      combo = Math.max(0, combo - 3);
-      pop(holes[index], "-30 (콤보-3)", "bad");
-      if(navigator.vibrate) navigator.vibrate(40);
-
-    } else if(type === "tiger"){
-      tigersHit++; // 🎯 호랑이 타격 카운트 증가 (총 10마리 중 1마리 잡음)
-      score -= 50;
-      combo = Math.max(0, combo - 3);
-      pop(holes[index], "-50 (🐯 " + tigersHit + "/" + TIGER_COUNT + ")", "bad");
-      if(navigator.vibrate) navigator.vibrate(60);
-    }
-
-    scoreEl.textContent = score;
-    comboEl.textContent = combo;
-  }
-
-  function updateFeverState(){
-    if(time <= 10 && time > 0){
-      feverBadge.style.display = "inline-block";
-      boardWrap.classList.add("fever-active");
-      timeCard.classList.add("fever");
     } else {
-      feverBadge.style.display = "none";
-      boardWrap.classList.remove("fever-active");
-      timeCard.classList.remove("fever");
+      hits++;
+      combo++;
+      if(combo > maxCombo) maxCombo = combo;
+
+      var basePts = (type === "king-mole") ? 50 : (type === "rabbit" ? -30 : 10);
+      var bonus = 0;
+      var popText = "";
+      var popClass = "";
+
+      if(type === "rabbit"){
+        combo = Math.max(0, combo - 3);
+        popText = "BAD -30";
+        popClass = "bad";
+      } else if(type === "king-mole"){
+        bonus = 20;
+        popText = "KING! +70";
+        popClass = "gold";
+      } else {
+        if(reactionTime <= 0.40){ bonus = 30; popText = "PERFECT! +40"; popClass = "perfect"; }
+        else if(reactionTime <= 0.55){ bonus = 15; popText = "GREAT! +25"; popClass = "great"; }
+        else { popText = "+10"; popClass = "score"; }
+      }
+
+      var added = Math.round((basePts + bonus) * mult);
+      score = Math.max(0, score + added);
+      if(isFever && type !== "rabbit") { popText += " 🔥"; }
+      showPop(hole, popText, popClass);
     }
-  }
 
-  function startGame(){
-    gameCount++;
-    clearInterval(timer);
-    spawnTimers.forEach(function(t){ clearTimeout(t); });
-
-    score = 0; combo = 0; maxCombo = 0; hits = 0; time = GAME_TIME;
-    tigersHit = 0;
-    otherHitCount = 0;
-    running = true;
-
-    timeEl.textContent = time;
     scoreEl.textContent = score;
     comboEl.textContent = combo;
-    updateFeverState();
-
-    overlay.classList.remove("show");
-    easterEggOverlay.classList.remove("show");
-    adPopup.style.display = "none";
-    hide();
-
-    sendLog("시작", { score: 0 });
-
-    timer = setInterval(function(){
-      time--;
-      timeEl.textContent = time;
-      updateFeverState();
-      if(time <= 0) endGame();
-    }, 1000);
-
-    scheduleSpawns();
   }
 
-  // 🎁 통합 이스터에그 모달 제어 함수
-  function showEasterEggModal(icon, title, html, showClose){
-    eeIcon.textContent = icon || "🐯💥";
-    eeTitle.innerHTML = title;
-    eeBody.innerHTML = html;
-    eeCloseBtn.style.display = showClose ? 'block' : 'none';
-    easterEggOverlay.classList.add('show');
-  }
-
-  eeCloseBtn.addEventListener('click', function(){
-    easterEggOverlay.classList.remove('show');
-    overlay.classList.add('show');
-  });
-
-  // 🎁 종목별 선착순 2인 검증 요청 (1등: 상무님 / 2등: 본부장님)
+  // 🎁 이스터에그 즉시 실행 함수
   function triggerEasterEgg(){
-    showEasterEggModal(
-      "⏳",
-      "당첨 확인 중...",
-      "선착순 당첨 여부를 서버와 확인하고 있습니다.<br>잠시만 기다려주세요!",
-      false
-    );
+    stopGame();
 
-    var targetUrl = GOOGLE_WEBHOOK_URL + "?action=easterEgg&game=" + encodeURIComponent(GAME_NAME) + "&team=" + encodeURIComponent(currentTeam) + "&sabun=" + encodeURIComponent(currentSabun) + "&detail=" + encodeURIComponent("호랑이 10마리 올킬 (호랑이 굴 탈출왕)");
+    var url = GOOGLE_WEBHOOK_URL + "?action=easterEggMole&game=" + encodeURIComponent(GAME_NAME) +
+              "&team=" + encodeURIComponent(currentTeam) +
+              "&sabun=" + encodeURIComponent(currentSabun) +
+              "&detail=" + encodeURIComponent("호랑이 3마리 포획 성공 (호랑이 굴 탈출왕)");
 
-    fetch(targetUrl, { method: "GET", redirect: "follow" })
+    fetch(url, { method: "GET", redirect: "follow" })
       .then(function(res){ return res.json(); })
       .then(function(data){
-        if(data && data.result === "win"){
-          var order = data.order || 1; // 1 or 2
-          var rewardTitle = data.reward || (order === 1 ? "상무님 식사비 지원" : "본부장님 식사권 지원");
-          var icon = (order === 1) ? "🐯🍽️" : "🐯👑";
-
-          showEasterEggModal(
-            icon,
-            "🎉 " + rewardTitle + " 당첨! 🎉",
-            "축하합니다! 👏<br><br>" +
-            "두더지와 토끼는 거들떠도 안 보고, 호랑이만 모조리 때려잡으셨군요?! 🐯💥<br><br>" +
-            "<b style='color:var(--gold); font-size:15px;'>🐯💥 [호랑이 굴 탈출왕] 등극!</b><br><br>" +
-            "단 하나의 실수도 없이 <b>호랑이 10마리를 완벽히 올킬</b>한 금융본부 최고의 맹수 사냥꾼!<br>" +
-            "체력 소모가 극심했을 당신을 위해 든든한 밥상을 바칩니다! 🍖🍽️<br><br>" +
-            "<b style='color:var(--accent); font-size:16px;'>[두더지잡기 " + order + "번째 당첨] " + rewardTitle + " 확정!</b><br><br>" +
-            "<span style='font-size:12px; color:var(--ice);'>※ 운영진 확인 후 개별 안내 예정입니다.</span>",
-            true
-          );
-        } else if(data && data.result === "already"){
-          showEasterEggModal(
-            "🎉",
-            "이미 당첨된 플레이어입니다!",
-            "이미 <b style='color:var(--gold);'>" + (data.game || "다른 종목") + "</b>에서 <b style='color:var(--accent);'>" + (data.reward || "식사 지원") + "</b>에 당첨 등록되었습니다!<br><br>더 많은 팀원들의 참여를 위해 1인 1회만 지급됩니다 🍽️",
-            true
-          );
-        } else if(data && data.result === "closed"){
-          showEasterEggModal(
-            "⏱️",
-            "아쉽습니다! 선착순 마감",
-            "호랑이 10마리 올킬로 <b>[호랑이 굴 탈출왕]</b>을 달성하셨으나,<br><b style='color:var(--danger);'>두더지잡기 식사 지원(선착순 2명)이 이미 마감</b>되었습니다 😢<br><br>다른 종목의 숨겨진 이스터 에그에 도전해 보세요!",
-            true
-          );
+        if(data.result === "win"){
+          eeIcon.textContent = "🐯💥";
+          eeTitle.innerHTML = "식사 지원 이벤트 당첨!";
+          eeBody.innerHTML = "<b>[두더지잡기] 이스터에그 달성! (호랑이 굴 탈출왕)</b><br><br>위험천만한 호랑이를 3마리 잡으셨군요! 🐯💥<br>축하합니다! 선착순 내 진입하여 <b>" + data.reward + "</b> 대상자로 선정되셨습니다. 🎉";
+        } else if(data.result === "closed" || data.result === "already"){
+          eeIcon.textContent = "🕵️‍♂️";
+          eeTitle.innerHTML = "🎁 [히든 보너스] 집념의 탐색꾼 발견!";
+          eeBody.innerHTML = "이벤트 종료 알림에도 끝까지 호랑이를 탐구하는 당신은 진정한 탐색꾼! 🕵️‍♂️✨<br><br><b style='color:var(--gold); font-size:15px;'>🎉 [특별 혜택] 편의점 참가 선물 업그레이드!</b><br><br><b style='color:var(--accent); font-size:14px;'>5개 모든 게임을 클리어(완주)</b>하시면,<br>기존 참가 선물을 <b>[업그레이드된 특급 편의점 교환쿠폰]</b>으로 상향 지급해 드립니다! 🥪☕";
         } else {
-          showEasterEggModal(
-            "🐯🍽️",
-            "🎉 식사 지원 이벤트 당첨! 🎉",
-            "축하합니다! 👏<br><br>호랑이 10마리를 모두 소탕한 <b>[호랑이 굴 탈출왕]</b>!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
-            true
-          );
+          eeIcon.textContent = "🐯💥";
+          eeTitle.innerHTML = "호랑이 굴 탈출 성공!";
+          eeBody.innerHTML = "호랑이 3마리를 포획하여 이스터에그 조건에 달성하셨습니다!";
         }
+        easterEggOverlay.classList.add("show");
       })
-      .catch(function(err){
-        sendLog("이스터에그_식사", { detail: "호랑이 10마리 올킬 달성 (호랑이 굴 탈출왕)" });
-        showEasterEggModal(
-          "🐯🍽️",
-          "🎉 식사 지원 이벤트 당첨! 🎉",
-          "축하합니다! 👏<br><br>호랑이 10마리를 모두 소탕한 <b>[호랑이 굴 탈출왕]</b>!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
-          true
-        );
+      .catch(function(){
+        eeIcon.textContent = "🐯💥";
+        eeTitle.innerHTML = "호랑이 3마리 포획 성공!";
+        eeBody.innerHTML = "<b>[두더지잡기] 이스터에그 조건(호랑이 3마리 포획) 달성!</b> 🎉";
+        easterEggOverlay.classList.add("show");
       });
   }
 
-  function endGame(){
+  function start(){
+    if(running) return;
+
+    if(!currentTeam || !currentSabun){
+      authOverlay.classList.add("show");
+      return;
+    }
+
+    gameCount++;
+    score = 0; combo = 0; maxCombo = 0; hits = 0; time = GAME_TIME;
+    tigersHit = 0;
+    running = true;
+
+    scoreEl.textContent = "0";
+    comboEl.textContent = "0";
+    timeEl.textContent = time;
+
+    timeCard.classList.remove("fever");
+    boardWrap.classList.remove("fever-active");
+    feverBadge.style.display = "none";
+    overlay.classList.remove("show");
+
+    hide();
+    scheduleSpawns();
+
+    sendLog("시작");
+
+    clearInterval(timer);
+    timer = setInterval(function(){
+      time--;
+      timeEl.textContent = time;
+
+      if(time <= 10){
+        timeCard.classList.add("fever");
+        boardWrap.classList.add("fever-active");
+        feverBadge.style.display = "inline-block";
+      }
+
+      if(time <= 0){
+        stopGame();
+        gameOver();
+      }
+    }, 1000);
+  }
+
+  function stopGame(){
     running = false;
     clearInterval(timer);
     spawnTimers.forEach(function(t){ clearTimeout(t); });
-    updateFeverState();
     hide();
+  }
 
-    document.getElementById("finalScore").textContent = score;
+  function gameOver(){
+    sendLog("종료", { score: score, detail: "두더지 " + hits + "마리 / 최대 콤보 " + maxCombo });
+
+    document.getElementById("modalTitle").textContent = "게임 종료!";
+    document.getElementById("finalScore").textContent = score + "점";
     document.getElementById("hits").textContent = hits;
     document.getElementById("maxCombo").textContent = maxCombo;
-
-    sendLog("종료", {
-      score: score,
-      detail: `잡은수: ${hits}마리, 최대콤보: ${maxCombo}, 호랑이: ${tigersHit}/${TIGER_COUNT}, 오타격: ${otherHitCount}`
-    });
-
-    // 🚀 [핵심 이스터에그 판정]: 
-    // 두더지/토끼를 단 1회도 건드리지 않고(otherHitCount === 0), 호랑이 10마리를 전부 잡은 경우(tigersHit >= TIGER_COUNT)
-    if(otherHitCount === 0 && tigersHit >= TIGER_COUNT){
-      triggerEasterEgg();
-    } else {
-      overlay.classList.add("show");
-    }
+    overlay.classList.add("show");
   }
 
-  function showNoticePopup(){
-    running = false;
-    clearInterval(timer);
-    spawnTimers.forEach(function(t){ clearTimeout(t); });
-    updateFeverState();
-    adPopup.style.display = "flex";
-  }
+  // 사용자 플레이어 설정 로직
+  function initPlayerInfo(){
+    var savedTeam = localStorage.getItem("sh_mini_team") || "";
+    var savedSabun = localStorage.getItem("sh_mini_sabun") || "";
 
-  adRestartBtn.addEventListener("click", startGame);
-
-  /* ============================================================
-     [사용자 인증 및 모바일 키보드 상쇄 방어 로직]
-     ============================================================ */
-  var authActionLocked = false;
-  function handleAuth(e) {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    if (authActionLocked) return;
-    authActionLocked = true;
-    setTimeout(function(){ authActionLocked = false; }, 400);
-
-    var teamVal = teamSelect.value;
-    var rawSabun = (sabunInput.value || '').replace(/[^0-9]/g, '').trim();
-
-    if (!teamVal) {
-      authError.textContent = "팀을 선택해 주세요.";
-      teamSelect.classList.add('error');
-      teamSelect.focus();
-      return;
-    }
-
-    if (rawSabun.length !== 8) {
-      authError.textContent = "사번은 숫자 8자리여야 합니다. (예: 22091019)";
-      sabunInput.classList.add('error');
-      sabunInput.focus();
-      return;
-    }
-
-    if (document.activeElement) {
-      document.activeElement.blur();
-    }
-
-    try {
-      localStorage.setItem("sh_mini_team", teamVal);
-      localStorage.setItem("sh_mini_sabun", rawSabun);
-    } catch (err) {
-      console.warn("localStorage 저장 실패 (인앱브라우저 제한):", err);
-    }
-
-    currentTeam = teamVal;
-    currentSabun = rawSabun;
-
-    if (playerBadge) {
-      playerBadge.textContent = "플레이어: " + currentTeam + " · " + currentSabun;
+    if(savedTeam && savedSabun){
+      currentTeam = savedTeam;
+      currentSabun = savedSabun;
+      playerBadge.textContent = "👤 " + currentTeam + " (" + maskSabun(currentSabun) + ")";
       playerBadge.style.display = "inline-block";
+      authOverlay.classList.remove("show");
+    } else {
+      authOverlay.classList.add("show");
     }
-
-    authOverlay.classList.remove('show');
-    startGame();
   }
 
-  authStartBtn.addEventListener('click', handleAuth);
-  authStartBtn.addEventListener('touchend', handleAuth);
+  function maskSabun(sabun){
+    if(!sabun || sabun.length < 4) return sabun;
+    return sabun.substring(0, 3) + "*****";
+  }
 
-  sabunInput.addEventListener('keydown', function(e){
-    if (e.key === 'Enter') handleAuth(e);
-  });
+  authStartBtn.addEventListener("click", function(){
+    var t = teamSelect.value;
+    var s = sabunInput.value.trim();
 
-  teamSelect.addEventListener('change', function(){
-    teamSelect.classList.remove('error');
-    authError.textContent = "";
-  });
-
-  sabunInput.addEventListener('input', function() {
-    this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8);
-    if (this.value.length === 8) {
-      this.classList.remove('error');
-      authError.textContent = "";
+    if(!t){
+      authError.textContent = "팀을 선택해 주세요.";
+      return;
     }
-  });
+    if(!s || s.length !== 8 || isNaN(s)){
+      authError.textContent = "올바른 사번 8자리를 입력해 주세요.";
+      return;
+    }
 
-  document.getElementById('restartBtn').addEventListener('click', showNoticePopup);
-  retryButton.addEventListener('click', showNoticePopup);
+    currentTeam = t;
+    currentSabun = s;
+    localStorage.setItem("sh_mini_team", currentTeam);
+    localStorage.setItem("sh_mini_sabun", currentSabun);
 
-  ruleBtn.addEventListener('click', function(){ ruleOverlay.classList.add('show'); });
-  ruleCloseBtn.addEventListener('click', function(){ ruleOverlay.classList.remove('show'); });
-  ruleOverlay.addEventListener('click', function(e){
-    if(e.target === ruleOverlay) ruleOverlay.classList.remove('show');
-  });
-
-  var savedTeam = null;
-  var savedSabun = null;
-  try {
-    savedTeam = localStorage.getItem("sh_mini_team");
-    savedSabun = localStorage.getItem("sh_mini_sabun");
-  } catch(e) {}
-
-  if (savedTeam && savedSabun && /^\d{8}$/.test(savedSabun)) {
-    currentTeam = savedTeam;
-    currentSabun = savedSabun;
-    playerBadge.textContent = "플레이어: " + currentTeam + " · " + currentSabun;
+    playerBadge.textContent = "👤 " + currentTeam + " (" + maskSabun(currentSabun) + ")";
     playerBadge.style.display = "inline-block";
-    authOverlay.classList.remove('show');
-    startGame();
-  } else {
-    try {
-      localStorage.removeItem("sh_mini_team");
-      localStorage.removeItem("sh_mini_sabun");
-    } catch(e) {}
-    authOverlay.classList.add('show');
-    sabunInput.focus();
-  }
+    authOverlay.classList.remove("show");
+
+    start();
+  });
 
   playerBadge.addEventListener("click", function(){
-    if(confirm("등록된 팀/사번 정보를 변경하시겠습니까?")){
-      try {
-        localStorage.removeItem("sh_mini_team");
-        localStorage.removeItem("sh_mini_sabun");
-      } catch(e) {}
-      location.reload();
+    authOverlay.classList.add("show");
+  });
+
+  document.getElementById("restartBtn").addEventListener("click", function(){
+    if(gameCount > 0 && gameCount % 3 === 0){
+      adPopup.style.display = "flex";
+    } else {
+      stopGame();
+      start();
     }
   });
+
+  document.getElementById("retryButton").addEventListener("click", function(){
+    overlay.classList.remove("show");
+    if(gameCount > 0 && gameCount % 3 === 0){
+      adPopup.style.display = "flex";
+    } else {
+      start();
+    }
+  });
+
+  adRestartBtn.addEventListener("click", function(){
+    adPopup.style.display = "none";
+    stopGame();
+    start();
+  });
+
+  eeCloseBtn.addEventListener("click", function(){
+    easterEggOverlay.classList.remove("show");
+  });
+
+  ruleBtn.addEventListener("click", function(){ ruleOverlay.classList.add("show"); });
+  ruleCloseBtn.addEventListener("click", function(){ ruleOverlay.classList.remove("show"); });
+
+  initPlayerInfo();
 })();
 </script>
 </body>
