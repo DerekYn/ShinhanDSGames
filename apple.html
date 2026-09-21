@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>사과게임 - 금융본부 미니 게임대회</title>
+<title>두더지 잡기 - 금융본부 미니 게임대회</title>
 <style>
   :root{
     --navy:#0B1F3A;
@@ -15,6 +15,7 @@
     --accent:#2FBF9E;
     --danger:#E0567A;
     --gold:#FFD700;
+    --fever:#FF4500;
     --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
     --font-num: "Segoe UI", "Consolas", "Malgun Gothic", monospace;
   }
@@ -26,6 +27,7 @@
     color: var(--paper);
     overflow:auto;
     user-select:none;
+    -webkit-user-select:none;
   }
   #app{
     display:flex; flex-direction:column; align-items:center;
@@ -72,7 +74,7 @@
     padding: 2px 8px;
     border-radius: 999px;
     width: fit-content;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.01em; 
   }
   .event-tag {
     font-size: 11px;
@@ -172,9 +174,25 @@
     letter-spacing: -0.02em;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     white-space: nowrap;
   }
+  .fever-badge{
+    display: none;
+    font-size: 11px;
+    font-weight: 900;
+    color: #fff;
+    background: linear-gradient(135deg, #FF4500, #F59E0B);
+    padding: 2px 7px;
+    border-radius: 999px;
+    box-shadow: 0 0 10px rgba(255, 69, 0, 0.7);
+    animation: feverGlow 0.8s infinite alternate;
+  }
+  @keyframes feverGlow {
+    from { transform: scale(0.96); opacity: 0.85; }
+    to { transform: scale(1.05); opacity: 1; box-shadow: 0 0 14px #FF4500; }
+  }
+
   .player-tag{
     font-size: 11px;
     background: rgba(47, 191, 158, 0.15);
@@ -190,7 +208,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 6px;
+    gap: 8px;
     width: 100%;
   }
   .stat-card{
@@ -198,7 +216,7 @@
     background: rgba(6, 20, 36, 0.75);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 10px;
-    padding: 4px 4px;
+    padding: 4px 6px;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -206,7 +224,7 @@
     min-width: 0;
   }
   .stat-lbl{
-    font-size: 9.5px;
+    font-size: 10px;
     color: var(--ice);
     opacity: 0.75;
     line-height: 1.1;
@@ -214,119 +232,206 @@
     white-space: nowrap;
   }
   .stat-val{
-    font-size: 14.5px;
+    font-size: 15px;
     font-weight: 800;
     font-family: var(--font-num);
     font-variant-numeric: tabular-nums;
     line-height: 1.1;
   }
-  .stat-card.time .stat-val { color: var(--sky); }
-  .stat-card.time.low .stat-val { color: var(--danger); }
+  .stat-card.time .stat-val { color: var(--danger); }
+  .stat-card.time.fever .stat-val { color: var(--fever); animation: feverText 0.5s infinite alternate; }
+  @keyframes feverText {
+    from { transform: scale(1); }
+    to { transform: scale(1.1); text-shadow: 0 0 8px #FF4500; }
+  }
   .stat-card.score .stat-val { color: var(--accent); }
-  .stat-card.combo .stat-val { color: var(--gold); }
-  .stat-card.left .stat-val { color: #fff; }
+  .stat-card.combo .stat-val { color: var(--sky); }
 
-  /* 보드 래퍼 */
+  /* 게임 보드 영역 */
   #board-wrap{
-    position:relative;
     background: linear-gradient(180deg, #0E2A4A, #0A2036);
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1.5px solid rgba(255,255,255,0.1);
     border-radius: 18px;
-    padding: 8px;
+    padding: 10px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
-    touch-action:none;
-    width: min(92vw, 560px);
+    width: min(94vw, 520px);
     box-sizing: border-box;
+    touch-action: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
   }
-  #board{
-    display:grid;
-    gap: 2.5px;
-    position:relative;
-    width:100%;
+  #board-wrap.fever-active{
+    border-color: #FF4500;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45), 0 0 20px rgba(255, 69, 0, 0.45);
   }
-  .cell{
-    display:flex; align-items:center; justify-content:center;
-    border-radius: 6px;
-    background: linear-gradient(160deg, #2170B8, #164E8C);
-    border: 1px solid rgba(255,255,255,0.15);
-    color:#fff;
-    font-family: var(--font-num);
-    font-weight:700;
-    font-size: clamp(9px, 2.8vw, 15px);
-    position:relative;
-    transition: transform 0.08s ease, background 0.15s ease, opacity 0.25s ease;
-    width:100%;
-    aspect-ratio: 1 / 1;
+  .board{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;
+    touch-action: none;
   }
-  .cell::after{
-    content:"";
-    position:absolute; top:2px; left:4px; right:4px; height:32%;
-    border-radius: 5px 5px 40% 40%;
-    background: rgba(255,255,255,0.18);
+
+  /* 팝업 텍스트가 구멍 밖으로 시원하게 올라오도록 허용하는 래퍼 */
+  .hole-wrap{
+    position: relative;
+    width: 100%;
+    overflow: visible;
+  }
+
+  .hole{
+    position:relative; width: 100%; height:94px; overflow:hidden; border-radius:50%;
+    background:#6b4935;
+    box-shadow: inset 0 8px 12px rgba(35,20,12,.65), 0 3px 8px rgba(0,0,0,.35);
+    border:2px solid #8b654b;
+    cursor:pointer;
+    touch-action: none;
+  }
+  .hole:after{
+    content:""; position:absolute; left:10%; right:10%; bottom:4px; height:18px;
+    background:#38251b; border-radius:50%; z-index:6; pointer-events:none;
+  }
+
+  /* 동물 공통 그래픽 */
+  .animal{
+    position:absolute; width:72px; height:82px; left:50%; bottom:-110px;
+    transform:translateX(-50%); transition:.12s ease-out; border-radius:45% 45% 40% 40%; z-index:2;
     pointer-events:none;
   }
-  .cell.selected{
-    background: linear-gradient(160deg, var(--sky), var(--blue));
-    box-shadow: 0 0 0 2px rgba(255,255,255,0.5) inset;
-    transform: scale(0.94);
+  .animal.active{ bottom:4px; }
+  .eye{ position:absolute; top:26px; width:8px; height:9px; background:#222; border-radius:50%; z-index:4; }
+  .eye.left{ left:18px; } .eye.right{ right:18px; }
+  .nose{ position:absolute; top:40px; left:50%; transform:translateX(-50%); width:12px; height:8px; background:#222; border-radius:50%; z-index:4; }
+
+  /* 1. 일반 두더지 */
+  .mole{ background:#8b5a3c; border:3px solid #65402d; border-radius:45% 45% 35% 35%; }
+  .mole .ear{ display:none; }
+  .mole .eye{ top:26px; width:8px; height:8px; }
+  .mole .nose{ top:41px; width:13px; height:9px; background:#e88d9d; }
+
+  /* 2. 👑 대왕 두더지 */
+  .king-mole{ 
+    background:#7c4a27; 
+    border:3px solid #542d12; 
+    border-radius:45% 45% 35% 35%;
+    box-shadow: 0 0 14px rgba(255, 215, 0, 0.45);
   }
-  .cell.gone{
-    opacity:0;
-    transform: scale(0.4) rotate(15deg);
-    pointer-events:none;
+  .king-mole .ear{ display:none; }
+  .king-mole .eye{ top:26px; width:8px; height:8px; background:#222; }
+  .king-mole .nose{ top:41px; width:13px; height:9px; background:#e88d9d; }
+  
+  .king-mole .crown{
+    position:absolute; top:-8px; left:50%; transform:translateX(-50%);
+    width:30px; height:16px;
+    background:linear-gradient(180deg, #FDE047 0%, #EAB308 60%, #CA8A04 100%);
+    clip-path: polygon(0% 100%, 0% 15%, 25% 65%, 50% 0%, 75% 65%, 100% 15%, 100% 100%);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    z-index: 5;
   }
-  .cell.pop{ animation: pop 0.3s ease; }
-  @keyframes pop{
-    0%{ transform: scale(1); }
-    40%{ transform: scale(1.25); background: linear-gradient(160deg, var(--accent), #1E9C81); }
-    100%{ transform: scale(0.4); }
+  .king-mole .crown:after{
+    content:""; position:absolute; bottom:2px; left:50%; transform:translateX(-50%);
+    width:5px; height:3px; background:#EF4444; border-radius:50%; box-shadow:0 0 4px #EF4444;
   }
-  #selRect{
-    position:absolute;
-    border: 2px solid var(--sky);
-    background: rgba(79,157,222,0.18);
-    border-radius:6px;
-    pointer-events:none;
-    display:none;
+
+  /* 3. 토끼 */
+  .rabbit{ background:#f1dddd; border:3px solid #d2b5b5; border-radius:45% 45% 35% 35%; }
+  .rabbit .ear{
+    position:absolute; width:15px; height:28px; top:-6px; background:#f1dddd;
+    border:3px solid #d2b5b5; border-radius:50%; z-index:1;
   }
-  .sumTag{
-    position:absolute;
-    top:-24px; left:0;
-    background: var(--navy);
-    border:1px solid var(--sky);
-    color:#fff;
-    font-size:11px;
-    font-family: var(--font-num);
-    font-weight:700;
-    padding:2px 7px;
-    border-radius:8px;
+  .rabbit .ear.left{ left:10px; transform:rotate(-8deg); }
+  .rabbit .ear.right{ right:10px; transform:rotate(8deg); }
+  .rabbit .ear:after{ content:""; position:absolute; width:6px; height:18px; top:4px; left:2px; background:#e8a8b8; border-radius:50%; }
+  .rabbit .nose{ background:#d87f98; }
+  .rabbit:after{
+    content:""; position:absolute; left:50%; top:48px; transform:translateX(-50%);
+    width:19px; height:12px;
+    background:linear-gradient(to right, white 0, white 8px, transparent 8px, transparent 12px, white 12px, white 20px);
+    border-radius:0 0 4px 4px; z-index:3;
+  }
+
+  /* 4. 🐯 호랑이 */
+  .tiger{ 
+    background:#ea580c; 
+    background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
+    border:3px solid #9a3412; 
+    border-radius:45% 45% 35% 35%; 
+    overflow:hidden;
+  }
+  .tiger .ear{
+    position:absolute; width:18px; height:18px; top:-2px; background:#9a3412;
+    border-radius:50%; z-index:1;
+  }
+  .tiger .ear.left{ left:5px; } .tiger .ear.right{ right:5px; }
+  .tiger .ear:after{ content:""; position:absolute; width:10px; height:10px; left:4px; top:4px; background:#fff7ed; border-radius:50%; }
+
+  .tiger .stripes-forehead{
+    position:absolute; top:7px; left:50%; transform:translateX(-50%);
+    width:14px; height:14px; z-index:3;
+  }
+  .tiger .stripes-forehead:before{
+    content:""; position:absolute; left:5px; top:0; width:4px; height:14px; background:#1c1917; border-radius:2px;
+  }
+  .tiger .stripes-forehead:after{
+    content:""; position:absolute; left:0; top:2px; width:14px; height:3px; background:#1c1917; border-radius:2px;
+    box-shadow: 0 8px 0 #1c1917;
+  }
+
+  .tiger .stripe-left{
+    position:absolute; left:0; top:32px; width:12px; height:4px; background:#1c1917;
+    border-radius:0 4px 4px 0; z-index:3;
+    box-shadow: 0 10px 0 #1c1917;
+  }
+  .tiger .stripe-right{
+    position:absolute; right:0; top:32px; width:12px; height:4px; background:#1c1917;
+    border-radius:4px 0 0 4px; z-index:3;
+    box-shadow: 0 10px 0 #1c1917;
+  }
+
+  .tiger .muzzle{
+    position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
+    width:34px; height:22px; background:#fffbf0; border-radius:50% 50% 45% 45%; z-index:3;
+  }
+  .tiger .muzzle:after{
+    content:""; position:absolute; bottom:3px; left:50%; transform:translateX(-50%);
+    width:14px; height:3px; border-bottom:2px solid #292524; border-radius:50%;
+  }
+
+  .tiger .eye{ width:8px; height:9px; top:26px; background:#1c1917; z-index:4; }
+  .tiger .eye:after{ content:""; position:absolute; top:1px; right:1px; width:3px; height:3px; background:#fff; border-radius:50%; }
+  .tiger .nose{ top:40px; width:13px; height:8px; background:#b91c1c; border-radius:2px 2px 50% 50%; z-index:5; }
+
+  /* 팝업 점수 및 판정 */
+  .pop{
+    position:absolute; top:4px; left:50%; transform:translateX(-50%);
+    font-size:16px; font-weight:900; font-family:var(--font-num); color:var(--accent);
+    animation:popAnim .7s forwards ease-out; z-index:25; pointer-events:none;
     white-space:nowrap;
   }
-  .sumTag.ok{ background: var(--accent); border-color: var(--accent); color:#04241c;}
+  .pop.perfect{ color:#22D3EE; text-shadow:0 0 10px rgba(34, 211, 238, 0.95); font-size:17px; }
+  .pop.great{ color:#34D399; text-shadow:0 0 8px rgba(52, 211, 153, 0.85); }
+  .pop.gold{ color:var(--gold); text-shadow:0 0 10px rgba(255,215,0,0.9); font-size:17.5px; }
+  .pop.fever{ color:#FF4500; text-shadow:0 0 12px rgba(255, 69, 0, 0.95); font-size:17px; }
+  .pop.bad{ color:var(--danger); font-size:15px; }
+  @keyframes popAnim{ 
+    0%{ opacity:0; transform:translate(-50%, 6px) scale(0.85); }
+    20%{ opacity:1; transform:translate(-50%, -10px) scale(1.1); }
+    80%{ opacity:1; transform:translate(-50%, -28px) scale(1); }
+    100%{ opacity:0; transform:translate(-50%, -42px) scale(0.9); } 
+  }
 
-  /* 컨트롤 버튼 */
-  .controls{ display:flex; gap:8px; margin-top:2px; justify-content:center; flex-wrap:wrap; }
+  .controls{ display:flex; gap:10px; margin-top:2px; }
   button.main{
-    font-family: var(--font-ui); font-size:13.5px; font-weight:700;
+    font-family: var(--font-ui); font-size:14px; font-weight:600;
     background: var(--blue); color:#fff; border:none;
-    padding: 8px 16px; border-radius: 10px; cursor:pointer;
+    padding: 9px 18px; border-radius: 10px; cursor:pointer;
     transition: background 0.15s ease, transform 0.1s ease;
   }
   button.main:hover{ background: var(--sky); }
   button.main:active{ transform: scale(0.97); }
   button.ghost{
     background: transparent; border:1px solid rgba(255,255,255,0.25);
-    color: var(--ice); font-family: var(--font-ui); font-size:13.5px; font-weight:700;
-    padding: 8px 14px; border-radius: 10px; cursor:pointer;
-    transition: all 0.15s ease;
+    color: var(--ice); font-family: var(--font-ui); font-size:14px; font-weight:600;
+    padding: 9px 18px; border-radius: 10px; cursor:pointer;
+    transition: background 0.15s ease;
   }
   button.ghost:hover{ background: rgba(255,255,255,0.08); }
-  button.ghost:active{ transform: scale(0.97); }
-  button.ghost.highlight{
-    border-color: var(--gold); color: var(--gold);
-    background: rgba(255, 215, 0, 0.08);
-  }
-  button.ghost.highlight:hover{ background: rgba(255, 215, 0, 0.18); }
 
   .hint{ font-size:11.5px; color:var(--ice); opacity:0.65; text-align:center; max-width:480px; }
 
@@ -426,7 +531,7 @@
 <!-- 사번/팀 입력 최초 진입 모달 -->
 <div id="authOverlay" class="show">
   <div class="modal">
-    <h2>🍎 사과게임 시작</h2>
+    <h2>🐹 두더지 잡기 시작</h2>
     <p>사내 랭킹 집계 및 참여 기록 확인을 위해<br>팀과 사번을 입력해 주세요.</p>
     <select id="teamSelect" class="auth-input">
       <option value="" disabled selected>팀 선택</option>
@@ -435,7 +540,7 @@
       <option value="카드개발팀">카드개발팀</option>
       <option value="라이프개발팀">라이프개발팀</option>
       <option value="기타">기타</option>
-	  <option value="영포스">영포스</option>
+      <option value="영포스">영포스</option>
     </select>
     <input type="text" id="sabunInput" class="auth-input" placeholder="사번 8자리 (예: 22091019)" maxlength="8" inputmode="numeric" pattern="[0-9]*">
     <span class="auth-error" id="authError"></span>
@@ -472,8 +577,8 @@
     
     <nav class="nav-games" aria-label="게임 종목 바로가기">
       <a href="https://derekyn.github.io/ShinhanDSGames/ball.html" class="nav-item">⚽ 공튀기기</a>
-      <a href="https://derekyn.github.io/ShinhanDSGames/mole.html" class="nav-item">🐹 두더지 잡기</a>
-      <a href="https://derekyn.github.io/ShinhanDSGames/apple.html" class="nav-item active">🍎 사과게임</a>
+      <a href="https://derekyn.github.io/ShinhanDSGames/mole.html" class="nav-item active">🐹 두더지 잡기</a>
+      <a href="https://derekyn.github.io/ShinhanDSGames/apple.html" class="nav-item">🍎 사과게임</a>
       <a href="https://derekyn.github.io/ShinhanDSGames/bomb.html" class="nav-item">💣 지뢰찾기</a>
       <a href="https://derekyn.github.io/ShinhanDSGames/drop.html" class="nav-item">💧 낙하캐치</a>
     </nav>
@@ -482,71 +587,77 @@
   <!-- 가로형 2단 대시보드 -->
   <div class="game-dash">
     <div class="dash-left">
-      <h1 class="game-title">🍎 사과게임</h1>
+      <h1 class="game-title">
+        🐹 두더지 잡기
+        <span class="fever-badge" id="feverBadge">🔥 FEVER 1.3X</span>
+      </h1>
       <span id="playerBadge" class="player-tag" style="display:none;" title="클릭 시 팀/사번 변경"></span>
     </div>
 
     <div class="dash-stats">
-      <div class="stat-card time" id="timeStat">
+      <div class="stat-card time" id="timeCard">
         <span class="stat-lbl">남은 시간</span>
-        <span class="stat-val" id="timeVal">01:50</span>
+        <span class="stat-val"><span id="time">30</span>초</span>
       </div>
       <div class="stat-card score">
         <span class="stat-lbl">점수</span>
-        <span class="stat-val" id="scoreVal">0</span>
+        <span class="stat-val" id="score">0</span>
       </div>
-      <div class="stat-card combo" id="comboStat">
+      <div class="stat-card combo">
         <span class="stat-lbl">콤보</span>
-        <span class="stat-val" id="comboVal">0</span>
-      </div>
-      <div class="stat-card left">
-        <span class="stat-lbl">남은 사과</span>
-        <span class="stat-val" id="leftVal">108</span>
+        <span class="stat-val" id="combo">0</span>
       </div>
     </div>
   </div>
 
   <div id="board-wrap">
-    <div id="board"></div>
-    <div id="selRect"><span class="sumTag" id="sumTag"></span></div>
+    <div class="board" id="board"></div>
   </div>
 
   <div class="controls">
     <button class="main" id="restartBtn">다시 시작</button>
-    <button class="ghost highlight" id="shuffleBtn">🎲 판 섞기 (1/1)</button>
     <button class="ghost" id="ruleBtn">규칙 보기</button>
   </div>
-  <div class="hint">드래그로 합 10을 만드세요! 3.5초 내 연속 완성 시 콤보 보너스, 막히면 🎲판 섞기를 쓰세요.</div>
+  <div class="hint">⚡빠를수록 PERFECT(+30) 보너스! 실수해도 콤보는 -3만 차감돼요.</div>
 </div>
 
+<!-- 일반 결과 화면 -->
 <div id="overlay">
   <div class="modal">
-    <h2 id="modalTitle">시간 종료!</h2>
-    <div class="bigscore" id="modalScore">0</div>
-    <p id="modalDesc">획득한 사과 개수입니다.</p>
-    <button class="main" id="modalRestart">다시 도전하기</button>
+    <h2 id="modalTitle">게임 종료!</h2>
+    <div class="bigscore" id="finalScore">0</div>
+    <p id="modalDesc">
+      잡은 두더지: <b id="hits" style="color:var(--sky);">0</b>마리<br>
+      최대 콤보: <b id="maxCombo" style="color:var(--accent);">0</b>
+    </p>
+    <button class="main" id="retryButton">다시 하기</button>
   </div>
 </div>
 
-<!-- 🎁 이스터에그 모달 (당첨자 / 집념의 탐색꾼 / 원조 당첨자 공용) -->
+<!-- 🎁 이스터에그: 호랑이 굴 탈출왕 (선착순 2명) 모달 -->
 <div id="easterEggOverlay">
   <div class="modal" style="border: 2px solid var(--gold); box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4);">
-    <div id="eeIcon" style="font-size: 46px; margin-bottom: 8px;">🍎📦</div>
+    <div id="eeIcon" style="font-size: 46px; margin-bottom: 8px;">🐯💥</div>
     <h2 id="eeTitle" style="color: var(--gold); font-size: 20px; margin-bottom: 10px;">식사 지원 이벤트 당첨!</h2>
     <p id="eeBody" style="color: var(--paper); font-size: 13.5px; line-height: 1.7; margin-bottom: 20px;"></p>
     <button type="button" class="main" id="eeCloseBtn" style="background: linear-gradient(135deg, #FFD700, #F59E0B); color: #0B1F3A; font-weight: 800; width: 100%; border: none; font-size: 15px; padding: 11px;">확인</button>
   </div>
 </div>
 
+<!-- 규칙 모달 -->
 <div id="ruleOverlay">
   <div class="modal">
     <h2>게임 규칙</h2>
     <ol>
-      <li>보드 위에서 드래그하여 직사각형 안의 사과 숫자 합이 <b>10</b>이 되면 사라져요.</li>
-      <li>⚡ <b>스피드 콤보</b>: 3.5초 이내에 연속으로 10을 완성하면 <b>콤보 보너스 점수</b> 추가!</li>
-      <li>🎲 <b>판 섞기</b>: 게임당 1회, 막히거나 조합이 안 보일 때 남아있는 사과들을 재배치해요.</li>
-      <li>⏱️ <b>실시간 절대 타이머</b>: 공정한 경쟁을 위해 화면을 끄거나 이탈해도 현실의 시간은 멈추지 않고 흘러갑니다.</li>
-      <li>제한시간(1분 50초) 안에 최대한 많은 사과를 없애 고득점을 노려보세요!</li>
+      <li>⏱ 제한시간 : <b>30초</b> 동안 진행됩니다.</li>
+      <li>⚡ <b>반응속도 판정 보너스</b> (동점 원천 차단):<br>
+        - <b>PERFECT</b> (0.40초 이내): <b>+30점</b><br>
+        - <b>GREAT</b> (0.55초 이내): <b>+15점</b>
+      </li>
+      <li>🔥 <b>막판 10초 피버 타임</b> : <b>획득 점수 1.3배</b> 적용!</li>
+      <li>🐹 일반 두더지 : <b>+10점</b> (연속 성공 시 콤보 가산)</li>
+      <li>👑 <b>대왕 두더지</b> : <b>+50점</b> (왕관 쓴 보너스 타겟)</li>
+      <li>🐰 토끼(-30점) / 🐯 호랑이(-50점) : <b>콤보 3 차감</b> (완전 초기화 X)</li>
     </ol>
     <button class="main" id="ruleCloseBtn">확인</button>
   </div>
@@ -593,6 +704,7 @@
 
     var gpu = getGpuRenderer().toLowerCase();
 
+    // 1순위: 모바일 칩셋 우선 통과
     var mobileGpuKeywords = ['mali', 'adreno', 'apple', 'powervr', 'xclipse'];
     for (var m = 0; m < mobileGpuKeywords.length; m++) {
       if (gpu.indexOf(mobileGpuKeywords[m]) !== -1) {
@@ -600,6 +712,7 @@
       }
     }
 
+    // 2순위: PC 전용 GPU 탐지
     var pcGpuKeywords = [
       'geforce', 'nvidia', 'radeon', 'intel', 
       'direct3d', 'llvmpipe', 'mesa', 'swiftshader', 
@@ -637,71 +750,62 @@
      [게임 메인 로직]
      ============================================================ */
   var GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwXeZ1OMPgMQb-JhW_uOAxQ-w1sTq5kb6XbTa6XF3BjzhVrax6uvPc8LBC0YfTSKiZKEQ/exec";
-  var GAME_NAME = "사과게임";
+  var GAME_NAME = "두더지잡기";
 
-  // 👑 사과게임 기존 명예의 전당 당첨 사번
-  var PREV_CHAMPIONS = ["25042001", "18081010"];
+  var GAME_TIME = 30;
 
-  var COLS = 12, ROWS = 9, GAME_TIME = 110;
-  var COMBO_WINDOW_MS = 3500;
+  var MOLE_COUNT = 30;
+  var KING_MOLE_COUNT = 6;
+  var RABBIT_COUNT = 10;
+  var TIGER_COUNT = 10;
 
-  var curLevel = 'medium (12x9)';
-  var board, cells, boardEl, selRect, sumTag;
-  var timeLeft, score, timerId, gameActive;
-  var gameStartTime = 0;
-  var dragging = false, startCell = null, curSel = [];
-  var currentSabun = "";
   var currentTeam = "";
+  var currentSabun = "";
+  var gameCount = 0;
 
-  var combo = 0;
-  var maxCombo = 0;
-  var comboTimeoutId = null;
-  var shufflesLeft = 1;
+  var board = document.getElementById("board");
+  var boardWrap = document.getElementById("board-wrap");
+  var timeEl = document.getElementById("time");
+  var timeCard = document.getElementById("timeCard");
+  var scoreEl = document.getElementById("score");
+  var comboEl = document.getElementById("combo");
+  var feverBadge = document.getElementById("feverBadge");
 
-  var easterEggTriggered = false;
-  var eePauseStart = 0;
+  var authOverlay = document.getElementById("authOverlay");
+  var teamSelect = document.getElementById("teamSelect");
+  var sabunInput = document.getElementById("sabunInput");
+  var authStartBtn = document.getElementById("authStartBtn");
+  var playerBadge = document.getElementById("playerBadge");
+  var authError = document.getElementById("authError");
 
-  boardEl = document.getElementById('board');
-  selRect = document.getElementById('selRect');
-  sumTag = document.getElementById('sumTag');
-  var boardWrap = document.getElementById('board-wrap');
-  var timeVal = document.getElementById('timeVal');
-  var timeStat = document.getElementById('timeStat');
-  var scoreVal = document.getElementById('scoreVal');
-  var comboVal = document.getElementById('comboVal');
-  var leftVal = document.getElementById('leftVal');
+  var overlay = document.getElementById("overlay");
+  var retryButton = document.getElementById("retryButton");
+  var ruleOverlay = document.getElementById("ruleOverlay");
+  var ruleBtn = document.getElementById("ruleBtn");
+  var ruleCloseBtn = document.getElementById("ruleCloseBtn");
 
-  var overlay = document.getElementById('overlay');
-  var modalTitle = document.getElementById('modalTitle');
-  var modalScore = document.getElementById('modalScore');
-  var modalDesc = document.getElementById('modalDesc');
-  var ruleOverlay = document.getElementById('ruleOverlay');
-
-  var easterEggOverlay = document.getElementById('easterEggOverlay');
-  var eeIcon = document.getElementById('eeIcon');
-  var eeTitle = document.getElementById('eeTitle');
-  var eeBody = document.getElementById('eeBody');
-  var eeCloseBtn = document.getElementById('eeCloseBtn');
+  var easterEggOverlay = document.getElementById("easterEggOverlay");
+  var eeIcon = document.getElementById("eeIcon");
+  var eeTitle = document.getElementById("eeTitle");
+  var eeBody = document.getElementById("eeBody");
+  var eeCloseBtn = document.getElementById("eeCloseBtn");
 
   var adPopup = document.getElementById("adPopup");
   var adRestartBtn = document.getElementById("adRestartBtn");
-  var shuffleBtn = document.getElementById("shuffleBtn");
 
-  var authOverlay = document.getElementById('authOverlay');
-  var teamSelect = document.getElementById('teamSelect');
-  var sabunInput = document.getElementById('sabunInput');
-  var authStartBtn = document.getElementById('authStartBtn');
-  var playerBadge = document.getElementById('playerBadge');
-  var authError = document.getElementById('authError');
+  var score = 0, combo = 0, maxCombo = 0, hits = 0, time = GAME_TIME;
+  var running = false;
+  var spawnTimers = [];
+  var timer;
 
-  function logEvent(eventType, extraData){
+  function sendLog(eventType, extraData){
     if(!GOOGLE_WEBHOOK_URL) return;
     var payload = Object.assign({
       game: GAME_NAME,
       team: currentTeam,
       sabun: currentSabun,
       event: eventType,
-      level: curLevel
+      level: gameCount + "회차"
     }, extraData || {});
 
     fetch(GOOGLE_WEBHOOK_URL, {
@@ -709,172 +813,269 @@
       mode: "no-cors",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
-    }).catch(function(err){ console.warn("로깅 실패:", err); });
+    }).catch(function(err){ console.warn("로그 실패:", err); });
   }
 
-  function fmtTime(s){
-    var m = Math.floor(s/60), ss = s%60;
-    return (m<10?'0':'')+m+':'+(ss<10?'0':'')+ss;
-  }
+  // 9개 구멍 생성 (래퍼 구조를 적용하여 글자 잘림 방지)
+  for(var i = 0; i < 9; i++){
+    (function(idx){
+      var wrap = document.createElement("div");
+      wrap.className = "hole-wrap";
 
-  function buildBoard(){
-    boardEl.style.gridTemplateColumns = 'repeat('+COLS+', 1fr)';
-    boardEl.innerHTML = '';
-    board = []; cells = [];
-    for(var r=0;r<ROWS;r++){
-      board.push([]); cells.push([]);
-      for(var c=0;c<COLS;c++){
-        var n = 1 + Math.floor(Math.random()*9);
-        board[r].push(n);
-        var div = document.createElement('div');
-        div.className = 'cell'; div.textContent = n;
-        div.dataset.r = r; div.dataset.c = c;
-        boardEl.appendChild(div);
-        cells[r].push(div);
-      }
-    }
-  }
+      var hole = document.createElement("div");
+      hole.className = "hole";
+      hole._hittableAnimal = null;
+      hole._animalType = null;
+      hole._spawnTime = 0;
 
-  function remainingCount(){
-    var cnt=0;
-    for(var r=0;r<ROWS;r++) for(var c=0;c<COLS;c++) if(board[r][c]>0) cnt++;
-    return cnt;
-  }
-
-  function hasValidMove(){
-    var pre = [];
-    for(var r=0;r<=ROWS;r++){ pre.push(new Array(COLS+1).fill(0)); }
-    for(var r=1;r<=ROWS;r++){
-      for(var c=1;c<=COLS;c++){
-        var v = board[r-1][c-1] > 0 ? board[r-1][c-1] : 0;
-        pre[r][c] = v + pre[r-1][c] + pre[r][c-1] - pre[r-1][c-1];
-      }
-    }
-    function rectSum(r1,c1,r2,c2){
-      return pre[r2+1][c2+1] - pre[r1][c2+1] - pre[r2+1][c1] + pre[r1][c1];
-    }
-    for(var r1=0;r1<ROWS;r1++){
-      for(var r2=r1;r2<ROWS;r2++){
-        for(var c1=0;c1<COLS;c1++){
-          for(var c2=c1;c2<COLS;c2++){
-            if(rectSum(r1,c1,r2,c2) === 10) return true;
-          }
+      ["mole", "king-mole", "rabbit", "tiger"].forEach(function(type){
+        var extraParts = '';
+        if(type === 'king-mole'){
+          extraParts = '<div class="crown"></div>';
+        } else if(type === 'tiger'){
+          extraParts = '<div class="stripes-forehead"></div><div class="stripe-left"></div><div class="stripe-right"></div><div class="muzzle"></div>';
         }
+
+        hole.innerHTML += '<div class="animal ' + type + '">' +
+          '<div class="ear left"></div><div class="ear right"></div>' +
+          extraParts +
+          '<div class="eye left"></div><div class="eye right"></div>' +
+          '<div class="nose"></div></div>';
+      });
+
+      hole.addEventListener("pointerdown", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        hit(idx);
+      });
+
+      wrap.appendChild(hole);
+      board.appendChild(wrap);
+    })(i);
+  }
+  var holes = document.querySelectorAll(".hole");
+
+  function hide(){
+    holes.forEach(function(hole){
+      hole._hittableAnimal = null;
+      hole._animalType = null;
+      hole._spawnTime = 0;
+    });
+    document.querySelectorAll(".animal").forEach(function(a){
+      if(a._hideTimer) clearTimeout(a._hideTimer);
+      if(a._graceTimer) clearTimeout(a._graceTimer);
+      a.classList.remove("active");
+    });
+  }
+
+  function scheduleSpawns(){
+    spawnTimers.forEach(function(t){ clearTimeout(t); });
+    spawnTimers = [];
+
+    function generateSmartTimes(count){
+      var arr = [];
+      var normalCount = Math.round(count * 0.7);
+      var feverCount = count - normalCount;
+      for(var i = 0; i < normalCount; i++){
+        arr.push(400 + Math.random() * 19400);
+      }
+      for(var j = 0; j < feverCount; j++){
+        arr.push(20000 + Math.random() * 9200);
+      }
+      return arr.sort(function(a, b){ return a - b; });
+    }
+
+    generateSmartTimes(MOLE_COUNT).forEach(function(t){
+      spawnTimers.push(setTimeout(function(){ spawnAnimal("mole"); }, t));
+    });
+    generateSmartTimes(KING_MOLE_COUNT).forEach(function(t){
+      spawnTimers.push(setTimeout(function(){ spawnAnimal("king-mole"); }, t));
+    });
+    generateSmartTimes(RABBIT_COUNT).forEach(function(t){
+      spawnTimers.push(setTimeout(function(){ spawnAnimal("rabbit"); }, t));
+    });
+    generateSmartTimes(TIGER_COUNT).forEach(function(t){
+      spawnTimers.push(setTimeout(function(){ spawnAnimal("tiger"); }, t));
+    });
+  }
+
+  function spawnAnimal(type){
+    if(!running) return;
+
+    var activeAnimals = document.querySelectorAll(".animal.active");
+    if(activeAnimals.length >= 3){
+      setTimeout(function(){ if(running) spawnAnimal(type); }, 200);
+      return;
+    }
+
+    var availableHoles = [];
+    holes.forEach(function(hole, index){
+      if(!hole._hittableAnimal && !hole.querySelector(".animal.active")) availableHoles.push(index);
+    });
+
+    if(availableHoles.length === 0){
+      setTimeout(function(){ if(running) spawnAnimal(type); }, 200);
+      return;
+    }
+
+    var index = availableHoles[Math.floor(Math.random() * availableHoles.length)];
+    var animal = holes[index].querySelector("." + type);
+    if(!animal) return;
+
+    if(animal._hideTimer) clearTimeout(animal._hideTimer);
+    if(animal._graceTimer) clearTimeout(animal._graceTimer);
+
+    animal.classList.add("active");
+    holes[index]._hittableAnimal = animal;
+    holes[index]._animalType = type;
+    holes[index]._spawnTime = performance.now();
+
+    var stayTime = (time <= 10) ? 520 : 680;
+    if(type === "king-mole") stayTime = (time <= 10) ? 460 : 540;
+
+    animal._hideTimer = setTimeout(function(){
+      animal.classList.remove("active");
+      animal._graceTimer = setTimeout(function(){
+        if(holes[index]._hittableAnimal === animal){
+          holes[index]._hittableAnimal = null;
+          holes[index]._animalType = null;
+          holes[index]._spawnTime = 0;
+        }
+      }, 140);
+    }, stayTime);
+  }
+
+  function pop(hole, text, kind){
+    var el = document.createElement("div");
+    el.className = "pop " + (kind || "");
+    el.textContent = text;
+    var targetParent = hole.parentElement || hole;
+    targetParent.appendChild(el);
+    setTimeout(function(){ el.remove(); }, 700);
+  }
+
+  function hit(index){
+    if(!running) return;
+
+    var animal = holes[index]._hittableAnimal;
+    if(!animal) return;
+
+    var type = holes[index]._animalType;
+    var now = performance.now();
+    var reactionMs = holes[index]._spawnTime ? (now - holes[index]._spawnTime) : 999;
+
+    holes[index]._hittableAnimal = null;
+    holes[index]._animalType = null;
+    holes[index]._spawnTime = 0;
+
+    if(animal._hideTimer) clearTimeout(animal._hideTimer);
+    if(animal._graceTimer) clearTimeout(animal._graceTimer);
+
+    animal.classList.remove("active");
+
+    var isFever = (time <= 10);
+    var multiplier = isFever ? 1.3 : 1.0;
+
+    var speedBonus = 0;
+    var judgeText = "";
+    var judgeKind = "";
+
+    if(type === "king-mole" || type === "mole"){
+      if(reactionMs <= 400){
+        speedBonus = 30;
+        judgeText = "PERFECT!";
+        judgeKind = "perfect";
+      } else if(reactionMs <= 550){
+        speedBonus = 15;
+        judgeText = "GREAT";
+        judgeKind = "great";
       }
     }
-    return false;
+
+    if(type === "king-mole"){
+      hits++; combo++;
+      maxCombo = Math.max(maxCombo, combo);
+      var basePt = 50 + (combo - 1) * 10 + speedBonus;
+      var finalPt = Math.round(basePt * multiplier);
+      score += finalPt;
+
+      var tag = "+" + finalPt + (judgeText ? " " + judgeText : "👑");
+      pop(holes[index], tag, isFever ? "fever" : (judgeKind || "gold"));
+      if(navigator.vibrate) navigator.vibrate(25);
+
+    } else if(type === "mole"){
+      hits++; combo++;
+      maxCombo = Math.max(maxCombo, combo);
+      var basePt = 10 + (combo - 1) * 10 + speedBonus;
+      var finalPt = Math.round(basePt * multiplier);
+      score += finalPt;
+
+      var tag = "+" + finalPt + (judgeText ? " " + judgeText : "");
+      pop(holes[index], tag, isFever ? "fever" : judgeKind);
+      if(navigator.vibrate) navigator.vibrate(15);
+
+    } else if(type === "rabbit"){
+      score -= 30;
+      combo = Math.max(0, combo - 3);
+      pop(holes[index], "-30 (콤보-3)", "bad");
+      if(navigator.vibrate) navigator.vibrate(40);
+
+    } else if(type === "tiger"){
+      score -= 50;
+      combo = Math.max(0, combo - 3);
+      pop(holes[index], "-50 (콤보-3)", "bad");
+      if(navigator.vibrate) navigator.vibrate(60);
+    }
+
+    scoreEl.textContent = score;
+    comboEl.textContent = combo;
   }
 
-  function updateHud(){
-    timeVal.textContent = fmtTime(timeLeft);
-    timeStat.classList.toggle('low', timeLeft<=20);
-    scoreVal.textContent = score;
-    comboVal.textContent = combo > 0 ? (combo + 'x') : '0';
-    comboVal.style.color = combo >= 3 ? 'var(--gold)' : (combo >= 2 ? 'var(--accent)' : 'var(--paper)');
-    leftVal.textContent = remainingCount();
-  }
-
-  function updateShuffleBtn(){
-    if(!shuffleBtn) return;
-    if(shufflesLeft > 0){
-      shuffleBtn.textContent = '🎲 판 섞기 (1/1)';
-      shuffleBtn.disabled = false;
-      shuffleBtn.style.opacity = '1';
-      shuffleBtn.style.cursor = 'pointer';
-      shuffleBtn.classList.add('highlight');
+  function updateFeverState(){
+    if(time <= 10 && time > 0){
+      feverBadge.style.display = "inline-block";
+      boardWrap.classList.add("fever-active");
+      timeCard.classList.add("fever");
     } else {
-      shuffleBtn.textContent = '🎲 판 섞기 (0/1)';
-      shuffleBtn.disabled = true;
-      shuffleBtn.style.opacity = '0.4';
-      shuffleBtn.style.cursor = 'not-allowed';
-      shuffleBtn.classList.remove('highlight');
+      feverBadge.style.display = "none";
+      boardWrap.classList.remove("fever-active");
+      timeCard.classList.remove("fever");
     }
   }
 
-  function shuffleBoard(){
-    if(!gameActive || shufflesLeft <= 0) return;
+  function startGame(){
+    gameCount++;
+    clearInterval(timer);
+    spawnTimers.forEach(function(t){ clearTimeout(t); });
 
-    var activeCells = [];
-    var values = [];
-    for(var r=0; r<ROWS; r++){
-      for(var c=0; c<COLS; c++){
-        if(board[r][c] > 0){
-          activeCells.push({r: r, c: c});
-          values.push(board[r][c]);
-        }
-      }
-    }
+    score = 0; combo = 0; maxCombo = 0; hits = 0; time = GAME_TIME;
+    running = true;
 
-    if(values.length < 2) return;
+    timeEl.textContent = time;
+    scoreEl.textContent = score;
+    comboEl.textContent = combo;
+    updateFeverState();
 
-    for(var attempt=0; attempt<20; attempt++){
-      for(var i = values.length - 1; i > 0; i--){
-        var j = Math.floor(Math.random() * (i + 1));
-        var tmp = values[i];
-        values[i] = values[j];
-        values[j] = tmp;
-      }
-      for(var k=0; k<activeCells.length; k++){
-        board[activeCells[k].r][activeCells[k].c] = values[k];
-      }
-      if(hasValidMove()) break;
-    }
+    overlay.classList.remove("show");
+    easterEggOverlay.classList.remove("show");
+    adPopup.style.display = "none";
+    hide();
 
-    for(var idx=0; idx<activeCells.length; idx++){
-      var pos = activeCells[idx];
-      var val = board[pos.r][pos.c];
-      var cellEl = cells[pos.r][pos.c];
-      cellEl.textContent = val;
-      cellEl.classList.remove('pop');
-      void cellEl.offsetWidth;
-      cellEl.classList.add('pop');
-    }
+    sendLog("시작", { score: 0 });
 
-    shufflesLeft--;
-    updateShuffleBtn();
-    if(navigator.vibrate) navigator.vibrate(25);
+    timer = setInterval(function(){
+      time--;
+      timeEl.textContent = time;
+      updateFeverState();
+      if(time <= 0) endGame();
+    }, 1000);
 
-    if(!hasValidMove()){
-      endGame('nomoves');
-    }
+    scheduleSpawns();
   }
 
-  function getRectFromPoints(x1,y1,x2,y2){
-    return { left: Math.min(x1,x2), right: Math.max(x1,x2), top: Math.min(y1,y2), bottom: Math.max(y1,y2) };
-  }
-
-  function cellsInRect(rect){
-    var res = [];
-    var wrapRect = boardEl.getBoundingClientRect();
-    for(var r=0;r<ROWS;r++){
-      for(var c=0;c<COLS;c++){
-        if(board[r][c] <= 0) continue;
-        var el = cells[r][c];
-        var cr = el.getBoundingClientRect();
-        var cLeft = cr.left - wrapRect.left;
-        var cTop = cr.top - wrapRect.top;
-        var cRight = cLeft + cr.width;
-        var cBottom = cTop + cr.height;
-        var overlaps = !(cRight < rect.left || cLeft > rect.right || cBottom < rect.top || cTop > rect.bottom);
-        if(overlaps){ res.push({r:r,c:c, el:el, val: board[r][c]}); }
-      }
-    }
-    return res;
-  }
-
-  function clearSelectionVisual(){
-    curSel.forEach(function(item){ item.el.classList.remove('selected'); });
-  }
-
-  function getPointerPos(e){
-    var t = (e.touches && e.touches[0]) ? e.touches[0] : e;
-    var wrapRect = boardEl.getBoundingClientRect();
-    return { x: t.clientX - wrapRect.left, y: t.clientY - wrapRect.top };
-  }
-
-  // 🎁 이스터에그 모달 제어 함수
+  // 🎁 통합 이스터에그 모달 제어 함수
   function showEasterEggModal(icon, title, html, showClose){
-    eeIcon.textContent = icon || "🍎📦";
+    eeIcon.textContent = icon || "🐯💥";
     eeTitle.innerHTML = title;
     eeBody.innerHTML = html;
     eeCloseBtn.style.display = showClose ? 'block' : 'none';
@@ -883,254 +1084,107 @@
 
   eeCloseBtn.addEventListener('click', function(){
     easterEggOverlay.classList.remove('show');
-    if(eePauseStart > 0){
-      gameStartTime += (Date.now() - eePauseStart);
-      eePauseStart = 0;
-    }
+    overlay.classList.add('show');
   });
 
-  // 🎁 [이스터에그 판정]: 기 당첨 사번 예우 & 마감 후 집념의 탐색꾼 쿠폰 업그레이드 분기
+  // 🎁 종목별 선착순 2인 검증 요청 (1등: 상무님 / 2등: 본부장님)
   function triggerEasterEgg(){
-    eePauseStart = Date.now();
-
-    var isChampion = (PREV_CHAMPIONS.indexOf(String(currentSabun).trim()) !== -1);
-
     showEasterEggModal(
       "⏳",
-      "달성 확인 중...",
-      "기록을 서버에 전송하고 확인하고 있습니다.<br>잠시만 기다려주세요!",
+      "당첨 확인 중...",
+      "선착순 당첨 여부를 서버와 확인하고 있습니다.<br>잠시만 기다려주세요!",
       false
     );
 
-    var targetUrl = GOOGLE_WEBHOOK_URL + "?action=easterEgg&game=" + encodeURIComponent(GAME_NAME) + "&team=" + encodeURIComponent(currentTeam) + "&sabun=" + encodeURIComponent(currentSabun) + "&detail=" + encodeURIComponent("판 전체 싹쓸이 압류왕");
+    var targetUrl = GOOGLE_WEBHOOK_URL + "?action=easterEgg&game=" + encodeURIComponent(GAME_NAME) + "&team=" + encodeURIComponent(currentTeam) + "&sabun=" + encodeURIComponent(currentSabun) + "&detail=" + encodeURIComponent("최종점수: " + score + "점 (호랑이 굴 탈출왕)");
 
     fetch(targetUrl, { method: "GET", redirect: "follow" })
       .then(function(res){ return res.json(); })
       .then(function(data){
-        // 1. 기존 명예의 전당 당첨자인 경우: 전용 예우 팝업
-        if(isChampion){
+        if(data && data.result === "win"){
+          var order = data.order || 1; // 1 or 2
+          var rewardTitle = data.reward || (order === 1 ? "상무님 식사비 지원" : "본부장님 식사권 지원");
+          var icon = (order === 1) ? "🐯🍽️" : "🐯👑";
+
           showEasterEggModal(
-            "👑",
-            "👑 위대한 [욕심쟁이 싹쓸이 압류왕]의 귀환!",
-            "이미 전설을 쓰셨던 위대한 <b>[욕심쟁이 싹쓸이 압류왕]</b> 님이시군요! 👏<br><br>" +
-            "명예의 전당에 오르고도 몸이 기억하는 그 압도적인 피지컬은 여전하십니다.<br>" +
-            "판 전체를 통째로 쓸어가시던 전설적인 압류 스킬을 다시 한번 인정합니다! 🍎📦",
+            icon,
+            "🎉 " + rewardTitle + " 당첨! 🎉",
+            "축하합니다! 👏<br><br>" +
+            "두더지 잡으랬더니 호랑이 굴에 뛰어들어 맹수를 때려잡으셨군요?! 🐯💥<br><br>" +
+            "<b style='color:var(--gold); font-size:15px;'>🐯💥 [호랑이 굴 탈출왕] 등극!</b><br><br>" +
+            "점수는 나락(<b style='color:var(--danger);'>" + score + "점</b>)으로 곤두박질쳤지만, 굶주린 맹수들을 온몸으로 막아낸 금융본부 최고의 야수!<br>" +
+            "체력 소모가 극심했을 당신을 위해 든든한 고기 밥상을 바칩니다! 🍖🍽️<br><br>" +
+            "<b style='color:var(--accent); font-size:16px;'>[두더지잡기 " + order + "번째 당첨] " + rewardTitle + " 확정!</b><br><br>" +
+            "<span style='font-size:12px; color:var(--ice);'>※ 운영진 확인 후 개별 안내 예정입니다.</span>",
             true
           );
-          return;
-        }
-
-        // 2. 신규 달성자 (마감 후 탐색꾼)
-        showEasterEggModal(
-          "🕵️‍♂️",
-          "🎁 [히든 보너스] 집념의 탐색꾼 발견!",
-          "이스터에그 이벤트 종료 알림에도 끝까지 비밀을 탐구하는 당신은 진정한 탐색꾼! 🕵️‍♂️✨<br><br>" +
-          "선착순 식사 지원은 아쉽게 마감되었으나, 당신의 놀라운 집념과 탐구열에 감동했습니다.<br><br>" +
-          "<b style='color:var(--gold); font-size:15px;'>🎉 [특별 혜택] 편의점 참가 선물 업그레이드!</b><br><br>" +
-          "<b style='color:var(--accent); font-size:14px;'>5개 모든 게임을 클리어(완주)</b>하시면,<br>" +
-          "기존 참가 선물을 <b>[업그레이드된 특급 편의점 교환쿠폰]</b>으로 상향 지급해 드립니다! 🥪☕<br><br>" +
-          "<span style='font-size:11.5px; color:var(--ice); opacity:0.85;'>※ 전 종목 통틀어 1인 1회 한정 적용 (중복 지급 불가)</span>",
-          true
-        );
-      })
-      .catch(function(err){
-        logEvent("이스터에그_시도", { detail: "사과게임 판 전체 싹쓸이 압류왕 달성 (마감 후 탐색)" });
-        if(isChampion){
+        } else if(data && data.result === "already"){
           showEasterEggModal(
-            "👑",
-            "👑 위대한 [욕심쟁이 싹쓸이 압류왕]의 귀환!",
-            "이미 전설을 쓰셨던 위대한 <b>[욕심쟁이 싹쓸이 압류왕]</b> 님이시군요! 👏<br><br>" +
-            "명예의 전당에 오르고도 몸이 기억하는 그 압도적인 피지컬은 여전하십니다.<br>" +
-            "판 전체를 통째로 쓸어가시던 전설적인 압류 스킬을 다시 한번 인정합니다! 🍎📦",
+            "🎉",
+            "이미 당첨된 플레이어입니다!",
+            "이미 <b style='color:var(--gold);'>" + (data.game || "다른 종목") + "</b>에서 <b style='color:var(--accent);'>" + (data.reward || "식사 지원") + "</b>에 당첨 등록되었습니다!<br><br>더 많은 팀원들의 참여를 위해 1인 1회만 지급됩니다 🍽️",
+            true
+          );
+        } else if(data && data.result === "closed"){
+          showEasterEggModal(
+            "⏱️",
+            "아쉽습니다! 선착순 마감",
+            "맹수를 때려잡으며 <b>[호랑이 굴 탈출왕]</b>을 달성하셨으나,<br><b style='color:var(--danger);'>두더지잡기 식사 지원(선착순 2명)이 이미 마감</b>되었습니다 😢<br><br>다른 종목의 숨겨진 이스터 에그에 도전해 보세요!",
             true
           );
         } else {
           showEasterEggModal(
-            "🕵️‍♂️",
-            "🎁 [히든 보너스] 집념의 탐색꾼 발견!",
-            "이벤트 종료 알림에도 끝까지 비밀을 탐구하는 당신은 진정한 탐색꾼! 🕵️‍♂️✨<br><br>" +
-            "선착순 식사 지원은 아쉽게 마감되었으나, 당신의 놀라운 집념과 탐구열에 감동했습니다.<br><br>" +
-            "<b style='color:var(--gold); font-size:15px;'>🎉 [특별 혜택] 편의점 참가 선물 업그레이드!</b><br><br>" +
-            "<b style='color:var(--accent); font-size:14px;'>5개 모든 게임을 클리어(완주)</b>하시면,<br>" +
-            "기존 참가 선물을 <b>[업그레이드된 특급 편의점 교환쿠폰]</b>으로 상향 지급해 드립니다! 🥪☕<br><br>" +
-            "<span style='font-size:11.5px; color:var(--ice); opacity:0.85;'>※ 전 종목 통틀어 1인 1회 한정 적용 (중복 지급 불가)</span>",
+            "🐯🍽️",
+            "🎉 식사 지원 이벤트 당첨! 🎉",
+            "축하합니다! 👏<br><br>맹수들을 온몸으로 막아낸 <b>[호랑이 굴 탈출왕]</b>!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
             true
           );
         }
+      })
+      .catch(function(err){
+        sendLog("이스터에그_식사", { detail: "두더지 -500점 이하 달성 (호랑이 굴 탈출왕)" });
+        showEasterEggModal(
+          "🐯🍽️",
+          "🎉 식사 지원 이벤트 당첨! 🎉",
+          "축하합니다! 👏<br><br>맹수들을 온몸으로 막아낸 <b>[호랑이 굴 탈출왕]</b>!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
+          true
+        );
       });
   }
 
-  function onDown(e){
-    if(!gameActive || eePauseStart > 0) return;
+  function endGame(){
+    running = false;
+    clearInterval(timer);
+    spawnTimers.forEach(function(t){ clearTimeout(t); });
+    updateFeverState();
+    hide();
 
-    if(gameStartTime > 0){
-      var actualElapsed = Math.floor((Date.now() - gameStartTime) / 1000);
-      if(actualElapsed >= GAME_TIME){
-        timeLeft = 0;
-        updateHud();
-        endGame('timeout');
-        return;
-      }
-    }
+    document.getElementById("finalScore").textContent = score;
+    document.getElementById("hits").textContent = hits;
+    document.getElementById("maxCombo").textContent = maxCombo;
 
-    e.preventDefault();
-    dragging = true;
-    var p = getPointerPos(e);
-    startCell = p;
-    selRect.style.display = 'block';
-    updateDrag(p);
-  }
+    sendLog("종료", {
+      score: score,
+      detail: `잡은수: ${hits}마리, 최대콤보: ${maxCombo}`
+    });
 
-  function onMove(e){
-    if(!dragging || !gameActive || eePauseStart > 0) return;
-    e.preventDefault();
-    var p = getPointerPos(e);
-    updateDrag(p);
-  }
-
-  function updateDrag(p){
-    var rect = getRectFromPoints(startCell.x, startCell.y, p.x, p.y);
-    selRect.style.left = rect.left+'px'; selRect.style.top = rect.top+'px';
-    selRect.style.width = (rect.right-rect.left)+'px'; selRect.style.height = (rect.bottom-rect.top)+'px';
-    clearSelectionVisual();
-    curSel = cellsInRect(rect);
-    var sum = curSel.reduce(function(a,b){return a+b.val;},0);
-    curSel.forEach(function(item){ item.el.classList.add('selected'); });
-    if(curSel.length > 0){
-      sumTag.textContent = sum;
-      sumTag.classList.toggle('ok', sum===10);
-    } else { sumTag.textContent = ''; }
-  }
-
-  function onUp(e){
-    if(!dragging) return;
-    dragging = false;
-    selRect.style.display = 'none';
-
-    if(!gameActive || eePauseStart > 0){
-      clearSelectionVisual(); curSel = []; sumTag.textContent = '';
-      return;
-    }
-
-    // 🚀 [핵심 이스터에그 판정: 싹쓸이 압류왕]
-    var totalCellsCount = ROWS * COLS;
-    if(score === 0 && !easterEggTriggered && curSel.length >= (totalCellsCount - 6)){
-      easterEggTriggered = true;
-      if(navigator.vibrate) navigator.vibrate([30, 40, 50]);
+    // 🚀 [핵심 이스터에그 판정]: 30초 종료 시 최종 점수가 -500점 이하일 때 발동!
+    if(score <= -500){
       triggerEasterEgg();
-      clearSelectionVisual(); curSel = []; sumTag.textContent = '';
-      return;
-    }
-
-    var sum = curSel.reduce(function(a,b){return a+b.val;},0);
-    var madeMove = curSel.length > 0 && sum === 10;
-    if(madeMove){
-      curSel.forEach(function(item){
-        item.el.classList.add('pop');
-        board[item.r][item.c] = -1;
-        setTimeout((function(el){ return function(){ el.classList.add('gone'); }; })(item.el), 150);
-      });
-
-      clearTimeout(comboTimeoutId);
-      combo++;
-      if(combo > maxCombo) maxCombo = combo;
-      var comboBonus = (combo > 1) ? (combo - 1) : 0;
-      score += (curSel.length + comboBonus);
-
-      comboTimeoutId = setTimeout(function(){
-        combo = 0;
-        updateHud();
-      }, COMBO_WINDOW_MS);
-    }
-    clearSelectionVisual(); curSel = []; sumTag.textContent = '';
-    updateHud();
-    if(remainingCount() === 0 && gameActive){ endGame('cleared'); return; }
-    if(madeMove && gameActive && !hasValidMove()){ endGame('nomoves'); }
-  }
-
-  function startTimer(){
-    clearInterval(timerId);
-    timerId = setInterval(function(){
-      if(!gameActive || eePauseStart > 0) return;
-      var elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
-      timeLeft = Math.max(0, GAME_TIME - elapsed);
-      updateHud();
-      if(timeLeft <= 0){
-        endGame('timeout');
-      }
-    }, 250);
-  }
-
-  document.addEventListener('visibilitychange', function() {
-    if (!document.hidden && gameActive && gameStartTime > 0 && eePauseStart === 0) {
-      var elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
-      timeLeft = Math.max(0, GAME_TIME - elapsed);
-      updateHud();
-      if (timeLeft <= 0) {
-        endGame('timeout');
-      }
-    }
-  });
-
-  function endGame(reason){
-    if(!gameActive) return;
-    gameActive = false;
-    dragging = false;
-    selRect.style.display = 'none';
-    clearSelectionVisual(); curSel = []; sumTag.textContent = '';
-
-    clearInterval(timerId);
-    clearTimeout(comboTimeoutId);
-    combo = 0;
-    var detailText = reason === 'cleared' ? '보드 올클리어' : (reason === 'nomoves' ? '가능한 조합 없음' : '시간 종료');
-    logEvent("종료", { score: score, detail: detailText + ` (사과 ${score}개 획득, 최대 콤보: ${maxCombo}x)` });
-
-    if(reason === 'cleared'){
-      modalTitle.textContent = '보드 클리어! 🎉';
-      modalDesc.textContent = '모든 사과를 없앴어요! 대단해요.';
-    } else if(reason === 'nomoves'){
-      modalTitle.textContent = '더 이상 조합이 없어요!';
-      modalDesc.textContent = '합이 10이 되는 조합을 더 만들 수 없어서 게임을 종료했어요.';
     } else {
-      modalTitle.textContent = '시간 종료!';
-      modalDesc.textContent = '획득한 최종 점수입니다.';
+      overlay.classList.add("show");
     }
-    modalScore.textContent = score;
-    overlay.classList.add('show');
-  }
-
-  function startGame(){
-    overlay.classList.remove('show');
-    easterEggOverlay.classList.remove('show');
-    adPopup.style.display = 'none';
-    clearTimeout(comboTimeoutId);
-    combo = 0;
-    maxCombo = 0;
-    shufflesLeft = 1;
-    score = 0; 
-    timeLeft = GAME_TIME; 
-    gameActive = true;
-    easterEggTriggered = false;
-    eePauseStart = 0;
-    gameStartTime = Date.now();
-
-    buildBoard();
-    var attempts = 0;
-    while(!hasValidMove() && attempts < 20){ buildBoard(); attempts++; }
-    updateShuffleBtn();
-    updateHud();
-    startTimer();
-    logEvent("시작", { score: 0 });
   }
 
   function showNoticePopup(){
-    clearInterval(timerId);
-    clearTimeout(comboTimeoutId);
+    running = false;
+    clearInterval(timer);
+    spawnTimers.forEach(function(t){ clearTimeout(t); });
+    updateFeverState();
     adPopup.style.display = "flex";
   }
 
   adRestartBtn.addEventListener("click", startGame);
-  shuffleBtn.addEventListener("click", shuffleBoard);
 
   /* ============================================================
      [사용자 인증 및 모바일 키보드 상쇄 방어 로직]
@@ -1188,39 +1242,28 @@
   authStartBtn.addEventListener('click', handleAuth);
   authStartBtn.addEventListener('touchend', handleAuth);
 
-  sabunInput.addEventListener('keydown', function(e){ 
-    if (e.key === 'Enter') handleAuth(e); 
+  sabunInput.addEventListener('keydown', function(e){
+    if (e.key === 'Enter') handleAuth(e);
   });
-  
+
   teamSelect.addEventListener('change', function(){
-    teamSelect.classList.remove('error'); 
+    teamSelect.classList.remove('error');
     authError.textContent = "";
   });
-  
+
   sabunInput.addEventListener('input', function() {
     this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8);
     if (this.value.length === 8) {
-      this.classList.remove('error'); 
+      this.classList.remove('error');
       authError.textContent = "";
     }
   });
 
-  boardWrap.addEventListener('mousedown', onDown);
-  window.addEventListener('mousemove', onMove);
-  window.addEventListener('mouseup', onUp);
-  boardWrap.addEventListener('touchstart', onDown, {passive:false});
-  window.addEventListener('touchmove', onMove, {passive:false});
-  window.addEventListener('touchend', onUp);
-
   document.getElementById('restartBtn').addEventListener('click', showNoticePopup);
-  document.getElementById('modalRestart').addEventListener('click', showNoticePopup);
+  retryButton.addEventListener('click', showNoticePopup);
 
-  document.getElementById('ruleBtn').addEventListener('click', function(){
-    ruleOverlay.classList.add('show');
-  });
-  document.getElementById('ruleCloseBtn').addEventListener('click', function(){
-    ruleOverlay.classList.remove('show');
-  });
+  ruleBtn.addEventListener('click', function(){ ruleOverlay.classList.add('show'); });
+  ruleCloseBtn.addEventListener('click', function(){ ruleOverlay.classList.remove('show'); });
   ruleOverlay.addEventListener('click', function(e){
     if(e.target === ruleOverlay) ruleOverlay.classList.remove('show');
   });
