@@ -1,2508 +1,1256 @@
 <!DOCTYPE html>
-
 <html lang="ko">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
 <title>사과게임 - 금융본부 미니 게임대회</title>
-
 <style>
-
-:root{
-
---navy:#0B1F3A;
-
---ocean:#123A63;
-
---blue:#1B5FA8;
-
---sky:#4F9DDE;
-
---ice:#BFE2F7;
-
---paper:#EAF4FC;
-
---accent:#2FBF9E;
-
---danger:#E0567A;
-
---gold:#FFD700;
-
---font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
-
---font-num: "Segoe UI", "Consolas", "Malgun Gothic", monospace;
-
-}
-
-*{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
-
-html,body{
-
-margin:0; padding:0; height:100%;
-
-background: radial-gradient(circle at 20% 0%, #163A63 0%, var(--navy) 55%, #071426 100%);
-
-font-family: var(--font-ui);
-
-color: var(--paper);
-
-overflow:auto;
-
-user-select:none;
-
-}
-
-#app{
-
-display:flex; flex-direction:column; align-items:center;
-
-min-height:100vh; min-height:100dvh; padding: 8px 12px; gap:6px;
-
-}
-
-
-
-/* 브랜드 헤더 */
-
-.brand-bar{
-
-width:100%;
-
-max-width: 640px;
-
-display:flex;
-
-flex-direction:column;
-
-gap:6px;
-
-background: linear-gradient(135deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02));
-
-border:1px solid rgba(255,255,255,0.16);
-
-border-radius:16px;
-
-padding:8px 12px;
-
-box-sizing:border-box;
-
-}
-
-.brand-top{
-
-display:flex;
-
-align-items:center;
-
-justify-content:space-between;
-
-gap:10px;
-
-width:100%;
-
-}
-
-.brand-left{ display:flex; align-items:center; gap:10px; }
-
-.brand-logo{ width:56px; height:28px; flex-shrink:0; }
-
-.brand-logo svg{ width:100%; height:100%; display:block; }
-
-.brand-text{ display:flex; flex-direction:column; line-height:1.2; }
-
-.brand-name {
-
-font-size: 13px;
-
-font-weight: 800;
-
-color: #fff;
-
-letter-spacing: -0.02em;
-
-}
-
-.brand-dept {
-
-display: inline-block;
-
-margin-top: 2px;
-
-font-size: 10px;
-
-font-weight: 800;
-
-color: var(--navy);
-
-background: var(--sky);
-
-padding: 2px 8px;
-
-border-radius: 999px;
-
-width: fit-content;
-
-letter-spacing: -0.01em;
-
-}
-
-.event-tag {
-
-font-size: 11px;
-
-font-weight: 700;
-
-color: var(--ice);
-
-background: rgba(255, 255, 255, 0.08);
-
-border: 1px solid rgba(255, 255, 255, 0.2);
-
-padding: 6px 12px;
-
-border-radius: 999px;
-
-white-space: nowrap;
-
-letter-spacing: -0.01em;
-
-text-decoration: none;
-
-display: inline-flex;
-
-align-items: center;
-
-cursor: pointer;
-
-transition: all 0.15s ease;
-
-}
-
-.event-tag:hover {
-
-background: rgba(255, 255, 255, 0.18);
-
-color: #fff;
-
-border-color: var(--sky);
-
-transform: translateY(-1px);
-
-}
-
-.event-tag:active {
-
-transform: scale(0.95);
-
-background: var(--blue);
-
-}
-
-
-
-.brand-right{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
-
-
-
-/* 게임 바로가기 네비게이션 바 */
-
-.nav-games{
-
-display:flex;
-
-align-items:center;
-
-justify-content:space-between;
-
-gap:6px;
-
-width:100%;
-
-overflow-x:auto;
-
-padding-top:4px;
-
-border-top:1px solid rgba(255,255,255,0.08);
-
-}
-
-.nav-games::-webkit-scrollbar { display:none; }
-
-.nav-item{
-
-flex:1;
-
-min-width:54px;
-
-display:inline-flex;
-
-align-items:center;
-
-justify-content:center;
-
-gap:4px;
-
-padding:5px 7px;
-
-border-radius:10px;
-
-background: rgba(255,255,255,0.05);
-
-border: 1px solid rgba(255,255,255,0.12);
-
-color: var(--ice);
-
-text-decoration: none;
-
-font-size: 11px;
-
-font-weight: 700;
-
-transition: all 0.15s ease;
-
-white-space: nowrap;
-
-}
-
-.nav-item:hover{
-
-background: rgba(255,255,255,0.15);
-
-color: #fff;
-
-transform: translateY(-1px);
-
-}
-
-.nav-item.active{
-
-background: var(--blue);
-
-border-color: var(--sky);
-
-color: #fff;
-
-box-shadow: 0 0 10px rgba(79, 157, 222, 0.4);
-
-}
-
-
-
-/* 2단 대시보드 (시간/점수/콤보/남은사과) */
-
-.game-dash{
-
-width: 100%;
-
-max-width: 640px;
-
-display: flex;
-
-flex-direction: column;
-
-gap: 6px;
-
-background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
-
-border: 1px solid rgba(255,255,255,0.14);
-
-border-radius: 14px;
-
-padding: 8px 12px;
-
-box-sizing: border-box;
-
-}
-
-.dash-left{
-
-display: flex;
-
-align-items: center;
-
-justify-content: space-between;
-
-width: 100%;
-
-}
-
-.game-title{
-
-font-size: clamp(15px, 3.2vw, 18px);
-
-font-weight: 800;
-
-color: #fff;
-
-margin: 0;
-
-letter-spacing: -0.02em;
-
-display: flex;
-
-align-items: center;
-
-gap: 4px;
-
-white-space: nowrap;
-
-}
-
-.player-tag{
-
-font-size: 11px;
-
-background: rgba(47, 191, 158, 0.15);
-
-border: 1px solid var(--accent);
-
-color: var(--accent);
-
-padding: 3px 9px;
-
-border-radius: 20px;
-
-font-weight: 600;
-
-white-space: nowrap;
-
-cursor: pointer;
-
-}
-
-.dash-stats{
-
-display: flex;
-
-align-items: center;
-
-justify-content: space-between;
-
-gap: 6px;
-
-width: 100%;
-
-}
-
-.stat-card{
-
-flex: 1;
-
-background: rgba(6, 20, 36, 0.75);
-
-border: 1px solid rgba(255,255,255,0.1);
-
-border-radius: 10px;
-
-padding: 4px 4px;
-
-text-align: center;
-
-display: flex;
-
-flex-direction: column;
-
-align-items: center;
-
-min-width: 0;
-
-}
-
-.stat-lbl{
-
-font-size: 9.5px;
-
-color: var(--ice);
-
-opacity: 0.75;
-
-line-height: 1.1;
-
-margin-bottom: 2px;
-
-white-space: nowrap;
-
-}
-
-.stat-val{
-
-font-size: 14.5px;
-
-font-weight: 800;
-
-font-family: var(--font-num);
-
-font-variant-numeric: tabular-nums;
-
-line-height: 1.1;
-
-}
-
-.stat-card.time .stat-val { color: var(--sky); }
-
-.stat-card.time.low .stat-val { color: var(--danger); }
-
-.stat-card.score .stat-val { color: var(--accent); }
-
-.stat-card.combo .stat-val { color: var(--gold); }
-
-.stat-card.left .stat-val { color: #fff; }
-
-
-
-/* 보드 래퍼 */
-
-#board-wrap{
-
-position:relative;
-
-background: linear-gradient(180deg, #0E2A4A, #0A2036);
-
-border: 1px solid rgba(255,255,255,0.1);
-
-border-radius: 18px;
-
-padding: 8px;
-
-box-shadow: 0 20px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
-
-touch-action:none;
-
-width: min(92vw, 560px);
-
-box-sizing: border-box;
-
-}
-
-#board{
-
-display:grid;
-
-gap: 2.5px;
-
-position:relative;
-
-width:100%;
-
-}
-
-.cell{
-
-display:flex; align-items:center; justify-content:center;
-
-border-radius: 6px;
-
-background: linear-gradient(160deg, #2170B8, #164E8C);
-
-border: 1px solid rgba(255,255,255,0.15);
-
-color:#fff;
-
-font-family: var(--font-num);
-
-font-weight:700;
-
-font-size: clamp(9px, 2.8vw, 15px);
-
-position:relative;
-
-transition: transform 0.08s ease, background 0.15s ease, opacity 0.25s ease;
-
-width:100%;
-
-aspect-ratio: 1 / 1;
-
-}
-
-.cell::after{
-
-content:"";
-
-position:absolute; top:2px; left:4px; right:4px; height:32%;
-
-border-radius: 5px 5px 40% 40%;
-
-background: rgba(255,255,255,0.18);
-
-pointer-events:none;
-
-}
-
-.cell.selected{
-
-background: linear-gradient(160deg, var(--sky), var(--blue));
-
-box-shadow: 0 0 0 2px rgba(255,255,255,0.5) inset;
-
-transform: scale(0.94);
-
-}
-
-.cell.gone{
-
-opacity:0;
-
-transform: scale(0.4) rotate(15deg);
-
-pointer-events:none;
-
-}
-
-.cell.pop{ animation: pop 0.3s ease; }
-
-@keyframes pop{
-
-0%{ transform: scale(1); }
-
-40%{ transform: scale(1.25); background: linear-gradient(160deg, var(--accent), #1E9C81); }
-
-100%{ transform: scale(0.4); }
-
-}
-
-#selRect{
-
-position:absolute;
-
-border: 2px solid var(--sky);
-
-background: rgba(79,157,222,0.18);
-
-border-radius:6px;
-
-pointer-events:none;
-
-display:none;
-
-}
-
-.sumTag{
-
-position:absolute;
-
-top:-24px; left:0;
-
-background: var(--navy);
-
-border:1px solid var(--sky);
-
-color:#fff;
-
-font-size:11px;
-
-font-family: var(--font-num);
-
-font-weight:700;
-
-padding:2px 7px;
-
-border-radius:8px;
-
-white-space:nowrap;
-
-}
-
-.sumTag.ok{ background: var(--accent); border-color: var(--accent); color:#04241c;}
-
-
-
-/* 컨트롤 버튼 */
-
-.controls{ display:flex; gap:8px; margin-top:2px; justify-content:center; flex-wrap:wrap; }
-
-button.main{
-
-font-family: var(--font-ui); font-size:13.5px; font-weight:700;
-
-background: var(--blue); color:#fff; border:none;
-
-padding: 8px 16px; border-radius: 10px; cursor:pointer;
-
-transition: background 0.15s ease, transform 0.1s ease;
-
-}
-
-button.main:hover{ background: var(--sky); }
-
-button.main:active{ transform: scale(0.97); }
-
-button.ghost{
-
-background: transparent; border:1px solid rgba(255,255,255,0.25);
-
-color: var(--ice); font-family: var(--font-ui); font-size:13.5px; font-weight:700;
-
-padding: 8px 14px; border-radius: 10px; cursor:pointer;
-
-transition: all 0.15s ease;
-
-}
-
-button.ghost:hover{ background: rgba(255,255,255,0.08); }
-
-button.ghost:active{ transform: scale(0.97); }
-
-button.ghost.highlight{
-
-border-color: var(--gold); color: var(--gold);
-
-background: rgba(255, 215, 0, 0.08);
-
-}
-
-button.ghost.highlight:hover{ background: rgba(255, 215, 0, 0.18); }
-
-
-
-.hint{ font-size:11.5px; color:var(--ice); opacity:0.65; text-align:center; max-width:480px; }
-
-
-
-/* 모달 레이아웃 */
-
-#overlay, #ruleOverlay, #authOverlay, #easterEggOverlay{
-
-position:fixed; inset:0;
-
-background: rgba(4,12,24,0.85);
-
-display:none; align-items:center; justify-content:center; z-index:100;
-
-padding:20px;
-
-}
-
-#overlay.show, #ruleOverlay.show, #authOverlay.show, #easterEggOverlay.show{ display:flex; }
-
-.modal{
-
-background: linear-gradient(180deg, #123A63, #0B1F3A);
-
-border: 1px solid rgba(255,255,255,0.15);
-
-border-radius: 18px;
-
-padding: 30px 36px;
-
-text-align:center;
-
-min-width: 260px;
-
-max-width: 420px;
-
-box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-
-}
-
-.modal h2{ margin:0 0 8px; font-size:22px; }
-
-.modal .bigscore{ font-size:42px; font-weight:800; color: var(--accent); margin: 10px 0; font-family: var(--font-num);}
-
-.modal p{ margin:0 0 18px; color: var(--ice); font-size:14px; line-height:1.6; }
-
-.modal ol{ text-align:left; color:var(--ice); font-size:13px; line-height:1.8; padding-left:20px; margin:0 0 18px; }
-
-
-
-.auth-input{
-
-width: 100%; padding: 12px 14px;
-
-border: 1px solid rgba(255,255,255,0.25); border-radius: 10px;
-
-background: rgba(255,255,255,0.08); color: #fff; font-size: 16px;
-
-font-family: var(--font-num); text-align: center; margin-bottom: 16px; outline: none;
-
-}
-
-.auth-input:focus{ border-color: var(--sky); background: rgba(255,255,255,0.12); }
-
-.auth-input.error{ border-color: var(--danger); }
-
-select.auth-input{
-
-appearance: none; -webkit-appearance: none; -moz-appearance: none;
-
-background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23BFE2F7' stroke-width='2'%3e%3cpath d='M6 9l6 6 6-6'/%3e%3c/svg%3e");
-
-background-repeat: no-repeat; background-position: right 12px center; background-size: 18px;
-
-text-align: left; padding-right: 38px; cursor: pointer;
-
-}
-
-select.auth-input option{ background: #123A63; color:#fff; }
-
-.auth-error{ color: var(--danger); font-size: 12px; margin: -10px 0 14px; height: 14px; display: block; }
-
-
-
-/* 10대 업무수칙 팝업 */
-
-.adPopup{
-
-position:fixed; inset:0;
-
-background:rgba(4,12,24,0.92);
-
-display:none; justify-content:center; align-items:center;
-
-z-index:9999; padding:20px;
-
-}
-
-.adBox{ text-align:center; max-width:90vw; }
-
-.adBox img{
-
-width:350px; max-width:90vw; border-radius:12px;
-
-box-shadow:0 15px 40px rgba(0,0,0,0.6);
-
-}
-
-#adRestartBtn{
-
-width:auto; min-width:140px; margin-top:16px;
-
-}
-
-
-
-/* PC 차단 전면 안내 오버레이 */
-
-#pcBlockOverlay {
-
-position: fixed;
-
-inset: 0;
-
-background: radial-gradient(circle at 50% 30%, #163A63 0%, #071426 100%);
-
-z-index: 999999;
-
-display: none;
-
-align-items: center;
-
-justify-content: center;
-
-padding: 24px;
-
-text-align: center;
-
-}
-
-#pcBlockOverlay.show { display: flex; }
-
+  :root{
+    --navy:#0B1F3A;
+    --ocean:#123A63;
+    --blue:#1B5FA8;
+    --sky:#4F9DDE;
+    --ice:#BFE2F7;
+    --paper:#EAF4FC;
+    --accent:#2FBF9E;
+    --danger:#E0567A;
+    --gold:#FFD700;
+    --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    --font-num: "Segoe UI", "Consolas", "Malgun Gothic", monospace;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{
+    margin:0; padding:0; height:100%;
+    background: radial-gradient(circle at 20% 0%, #163A63 0%, var(--navy) 55%, #071426 100%);
+    font-family: var(--font-ui);
+    color: var(--paper);
+    overflow:auto;
+    user-select:none;
+  }
+  #app{
+    display:flex; flex-direction:column; align-items:center;
+    min-height:100vh; min-height:100dvh; padding: 8px 12px; gap:6px;
+  }
+
+  /* 브랜드 헤더 */
+  .brand-bar{
+    width:100%;
+    max-width: 640px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02));
+    border:1px solid rgba(255,255,255,0.16);
+    border-radius:16px;
+    padding:8px 12px;
+    box-sizing:border-box;
+  }
+  .brand-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    width:100%;
+  }
+  .brand-left{ display:flex; align-items:center; gap:10px; }
+  .brand-logo{ width:56px; height:28px; flex-shrink:0; }
+  .brand-logo svg{ width:100%; height:100%; display:block; }
+  .brand-text{ display:flex; flex-direction:column; line-height:1.2; }
+  .brand-name { 
+    font-size: 13px; 
+    font-weight: 800; 
+    color: #fff; 
+    letter-spacing: -0.02em; 
+  }
+  .brand-dept {
+    display: inline-block;
+    margin-top: 2px;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--navy);
+    background: var(--sky);
+    padding: 2px 8px;
+    border-radius: 999px;
+    width: fit-content;
+    letter-spacing: -0.01em;
+  }
+  .event-tag {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ice);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 6px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .event-tag:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    border-color: var(--sky);
+    transform: translateY(-1px);
+  }
+  .event-tag:active {
+    transform: scale(0.95);
+    background: var(--blue);
+  }
+
+  .brand-right{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
+
+  /* 게임 바로가기 네비게이션 바 */
+  .nav-games{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:6px;
+    width:100%;
+    overflow-x:auto;
+    padding-top:4px;
+    border-top:1px solid rgba(255,255,255,0.08);
+  }
+  .nav-games::-webkit-scrollbar { display:none; }
+  .nav-item{
+    flex:1;
+    min-width:54px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    padding:5px 7px;
+    border-radius:10px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--ice);
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 700;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+  .nav-item:hover{
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+  .nav-item.active{
+    background: var(--blue);
+    border-color: var(--sky);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(79, 157, 222, 0.4);
+  }
+
+  /* 2단 대시보드 (시간/점수/콤보/남은사과) */
+  .game-dash{
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 14px;
+    padding: 8px 12px;
+    box-sizing: border-box;
+  }
+  .dash-left{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+  .game-title{
+    font-size: clamp(15px, 3.2vw, 18px);
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  .player-tag{
+    font-size: 11px;
+    background: rgba(47, 191, 158, 0.15);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .dash-stats{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    width: 100%;
+  }
+  .stat-card{
+    flex: 1;
+    background: rgba(6, 20, 36, 0.75);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 4px 4px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+  }
+  .stat-lbl{
+    font-size: 9.5px;
+    color: var(--ice);
+    opacity: 0.75;
+    line-height: 1.1;
+    margin-bottom: 2px;
+    white-space: nowrap;
+  }
+  .stat-val{
+    font-size: 14.5px;
+    font-weight: 800;
+    font-family: var(--font-num);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+  .stat-card.time .stat-val { color: var(--sky); }
+  .stat-card.time.low .stat-val { color: var(--danger); }
+  .stat-card.score .stat-val { color: var(--accent); }
+  .stat-card.combo .stat-val { color: var(--gold); }
+  .stat-card.left .stat-val { color: #fff; }
+
+  /* 보드 래퍼 */
+  #board-wrap{
+    position:relative;
+    background: linear-gradient(180deg, #0E2A4A, #0A2036);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 18px;
+    padding: 8px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
+    touch-action:none;
+    width: min(92vw, 560px);
+    box-sizing: border-box;
+  }
+  #board{
+    display:grid;
+    gap: 2.5px;
+    position:relative;
+    width:100%;
+  }
+  .cell{
+    display:flex; align-items:center; justify-content:center;
+    border-radius: 6px;
+    background: linear-gradient(160deg, #2170B8, #164E8C);
+    border: 1px solid rgba(255,255,255,0.15);
+    color:#fff;
+    font-family: var(--font-num);
+    font-weight:700;
+    font-size: clamp(9px, 2.8vw, 15px);
+    position:relative;
+    transition: transform 0.08s ease, background 0.15s ease, opacity 0.25s ease;
+    width:100%;
+    aspect-ratio: 1 / 1;
+  }
+  .cell::after{
+    content:"";
+    position:absolute; top:2px; left:4px; right:4px; height:32%;
+    border-radius: 5px 5px 40% 40%;
+    background: rgba(255,255,255,0.18);
+    pointer-events:none;
+  }
+  .cell.selected{
+    background: linear-gradient(160deg, var(--sky), var(--blue));
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.5) inset;
+    transform: scale(0.94);
+  }
+  .cell.gone{
+    opacity:0;
+    transform: scale(0.4) rotate(15deg);
+    pointer-events:none;
+  }
+  .cell.pop{ animation: pop 0.3s ease; }
+  @keyframes pop{
+    0%{ transform: scale(1); }
+    40%{ transform: scale(1.25); background: linear-gradient(160deg, var(--accent), #1E9C81); }
+    100%{ transform: scale(0.4); }
+  }
+  #selRect{
+    position:absolute;
+    border: 2px solid var(--sky);
+    background: rgba(79,157,222,0.18);
+    border-radius:6px;
+    pointer-events:none;
+    display:none;
+  }
+  .sumTag{
+    position:absolute;
+    top:-24px; left:0;
+    background: var(--navy);
+    border:1px solid var(--sky);
+    color:#fff;
+    font-size:11px;
+    font-family: var(--font-num);
+    font-weight:700;
+    padding:2px 7px;
+    border-radius:8px;
+    white-space:nowrap;
+  }
+  .sumTag.ok{ background: var(--accent); border-color: var(--accent); color:#04241c;}
+
+  /* 컨트롤 버튼 */
+  .controls{ display:flex; gap:8px; margin-top:2px; justify-content:center; flex-wrap:wrap; }
+  button.main{
+    font-family: var(--font-ui); font-size:13.5px; font-weight:700;
+    background: var(--blue); color:#fff; border:none;
+    padding: 8px 16px; border-radius: 10px; cursor:pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  button.main:hover{ background: var(--sky); }
+  button.main:active{ transform: scale(0.97); }
+  button.ghost{
+    background: transparent; border:1px solid rgba(255,255,255,0.25);
+    color: var(--ice); font-family: var(--font-ui); font-size:13.5px; font-weight:700;
+    padding: 8px 14px; border-radius: 10px; cursor:pointer;
+    transition: all 0.15s ease;
+  }
+  button.ghost:hover{ background: rgba(255,255,255,0.08); }
+  button.ghost:active{ transform: scale(0.97); }
+  button.ghost.highlight{
+    border-color: var(--gold); color: var(--gold);
+    background: rgba(255, 215, 0, 0.08);
+  }
+  button.ghost.highlight:hover{ background: rgba(255, 215, 0, 0.18); }
+
+  .hint{ font-size:11.5px; color:var(--ice); opacity:0.65; text-align:center; max-width:480px; }
+
+  /* 모달 레이아웃 */
+  #overlay, #ruleOverlay, #authOverlay, #easterEggOverlay{
+    position:fixed; inset:0;
+    background: rgba(4,12,24,0.85);
+    display:none; align-items:center; justify-content:center; z-index:100;
+    padding:20px;
+  }
+  #overlay.show, #ruleOverlay.show, #authOverlay.show, #easterEggOverlay.show{ display:flex; }
+  .modal{
+    background: linear-gradient(180deg, #123A63, #0B1F3A);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 18px;
+    padding: 30px 36px;
+    text-align:center;
+    min-width: 260px;
+    max-width: 420px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  .modal h2{ margin:0 0 8px; font-size:22px; }
+  .modal .bigscore{ font-size:42px; font-weight:800; color: var(--accent); margin: 10px 0; font-family: var(--font-num);}
+  .modal p{ margin:0 0 18px; color: var(--ice); font-size:14px; line-height:1.6; }
+  .modal ol{ text-align:left; color:var(--ice); font-size:13px; line-height:1.8; padding-left:20px; margin:0 0 18px; }
+
+  .auth-input{
+    width: 100%; padding: 12px 14px;
+    border: 1px solid rgba(255,255,255,0.25); border-radius: 10px;
+    background: rgba(255,255,255,0.08); color: #fff; font-size: 16px;
+    font-family: var(--font-num); text-align: center; margin-bottom: 16px; outline: none;
+  }
+  .auth-input:focus{ border-color: var(--sky); background: rgba(255,255,255,0.12); }
+  .auth-input.error{ border-color: var(--danger); }
+  select.auth-input{
+    appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23BFE2F7' stroke-width='2'%3e%3cpath d='M6 9l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat; background-position: right 12px center; background-size: 18px;
+    text-align: left; padding-right: 38px; cursor: pointer;
+  }
+  select.auth-input option{ background: #123A63; color:#fff; }
+  .auth-error{ color: var(--danger); font-size: 12px; margin: -10px 0 14px; height: 14px; display: block; }
+
+  /* 10대 업무수칙 팝업 */
+  .adPopup{
+    position:fixed; inset:0;
+    background:rgba(4,12,24,0.92);
+    display:none; justify-content:center; align-items:center;
+    z-index:9999; padding:20px;
+  }
+  .adBox{ text-align:center; max-width:90vw; }
+  .adBox img{
+    width:350px; max-width:90vw; border-radius:12px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.6);
+  }
+  #adRestartBtn{
+    width:auto; min-width:140px; margin-top:16px;
+  }
+
+  /* PC 차단 전면 안내 오버레이 */
+  #pcBlockOverlay {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at 50% 30%, #163A63 0%, #071426 100%);
+    z-index: 999999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+  }
+  #pcBlockOverlay.show { display: flex; }
 </style>
-
 </head>
-
 <body>
 
-
-
 <!-- PC 접속 차단 안내 모달 -->
-
 <div id="pcBlockOverlay">
-
-<div class="modal" style="border-color: rgba(79, 157, 222, 0.4); max-width: 440px; padding: 32px 28px;">
-
-<div style="font-size: 48px; margin-bottom: 12px;">📱</div>
-
-<h2 style="color: #fff; font-size: 20px; margin-bottom: 14px;">모바일 환경에서 진행해주세요! 🙂</h2>
-
-<p style="color: var(--ice); line-height: 1.75; font-size: 13.5px; text-align: center; margin: 0;">
-
-우수하고 훌륭한 <b>금융본부 개발자</b> 여러분의 실력을<br>
-
-의심하는 것은 결코 아니오나...<br><br>
-
-혹시 모를 <b>'창의적인 코드 분석'</b>과<br>
-
-<b>'불미스러운 초고득점 사태'</b>를 미연에 방지하고자<br>
-
-본 게임은 <b style="color: var(--sky);">모바일 스마트폰</b>에서만 진행됩니다.<br><br>
-
-F12는 잠시 봉인해 주세요! 🙂<br>
-
-콘솔창 대신 <b>순수 피지컬과 터치</b>로 승부해 주세요!<br>
-
-<span style="font-size: 12px; color: var(--accent); display: inline-block; margin-top: 10px;">
-
-👉 사내 메신저 링크를 스마트폰으로 열어 접속해 주세요.
-
-</span>
-
-</p>
-
+  <div class="modal" style="border-color: rgba(79, 157, 222, 0.4); max-width: 440px; padding: 32px 28px;">
+    <div style="font-size: 48px; margin-bottom: 12px;">📱</div>
+    <h2 style="color: #fff; font-size: 20px; margin-bottom: 14px;">모바일 환경에서 진행해주세요! 🙂</h2>
+    <p style="color: var(--ice); line-height: 1.75; font-size: 13.5px; text-align: center; margin: 0;">
+      우수하고 훌륭한 <b>금융본부 개발자</b> 여러분의 실력을<br>
+      의심하는 것은 결코 아니오나...<br><br>
+      혹시 모를 <b>'창의적인 코드 분석'</b>과<br>
+      <b>'불미스러운 초고득점 사태'</b>를 미연에 방지하고자<br>
+      본 게임은 <b style="color: var(--sky);">모바일 스마트폰</b>에서만 진행됩니다.<br><br>
+      F12는 잠시 봉인해 주세요! 🙂<br>
+	  콘솔창 대신 <b>순수 피지컬과 터치</b>로 승부해 주세요!<br>
+      <span style="font-size: 12px; color: var(--accent); display: inline-block; margin-top: 10px;">
+        👉 사내 메신저 링크를 스마트폰으로 열어 접속해 주세요.
+      </span>
+    </p>
+  </div>
 </div>
-
-</div>
-
-
 
 <!-- 사번/팀 입력 최초 진입 모달 -->
-
 <div id="authOverlay" class="show">
-
-<div class="modal">
-
-<h2>🍎 사과게임 시작</h2>
-
-<p>사내 랭킹 집계 및 참여 기록 확인을 위해<br>팀과 사번을 입력해 주세요.</p>
-
-<select id="teamSelect" class="auth-input">
-
-<option value="" disabled selected>팀 선택</option>
-
-<option value="증권개발팀">증권개발팀</option>
-
-<option value="증권채널팀">증권채널팀</option>
-
-<option value="카드개발팀">카드개발팀</option>
-
-<option value="라이프개발팀">라이프개발팀</option>
-
-<option value="기타">기타</option>
-
-<option value="영포스">영포스</option>
-
-</select>
-
-<input type="text" id="sabunInput" class="auth-input" placeholder="사번 8자리 (예: 22091019)" maxlength="8" inputmode="numeric" pattern="[0-9]*">
-
-<span class="auth-error" id="authError"></span>
-
-<button type="button" class="main" id="authStartBtn" style="width: 100%;">도전 시작</button>
-
+  <div class="modal">
+    <h2>🍎 사과게임 시작</h2>
+    <p>사내 랭킹 집계 및 참여 기록 확인을 위해<br>팀과 사번을 입력해 주세요.</p>
+    <select id="teamSelect" class="auth-input">
+      <option value="" disabled selected>팀 선택</option>
+      <option value="증권개발팀">증권개발팀</option>
+      <option value="증권채널팀">증권채널팀</option>
+      <option value="카드개발팀">카드개발팀</option>
+      <option value="라이프개발팀">라이프개발팀</option>
+      <option value="기타">기타</option>
+	  <option value="영포스">영포스</option>
+    </select>
+    <input type="text" id="sabunInput" class="auth-input" placeholder="사번 8자리 (예: 22091019)" maxlength="8" inputmode="numeric" pattern="[0-9]*">
+    <span class="auth-error" id="authError"></span>
+    <button type="button" class="main" id="authStartBtn" style="width: 100%;">도전 시작</button>
+  </div>
 </div>
-
-</div>
-
-
 
 <div id="app">
+  <!-- 브랜드 바 -->
+  <div class="brand-bar" id="brandBar">
+    <div class="brand-top">
+      <div class="brand-left">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 68 34" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#4F9DDE"/>
+                <stop offset="1" stop-color="#123A63"/>
+              </linearGradient>
+            </defs>
+            <rect x="1" y="1" width="66" height="32" rx="8" fill="url(#logoGrad)" stroke="rgba(255,255,255,0.25)"/>
+            <text x="34" y="17" text-anchor="middle" dominant-baseline="central" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif" font-weight="800" font-size="14" fill="#fff" letter-spacing="-0.02em">신한DS</text>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">금융본부 🏆 소통 미니게임대회</span>
+          <span class="brand-dept">3분기 리버스 멘토링</span>
+        </div>
+      </div>
+      <div class="brand-right">
+        <a href="https://derekyn.github.io/ShinhanDSGames/ranking.html" class="event-tag btn-ranking">📊 실시간 순위</a>
+      </div>
+    </div>
+    
+    <nav class="nav-games" aria-label="게임 종목 바로가기">
+      <a href="https://derekyn.github.io/ShinhanDSGames/ball.html" class="nav-item">⚽ 공튀기기</a>
+      <a href="https://derekyn.github.io/ShinhanDSGames/mole.html" class="nav-item">🐹 두더지 잡기</a>
+      <a href="https://derekyn.github.io/ShinhanDSGames/apple.html" class="nav-item active">🍎 사과게임</a>
+      <a href="https://derekyn.github.io/ShinhanDSGames/bomb.html" class="nav-item">💣 지뢰찾기</a>
+      <a href="https://derekyn.github.io/ShinhanDSGames/drop.html" class="nav-item">💧 낙하캐치</a>
+    </nav>
+  </div>
 
-<!-- 브랜드 바 -->
+  <!-- 가로형 2단 대시보드 (콤보 카드 포함 4단 정렬) -->
+  <div class="game-dash">
+    <div class="dash-left">
+      <h1 class="game-title">🍎 사과게임</h1>
+      <span id="playerBadge" class="player-tag" style="display:none;" title="클릭 시 팀/사번 변경"></span>
+    </div>
 
-<div class="brand-bar" id="brandBar">
+    <div class="dash-stats">
+      <div class="stat-card time" id="timeStat">
+        <span class="stat-lbl">남은 시간</span>
+        <span class="stat-val" id="timeVal">01:50</span>
+      </div>
+      <div class="stat-card score">
+        <span class="stat-lbl">점수</span>
+        <span class="stat-val" id="scoreVal">0</span>
+      </div>
+      <div class="stat-card combo" id="comboStat">
+        <span class="stat-lbl">콤보</span>
+        <span class="stat-val" id="comboVal">0</span>
+      </div>
+      <div class="stat-card left">
+        <span class="stat-lbl">남은 사과</span>
+        <span class="stat-val" id="leftVal">108</span>
+      </div>
+    </div>
+  </div>
 
-<div class="brand-top">
+  <div id="board-wrap">
+    <div id="board"></div>
+    <div id="selRect"><span class="sumTag" id="sumTag"></span></div>
+  </div>
 
-<div class="brand-left">
-
-<div class="brand-logo" aria-hidden="true">
-
-<svg viewBox="0 0 68 34" xmlns="http://www.w3.org/2000/svg">
-
-<defs>
-
-<linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
-
-<stop offset="0" stop-color="#4F9DDE"/>
-
-<stop offset="1" stop-color="#123A63"/>
-
-</linearGradient>
-
-</defs>
-
-<rect x="1" y="1" width="66" height="32" rx="8" fill="url(#logoGrad)" stroke="rgba(255,255,255,0.25)"/>
-
-<text x="34" y="17" text-anchor="middle" dominant-baseline="central" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif" font-weight="800" font-size="14" fill="#fff" letter-spacing="-0.02em">신한DS</text>
-
-</svg>
-
+  <div class="controls">
+    <button class="main" id="restartBtn">다시 시작</button>
+    <button class="ghost highlight" id="shuffleBtn">🎲 판 섞기 (1/1)</button>
+    <button class="ghost" id="ruleBtn">규칙 보기</button>
+  </div>
+  <div class="hint">드래그로 합 10을 만드세요! 3.5초 내 연속 완성 시 콤보 보너스, 막히면 🎲판 섞기를 쓰세요.</div>
 </div>
-
-<div class="brand-text">
-
-<span class="brand-name">금융본부 🏆 소통 미니게임대회</span>
-
-<span class="brand-dept">3분기 리버스 멘토링</span>
-
-</div>
-
-</div>
-
-<div class="brand-right">
-
-<a href="https://derekyn.github.io/ShinhanDSGames/ranking.html" class="event-tag btn-ranking">📊 실시간 순위</a>
-
-</div>
-
-</div>
-
-
-<nav class="nav-games" aria-label="게임 종목 바로가기">
-
-<a href="https://derekyn.github.io/ShinhanDSGames/ball.html" class="nav-item">⚽ 공튀기기</a>
-
-<a href="https://derekyn.github.io/ShinhanDSGames/mole.html" class="nav-item">🐹 두더지 잡기</a>
-
-<a href="https://derekyn.github.io/ShinhanDSGames/apple.html" class="nav-item active">🍎 사과게임</a>
-
-<a href="https://derekyn.github.io/ShinhanDSGames/bomb.html" class="nav-item">💣 지뢰찾기</a>
-
-<a href="https://derekyn.github.io/ShinhanDSGames/drop.html" class="nav-item">💧 낙하캐치</a>
-
-</nav>
-
-</div>
-
-
-
-<!-- 가로형 2단 대시보드 (콤보 카드 포함 4단 정렬) -->
-
-<div class="game-dash">
-
-<div class="dash-left">
-
-<h1 class="game-title">🍎 사과게임</h1>
-
-<span id="playerBadge" class="player-tag" style="display:none;" title="클릭 시 팀/사번 변경"></span>
-
-</div>
-
-
-
-<div class="dash-stats">
-
-<div class="stat-card time" id="timeStat">
-
-<span class="stat-lbl">남은 시간</span>
-
-<span class="stat-val" id="timeVal">01:50</span>
-
-</div>
-
-<div class="stat-card score">
-
-<span class="stat-lbl">점수</span>
-
-<span class="stat-val" id="scoreVal">0</span>
-
-</div>
-
-<div class="stat-card combo" id="comboStat">
-
-<span class="stat-lbl">콤보</span>
-
-<span class="stat-val" id="comboVal">0</span>
-
-</div>
-
-<div class="stat-card left">
-
-<span class="stat-lbl">남은 사과</span>
-
-<span class="stat-val" id="leftVal">108</span>
-
-</div>
-
-</div>
-
-</div>
-
-
-
-<div id="board-wrap">
-
-<div id="board"></div>
-
-<div id="selRect"><span class="sumTag" id="sumTag"></span></div>
-
-</div>
-
-
-
-<div class="controls">
-
-<button class="main" id="restartBtn">다시 시작</button>
-
-<button class="ghost highlight" id="shuffleBtn">🎲 판 섞기 (1/1)</button>
-
-<button class="ghost" id="ruleBtn">규칙 보기</button>
-
-</div>
-
-<div class="hint">드래그로 합 10을 만드세요! 3.5초 내 연속 완성 시 콤보 보너스, 막히면 🎲판 섞기를 쓰세요.</div>
-
-</div>
-
-
 
 <div id="overlay">
-
-<div class="modal">
-
-<h2 id="modalTitle">시간 종료!</h2>
-
-<div class="bigscore" id="modalScore">0</div>
-
-<p id="modalDesc">획득한 사과 개수입니다.</p>
-
-<button class="main" id="modalRestart">다시 도전하기</button>
-
+  <div class="modal">
+    <h2 id="modalTitle">시간 종료!</h2>
+    <div class="bigscore" id="modalScore">0</div>
+    <p id="modalDesc">획득한 사과 개수입니다.</p>
+    <button class="main" id="modalRestart">다시 도전하기</button>
+  </div>
 </div>
-
-</div>
-
-
 
 <!-- 🎁 이스터에그: 싹쓸이 압류왕 (선착순 2명) 모달 -->
-
 <div id="easterEggOverlay">
-
-<div class="modal" style="border: 2px solid var(--gold); box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4);">
-
-<div id="eeIcon" style="font-size: 46px; margin-bottom: 8px;">🍎📦</div>
-
-<h2 id="eeTitle" style="color: var(--gold); font-size: 20px; margin-bottom: 10px;">식사 지원 이벤트 당첨!</h2>
-
-<p id="eeBody" style="color: var(--paper); font-size: 13.5px; line-height: 1.7; margin-bottom: 20px;"></p>
-
-<button type="button" class="main" id="eeCloseBtn" style="background: linear-gradient(135deg, #FFD700, #F59E0B); color: #0B1F3A; font-weight: 800; width: 100%; border: none; font-size: 15px; padding: 11px;">확인</button>
-
+  <div class="modal" style="border: 2px solid var(--gold); box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4);">
+    <div id="eeIcon" style="font-size: 46px; margin-bottom: 8px;">🍎📦</div>
+    <h2 id="eeTitle" style="color: var(--gold); font-size: 20px; margin-bottom: 10px;">식사 지원 이벤트 당첨!</h2>
+    <p id="eeBody" style="color: var(--paper); font-size: 13.5px; line-height: 1.7; margin-bottom: 20px;"></p>
+    <button type="button" class="main" id="eeCloseBtn" style="background: linear-gradient(135deg, #FFD700, #F59E0B); color: #0B1F3A; font-weight: 800; width: 100%; border: none; font-size: 15px; padding: 11px;">확인</button>
+  </div>
 </div>
-
-</div>
-
-
 
 <div id="ruleOverlay">
-
-<div class="modal">
-
-<h2>게임 규칙</h2>
-
-<ol>
-
-<li>보드 위에서 드래그하여 직사각형 안의 사과 숫자 합이 <b>10</b>이 되면 사라져요.</li>
-
-<li>⚡ <b>스피드 콤보</b>: 3.5초 이내에 연속으로 10을 완성하면 <b>콤보 보너스 점수</b> 추가!</li>
-
-<li>🎲 <b>판 섞기</b>: 게임당 1회, 막히거나 조합이 안 보일 때 남아있는 사과들을 재배치해요.</li>
-
-<li>⏱️ <b>실시간 절대 타이머</b>: 공정한 경쟁을 위해 화면을 끄거나 이탈해도 현실의 시간은 멈추지 않고 흘러갑니다.</li>
-
-<li>제한시간(1분 50초) 안에 최대한 많은 사과를 없애 고득점을 노려보세요!</li>
-
-</ol>
-
-<button class="main" id="ruleCloseBtn">확인</button>
-
+  <div class="modal">
+    <h2>게임 규칙</h2>
+    <ol>
+      <li>보드 위에서 드래그하여 직사각형 안의 사과 숫자 합이 <b>10</b>이 되면 사라져요.</li>
+      <li>⚡ <b>스피드 콤보</b>: 3.5초 이내에 연속으로 10을 완성하면 <b>콤보 보너스 점수</b> 추가!</li>
+      <li>🎲 <b>판 섞기</b>: 게임당 1회, 막히거나 조합이 안 보일 때 남아있는 사과들을 재배치해요.</li>
+      <li>⏱️ <b>실시간 절대 타이머</b>: 공정한 경쟁을 위해 화면을 끄거나 이탈해도 현실의 시간은 멈추지 않고 흘러갑니다.</li>
+      <li>제한시간(1분 50초) 안에 최대한 많은 사과를 없애 고득점을 노려보세요!</li>
+    </ol>
+    <button class="main" id="ruleCloseBtn">확인</button>
+  </div>
 </div>
-
-</div>
-
-
 
 <!-- 10대 업무수칙 팝업 -->
-
 <div class="adPopup" id="adPopup">
-
-<div class="adBox">
-
-<img src="ds_10.png" alt="신한DS 10대 업무수칙">
-
-<br>
-
-<button class="main" id="adRestartBtn">재시작하기</button>
-
+  <div class="adBox">
+    <img src="ds_10.png" alt="신한DS 10대 업무수칙">
+    <br>
+    <button class="main" id="adRestartBtn">재시작하기</button>
+  </div>
 </div>
-
-</div>
-
-
 
 <script>
-
 (function(){
-
-/* ============================================================
-
-[F12 모바일 에뮬레이터 및 DevTools 무력화 보안 엔진]
-
-============================================================ */
-
-
-
-function getGpuRenderer() {
-
-try {
-
-var canvas = document.createElement('canvas');
-
-var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-
-if (!gl) return '';
-
-var debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-
-return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : '';
-
-} catch (e) {
-
-return '';
-
-}
-
-}
-
-
-
-function isRealMobileDevice() {
-
-var ua = navigator.userAgent || '';
-
-var mobileRegex = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
-
-var hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-
-
-
-if (!mobileRegex.test(ua) || !hasTouch) return false;
-
-
-
-var platform = navigator.platform || '';
-
-if (['win32', 'win64', 'macintel'].indexOf(platform.toLowerCase()) !== -1) {
-
-return false;
-
-}
-
-
-
-var gpu = getGpuRenderer().toLowerCase();
-
-
-
-// 1순위: 모바일 고유 GPU 칩셋 우선 통과
-
-var mobileGpuKeywords = ['mali', 'adreno', 'apple', 'powervr', 'xclipse'];
-
-for (var m = 0; m < mobileGpuKeywords.length; m++) {
-
-if (gpu.indexOf(mobileGpuKeywords[m]) !== -1) {
-
-return true;
-
-}
-
-}
-
-
-
-// 2순위: PC 전용 외장/내장 GPU 탐지
-
-var pcGpuKeywords = [
-
-'geforce', 'nvidia', 'radeon', 'intel',
-
-'direct3d', 'llvmpipe', 'mesa', 'swiftshader',
-
-'virtualbox', 'vmware', 'microsoft basic render'
-
-];
-
-for (var i = 0; i < pcGpuKeywords.length; i++) {
-
-if (gpu.indexOf(pcGpuKeywords[i]) !== -1) {
-
-return false;
-
-}
-
-}
-
-
-
-return true;
-
-}
-
-
-
-function triggerBlock() {
-
-var pcOverlay = document.getElementById('pcBlockOverlay');
-
-if (pcOverlay) pcOverlay.classList.add('show');
-
-}
-
-
-
-if (!isRealMobileDevice()) {
-
-triggerBlock();
-
-return;
-
-}
-
-
-
-setInterval(function() {
-
-var start = performance.now();
-
-debugger;
-
-var end = performance.now();
-
-if (end - start > 100) {
-
-triggerBlock();
-
-}
-
-}, 1000);
-
-
-
-/* ============================================================
-
-[게임 메인 로직]
-
-============================================================ */
-
-var GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwXeZ1OMPgMQb-JhW_uOAxQ-w1sTq5kb6XbTa6XF3BjzhVrax6uvPc8LBC0YfTSKiZKEQ/exec";
-
-var GAME_NAME = "사과게임";
-
-
-
-var COLS = 12, ROWS = 9, GAME_TIME = 110; // 1분 50초
-
-var COMBO_WINDOW_MS = 3500; // 콤보 유지 시간 (3.5초)
-
-
-
-var curLevel = 'medium (12x9)';
-
-var board, cells, boardEl, selRect, sumTag;
-
-var timeLeft, score, timerId, gameActive;
-
-var gameStartTime = 0; // ⏱️ 절대 시간(Wall-clock) 동기화 타임스탬프
-
-var dragging = false, startCell = null, curSel = [];
-
-var currentSabun = "";
-
-var currentTeam = "";
-
-
-
-// 콤보 & 판 섞기 상태 관리 변수
-
-var combo = 0;
-
-var maxCombo = 0;
-
-var comboTimeoutId = null;
-
-var shufflesLeft = 1;
-
-
-
-// 🎁 이스터에그 상태 변수
-
-var easterEggTriggered = false;
-
-var eePauseStart = 0;
-
-
-
-boardEl = document.getElementById('board');
-
-selRect = document.getElementById('selRect');
-
-sumTag = document.getElementById('sumTag');
-
-var boardWrap = document.getElementById('board-wrap');
-
-var timeVal = document.getElementById('timeVal');
-
-var timeStat = document.getElementById('timeStat');
-
-var scoreVal = document.getElementById('scoreVal');
-
-var comboVal = document.getElementById('comboVal');
-
-var leftVal = document.getElementById('leftVal');
-
-
-
-var overlay = document.getElementById('overlay');
-
-var modalTitle = document.getElementById('modalTitle');
-
-var modalScore = document.getElementById('modalScore');
-
-var modalDesc = document.getElementById('modalDesc');
-
-var ruleOverlay = document.getElementById('ruleOverlay');
-
-
-
-var easterEggOverlay = document.getElementById('easterEggOverlay');
-
-var eeIcon = document.getElementById('eeIcon');
-
-var eeTitle = document.getElementById('eeTitle');
-
-var eeBody = document.getElementById('eeBody');
-
-var eeCloseBtn = document.getElementById('eeCloseBtn');
-
-
-
-var adPopup = document.getElementById("adPopup");
-
-var adRestartBtn = document.getElementById("adRestartBtn");
-
-var shuffleBtn = document.getElementById("shuffleBtn");
-
-
-
-var authOverlay = document.getElementById('authOverlay');
-
-var teamSelect = document.getElementById('teamSelect');
-
-var sabunInput = document.getElementById('sabunInput');
-
-var authStartBtn = document.getElementById('authStartBtn');
-
-var playerBadge = document.getElementById('playerBadge');
-
-var authError = document.getElementById('authError');
-
-
-
-function logEvent(eventType, extraData){
-
-if(!GOOGLE_WEBHOOK_URL) return;
-
-var payload = Object.assign({
-
-game: GAME_NAME,
-
-team: currentTeam,
-
-sabun: currentSabun,
-
-event: eventType,
-
-level: curLevel
-
-}, extraData || {});
-
-
-
-fetch(GOOGLE_WEBHOOK_URL, {
-
-method: "POST",
-
-mode: "no-cors",
-
-headers: { "Content-Type": "application/json" },
-
-body: JSON.stringify(payload)
-
-}).catch(function(err){ console.warn("로깅 실패:", err); });
-
-}
-
-
-
-function fmtTime(s){
-
-var m = Math.floor(s/60), ss = s%60;
-
-return (m<10?'0':'')+m+':'+(ss<10?'0':'')+ss;
-
-}
-
-
-
-function buildBoard(){
-
-boardEl.style.gridTemplateColumns = 'repeat('+COLS+', 1fr)';
-
-boardEl.innerHTML = '';
-
-board = []; cells = [];
-
-for(var r=0;r<ROWS;r++){
-
-board.push([]); cells.push([]);
-
-for(var c=0;c<COLS;c++){
-
-var n = 1 + Math.floor(Math.random()*9);
-
-board[r].push(n);
-
-var div = document.createElement('div');
-
-div.className = 'cell'; div.textContent = n;
-
-div.dataset.r = r; div.dataset.c = c;
-
-boardEl.appendChild(div);
-
-cells[r].push(div);
-
-}
-
-}
-
-}
-
-
-
-function remainingCount(){
-
-var cnt=0;
-
-for(var r=0;r<ROWS;r++) for(var c=0;c<COLS;c++) if(board[r][c]>0) cnt++;
-
-return cnt;
-
-}
-
-
-
-function hasValidMove(){
-
-var pre = [];
-
-for(var r=0;r<=ROWS;r++){ pre.push(new Array(COLS+1).fill(0)); }
-
-for(var r=1;r<=ROWS;r++){
-
-for(var c=1;c<=COLS;c++){
-
-var v = board[r-1][c-1] > 0 ? board[r-1][c-1] : 0;
-
-pre[r][c] = v + pre[r-1][c] + pre[r][c-1] - pre[r-1][c-1];
-
-}
-
-}
-
-function rectSum(r1,c1,r2,c2){
-
-return pre[r2+1][c2+1] - pre[r1][c2+1] - pre[r2+1][c1] + pre[r1][c1];
-
-}
-
-for(var r1=0;r1<ROWS;r1++){
-
-for(var r2=r1;r2<ROWS;r2++){
-
-for(var c1=0;c1<COLS;c1++){
-
-for(var c2=c1;c2<COLS;c2++){
-
-if(rectSum(r1,c1,r2,c2) === 10) return true;
-
-}
-
-}
-
-}
-
-}
-
-return false;
-
-}
-
-
-
-function updateHud(){
-
-timeVal.textContent = fmtTime(timeLeft);
-
-timeStat.classList.toggle('low', timeLeft<=20);
-
-scoreVal.textContent = score;
-
-comboVal.textContent = combo > 0 ? (combo + 'x') : '0';
-
-comboVal.style.color = combo >= 3 ? 'var(--gold)' : (combo >= 2 ? 'var(--accent)' : 'var(--paper)');
-
-leftVal.textContent = remainingCount();
-
-}
-
-
-
-function updateShuffleBtn(){
-
-if(!shuffleBtn) return;
-
-if(shufflesLeft > 0){
-
-shuffleBtn.textContent = '🎲 판 섞기 (1/1)';
-
-shuffleBtn.disabled = false;
-
-shuffleBtn.style.opacity = '1';
-
-shuffleBtn.style.cursor = 'pointer';
-
-shuffleBtn.classList.add('highlight');
-
-} else {
-
-shuffleBtn.textContent = '🎲 판 섞기 (0/1)';
-
-shuffleBtn.disabled = true;
-
-shuffleBtn.style.opacity = '0.4';
-
-shuffleBtn.style.cursor = 'not-allowed';
-
-shuffleBtn.classList.remove('highlight');
-
-}
-
-}
-
-
-
-function shuffleBoard(){
-
-if(!gameActive || shufflesLeft <= 0) return;
-
-
-
-var activeCells = [];
-
-var values = [];
-
-for(var r=0; r<ROWS; r++){
-
-for(var c=0; c<COLS; c++){
-
-if(board[r][c] > 0){
-
-activeCells.push({r: r, c: c});
-
-values.push(board[r][c]);
-
-}
-
-}
-
-}
-
-
-
-if(values.length < 2) return;
-
-
-
-for(var attempt=0; attempt<20; attempt++){
-
-for(var i = values.length - 1; i > 0; i--){
-
-var j = Math.floor(Math.random() * (i + 1));
-
-var tmp = values[i];
-
-values[i] = values[j];
-
-values[j] = tmp;
-
-}
-
-for(var k=0; k<activeCells.length; k++){
-
-board[activeCells[k].r][activeCells[k].c] = values[k];
-
-}
-
-if(hasValidMove()) break;
-
-}
-
-
-
-for(var idx=0; idx<activeCells.length; idx++){
-
-var pos = activeCells[idx];
-
-var val = board[pos.r][pos.c];
-
-var cellEl = cells[pos.r][pos.c];
-
-cellEl.textContent = val;
-
-cellEl.classList.remove('pop');
-
-void cellEl.offsetWidth;
-
-cellEl.classList.add('pop');
-
-}
-
-
-
-shufflesLeft--;
-
-updateShuffleBtn();
-
-if(navigator.vibrate) navigator.vibrate(25);
-
-
-
-if(!hasValidMove()){
-
-endGame('nomoves');
-
-}
-
-}
-
-
-
-function getRectFromPoints(x1,y1,x2,y2){
-
-return { left: Math.min(x1,x2), right: Math.max(x1,x2), top: Math.min(y1,y2), bottom: Math.max(y1,y2) };
-
-}
-
-
-
-function cellsInRect(rect){
-
-var res = [];
-
-var wrapRect = boardEl.getBoundingClientRect();
-
-for(var r=0;r<ROWS;r++){
-
-for(var c=0;c<COLS;c++){
-
-if(board[r][c] <= 0) continue;
-
-var el = cells[r][c];
-
-var cr = el.getBoundingClientRect();
-
-var cLeft = cr.left - wrapRect.left;
-
-var cTop = cr.top - wrapRect.top;
-
-var cRight = cLeft + cr.width;
-
-var cBottom = cTop + cr.height;
-
-var overlaps = !(cRight < rect.left || cLeft > rect.right || cBottom < rect.top || cTop > rect.bottom);
-
-if(overlaps){ res.push({r:r,c:c, el:el, val: board[r][c]}); }
-
-}
-
-}
-
-return res;
-
-}
-
-
-
-function clearSelectionVisual(){
-
-curSel.forEach(function(item){ item.el.classList.remove('selected'); });
-
-}
-
-
-
-function getPointerPos(e){
-
-var t = (e.touches && e.touches[0]) ? e.touches[0] : e;
-
-var wrapRect = boardEl.getBoundingClientRect();
-
-return { x: t.clientX - wrapRect.left, y: t.clientY - wrapRect.top };
-
-}
-
-
-
-// 🎁 이스터에그 모달 제어 함수
-
-function showEasterEggModal(icon, title, html, showClose){
-
-eeIcon.textContent = icon || "🍎📦";
-
-eeTitle.innerHTML = title;
-
-eeBody.innerHTML = html;
-
-eeCloseBtn.style.display = showClose ? 'block' : 'none';
-
-easterEggOverlay.classList.add('show');
-
-}
-
-
-
-eeCloseBtn.addEventListener('click', function(){
-
-easterEggOverlay.classList.remove('show');
-
-// 팝업 확인 후 타이머 보정 완료 (모달 읽는 동안 소모된 시간 복구)
-
-if(eePauseStart > 0){
-
-gameStartTime += (Date.now() - eePauseStart);
-
-eePauseStart = 0;
-
-}
-
-});
-
-
-
-// 🎁 [이스터에그: 싹쓸이 압류왕 (선착순 2인 검증 요청)]
-
-function triggerEasterEgg(){
-
-eePauseStart = Date.now(); // 타이머 일시 멈춤
-
-
-
-showEasterEggModal(
-
-"⏳",
-
-"당첨 확인 중...",
-
-"선착순 당첨 여부를 서버와 확인하고 있습니다.<br>잠시만 기다려주세요!",
-
-false
-
-);
-
-
-
-var targetUrl = GOOGLE_WEBHOOK_URL + "?action=easterEgg&game=" + encodeURIComponent(GAME_NAME) + "&team=" + encodeURIComponent(currentTeam) + "&sabun=" + encodeURIComponent(currentSabun) + "&detail=" + encodeURIComponent("판 전체 싹쓸이 압류왕");
-
-
-
-fetch(targetUrl, { method: "GET", redirect: "follow" })
-
-.then(function(res){ return res.json(); })
-
-.then(function(data){
-
-if(data && data.result === "win"){
-
-var order = data.order || 1; // 1 or 2
-
-var rewardTitle = data.reward || (order === 1 ? "상무님 식사비 지원" : "본부장님 식사권 지원");
-
-var icon = (order === 1) ? "🍽️" : "🍎🍽️";
-
-
-
-showEasterEggModal(
-
-icon,
-
-"🎉 " + rewardTitle + " 당첨! 🎉",
-
-"축하합니다! 👏<br><br>사과를 10씩 예쁘게 포장하랬더니 판 전체를 통째로 쓸어가시나요?! 🍎📦<br><b style='color:var(--gold); font-size:15px;'>욕심쟁이 싹쓸이 압류왕 등극!</b><br><b style='color:var(--accent); font-size:16px;'>[사과게임 " + order + "번째 당첨] " + rewardTitle + " 확정!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 운영진 확인 후 개별 안내 예정입니다.</span>",
-
-true
-
-);
-
-} else if(data && data.result === "already"){
-
-showEasterEggModal(
-
-"🎉",
-
-"이미 당첨된 플레이어입니다!",
-
-"이미 <b style='color:var(--gold);'>" + (data.game || "다른 종목") + "</b>에서 <b style='color:var(--accent);'>" + (data.reward || "식사 지원") + "</b>에 당첨 등록되었습니다!<br><br>더 많은 팀원들의 참여를 위해 1인 1회만 지급됩니다 🍽️",
-
-true
-
-);
-
-} else if(data && data.result === "closed"){
-
-showEasterEggModal(
-
-"⏱️",
-
-"아쉽습니다! 선착순 마감",
-
-"싹쓸이 압류왕(판 전체 드래그)을 달성하셨으나,<br><b style='color:var(--danger);'>사과게임 식사 지원(선착순 2명)이 이미 마감</b>되었습니다 😢<br><br>다른 종목의 숨겨진 이스터 에그에 도전해 보세요!",
-
-true
-
-);
-
-} else {
-
-showEasterEggModal(
-
-"🍎📦",
-
-"🎉 식사 지원 이벤트 당첨! 🎉",
-
-"축하합니다! 👏<br><br>판 전체를 통째로 쓸어간 욕심쟁이 싹쓸이 압류왕!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
-
-true
-
-);
-
-}
-
-})
-
-.catch(function(err){
-
-logEvent("이스터에그_식사", { detail: "사과게임 판 전체 싹쓸이 압류왕 달성" });
-
-showEasterEggModal(
-
-"🍎📦",
-
-"🎉 식사 지원 이벤트 당첨! 🎉",
-
-"축하합니다! 👏<br><br>판 전체를 통째로 쓸어간 욕심쟁이 싹쓸이 압류왕!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
-
-true
-
-);
-
-});
-
-}
-
-
-
-function onDown(e){
-
-if(!gameActive || eePauseStart > 0) return;
-
-
-
-if(gameStartTime > 0){
-
-var actualElapsed = Math.floor((Date.now() - gameStartTime) / 1000);
-
-if(actualElapsed >= GAME_TIME){
-
-timeLeft = 0;
-
-updateHud();
-
-endGame('timeout');
-
-return;
-
-}
-
-}
-
-
-
-e.preventDefault();
-
-dragging = true;
-
-var p = getPointerPos(e);
-
-startCell = p;
-
-selRect.style.display = 'block';
-
-updateDrag(p);
-
-}
-
-
-
-function onMove(e){
-
-if(!dragging || !gameActive || eePauseStart > 0) return;
-
-e.preventDefault();
-
-var p = getPointerPos(e);
-
-updateDrag(p);
-
-}
-
-
-
-function updateDrag(p){
-
-var rect = getRectFromPoints(startCell.x, startCell.y, p.x, p.y);
-
-selRect.style.left = rect.left+'px'; selRect.style.top = rect.top+'px';
-
-selRect.style.width = (rect.right-rect.left)+'px'; selRect.style.height = (rect.bottom-rect.top)+'px';
-
-clearSelectionVisual();
-
-curSel = cellsInRect(rect);
-
-var sum = curSel.reduce(function(a,b){return a+b.val;},0);
-
-curSel.forEach(function(item){ item.el.classList.add('selected'); });
-
-if(curSel.length > 0){
-
-sumTag.textContent = sum;
-
-sumTag.classList.toggle('ok', sum===10);
-
-} else { sumTag.textContent = ''; }
-
-}
-
-
-
-function onUp(e){
-
-if(!dragging) return;
-
-dragging = false;
-
-selRect.style.display = 'none';
-
-
-
-if(!gameActive || eePauseStart > 0){
-
-clearSelectionVisual(); curSel = []; sumTag.textContent = '';
-
-return;
-
-}
-
-
-
-// 🚀 [핵심 이스터에그 판정: 싹쓸이 압류왕]
-
-// 사과를 단 한 개도 맞추지 않은 시작 상태(score === 0)에서 판 전체(108칸 중 102칸 이상)를 한 번에 쫙 긁은 경우!
-
-var totalCellsCount = ROWS * COLS; // 108칸
-
-if(score === 0 && !easterEggTriggered && curSel.length >= (totalCellsCount - 6)){
-
-easterEggTriggered = true;
-
-if(navigator.vibrate) navigator.vibrate([30, 40, 50]);
-
-triggerEasterEgg();
-
-clearSelectionVisual(); curSel = []; sumTag.textContent = '';
-
-return;
-
-}
-
-
-
-var sum = curSel.reduce(function(a,b){return a+b.val;},0);
-
-var madeMove = curSel.length > 0 && sum === 10;
-
-if(madeMove){
-
-curSel.forEach(function(item){
-
-item.el.classList.add('pop');
-
-board[item.r][item.c] = -1;
-
-setTimeout((function(el){ return function(){ el.classList.add('gone'); }; })(item.el), 150);
-
-});
-
-
-
-clearTimeout(comboTimeoutId);
-
-combo++;
-
-if(combo > maxCombo) maxCombo = combo;
-
-var comboBonus = (combo > 1) ? (combo - 1) : 0;
-
-score += (curSel.length + comboBonus);
-
-
-
-comboTimeoutId = setTimeout(function(){
-
-combo = 0;
-
-updateHud();
-
-}, COMBO_WINDOW_MS);
-
-}
-
-clearSelectionVisual(); curSel = []; sumTag.textContent = '';
-
-updateHud();
-
-if(remainingCount() === 0 && gameActive){ endGame('cleared'); return; }
-
-if(madeMove && gameActive && !hasValidMove()){ endGame('nomoves'); }
-
-}
-
-
-
-function startTimer(){
-
-clearInterval(timerId);
-
-timerId = setInterval(function(){
-
-if(!gameActive || eePauseStart > 0) return;
-
-var elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
-
-timeLeft = Math.max(0, GAME_TIME - elapsed);
-
-updateHud();
-
-if(timeLeft <= 0){
-
-endGame('timeout');
-
-}
-
-}, 250);
-
-}
-
-
-
-document.addEventListener('visibilitychange', function() {
-
-if (!document.hidden && gameActive && gameStartTime > 0 && eePauseStart === 0) {
-
-var elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
-
-timeLeft = Math.max(0, GAME_TIME - elapsed);
-
-updateHud();
-
-if (timeLeft <= 0) {
-
-endGame('timeout');
-
-}
-
-}
-
-});
-
-
-
-function endGame(reason){
-
-if(!gameActive) return;
-
-gameActive = false;
-
-dragging = false;
-
-selRect.style.display = 'none';
-
-clearSelectionVisual(); curSel = []; sumTag.textContent = '';
-
-
-
-clearInterval(timerId);
-
-clearTimeout(comboTimeoutId);
-
-combo = 0;
-
-var detailText = reason === 'cleared' ? '보드 올클리어' : (reason === 'nomoves' ? '가능한 조합 없음' : '시간 종료');
-
-logEvent("종료", { score: score, detail: detailText + ` (사과 ${score}개 획득, 최대 콤보: ${maxCombo}x)` });
-
-
-
-if(reason === 'cleared'){
-
-modalTitle.textContent = '보드 클리어! 🎉';
-
-modalDesc.textContent = '모든 사과를 없앴어요! 대단해요.';
-
-} else if(reason === 'nomoves'){
-
-modalTitle.textContent = '더 이상 조합이 없어요!';
-
-modalDesc.textContent = '합이 10이 되는 조합을 더 만들 수 없어서 게임을 종료했어요.';
-
-} else {
-
-modalTitle.textContent = '시간 종료!';
-
-modalDesc.textContent = '획득한 최종 점수입니다.';
-
-}
-
-modalScore.textContent = score;
-
-overlay.classList.add('show');
-
-}
-
-
-
-function startGame(){
-
-overlay.classList.remove('show');
-
-easterEggOverlay.classList.remove('show');
-
-adPopup.style.display = 'none';
-
-clearTimeout(comboTimeoutId);
-
-combo = 0;
-
-maxCombo = 0;
-
-shufflesLeft = 1;
-
-score = 0;
-
-timeLeft = GAME_TIME;
-
-gameActive = true;
-
-easterEggTriggered = false;
-
-eePauseStart = 0;
-
-gameStartTime = Date.now();
-
-
-
-buildBoard();
-
-var attempts = 0;
-
-while(!hasValidMove() && attempts < 20){ buildBoard(); attempts++; }
-
-updateShuffleBtn();
-
-updateHud();
-
-startTimer();
-
-logEvent("시작", { score: 0 });
-
-}
-
-
-
-function showNoticePopup(){
-
-clearInterval(timerId);
-
-clearTimeout(comboTimeoutId);
-
-adPopup.style.display = "flex";
-
-}
-
-
-
-adRestartBtn.addEventListener("click", startGame);
-
-shuffleBtn.addEventListener("click", shuffleBoard);
-
-
-
-/* ============================================================
-
-[사용자 인증 및 모바일 키보드 상쇄 방어 로직]
-
-============================================================ */
-
-var authActionLocked = false;
-
-function handleAuth(e) {
-
-if (e) {
-
-e.preventDefault();
-
-e.stopPropagation();
-
-}
-
-if (authActionLocked) return;
-
-authActionLocked = true;
-
-setTimeout(function(){ authActionLocked = false; }, 400);
-
-
-
-var teamVal = teamSelect.value;
-
-var rawSabun = (sabunInput.value || '').replace(/[^0-9]/g, '').trim();
-
-
-
-if (!teamVal) {
-
-authError.textContent = "팀을 선택해 주세요.";
-
-teamSelect.classList.add('error');
-
-teamSelect.focus();
-
-return;
-
-}
-
-
-
-if (rawSabun.length !== 8) {
-
-authError.textContent = "사번은 숫자 8자리여야 합니다. (예: 22091019)";
-
-sabunInput.classList.add('error');
-
-sabunInput.focus();
-
-return;
-
-}
-
-
-
-if (document.activeElement) {
-
-document.activeElement.blur();
-
-}
-
-
-
-try {
-
-localStorage.setItem("sh_mini_team", teamVal);
-
-localStorage.setItem("sh_mini_sabun", rawSabun);
-
-} catch (err) {
-
-console.warn("localStorage 저장 실패 (인앱브라우저 제한):", err);
-
-}
-
-
-
-currentTeam = teamVal;
-
-currentSabun = rawSabun;
-
-
-
-if (playerBadge) {
-
-playerBadge.textContent = "플레이어: " + currentTeam + " · " + currentSabun;
-
-playerBadge.style.display = "inline-block";
-
-}
-
-
-
-authOverlay.classList.remove('show');
-
-startGame();
-
-}
-
-
-
-authStartBtn.addEventListener('click', handleAuth);
-
-authStartBtn.addEventListener('touchend', handleAuth);
-
-
-
-sabunInput.addEventListener('keydown', function(e){
-
-if (e.key === 'Enter') handleAuth(e);
-
-});
-
-
-teamSelect.addEventListener('change', function(){
-
-teamSelect.classList.remove('error');
-
-authError.textContent = "";
-
-});
-
-
-sabunInput.addEventListener('input', function() {
-
-this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8);
-
-if (this.value.length === 8) {
-
-this.classList.remove('error');
-
-authError.textContent = "";
-
-}
-
-});
-
-
-
-boardWrap.addEventListener('mousedown', onDown);
-
-window.addEventListener('mousemove', onMove);
-
-window.addEventListener('mouseup', onUp);
-
-boardWrap.addEventListener('touchstart', onDown, {passive:false});
-
-window.addEventListener('touchmove', onMove, {passive:false});
-
-window.addEventListener('touchend', onUp);
-
-
-
-document.getElementById('restartBtn').addEventListener('click', showNoticePopup);
-
-document.getElementById('modalRestart').addEventListener('click', showNoticePopup);
-
-
-
-document.getElementById('ruleBtn').addEventListener('click', function(){
-
-ruleOverlay.classList.add('show');
-
-});
-
-document.getElementById('ruleCloseBtn').addEventListener('click', function(){
-
-ruleOverlay.classList.remove('show');
-
-});
-
-ruleOverlay.addEventListener('click', function(e){
-
-if(e.target === ruleOverlay) ruleOverlay.classList.remove('show');
-
-});
-
-
-
-var savedTeam = null;
-
-var savedSabun = null;
-
-try {
-
-savedTeam = localStorage.getItem("sh_mini_team");
-
-savedSabun = localStorage.getItem("sh_mini_sabun");
-
-} catch(e) {}
-
-
-
-if (savedTeam && savedSabun && /^\d{8}$/.test(savedSabun)) {
-
-currentTeam = savedTeam;
-
-currentSabun = savedSabun;
-
-playerBadge.textContent = "플레이어: " + currentTeam + " · " + currentSabun;
-
-playerBadge.style.display = "inline-block";
-
-authOverlay.classList.remove('show');
-
-startGame();
-
-} else {
-
-try {
-
-localStorage.removeItem("sh_mini_team");
-
-localStorage.removeItem("sh_mini_sabun");
-
-} catch(e) {}
-
-authOverlay.classList.add('show');
-
-sabunInput.focus();
-
-}
-
-
-
-playerBadge.addEventListener("click", function(){
-
-if(confirm("등록된 팀/사번 정보를 변경하시겠습니까?")){
-
-try {
-
-localStorage.removeItem("sh_mini_team");
-
-localStorage.removeItem("sh_mini_sabun");
-
-} catch(e) {}
-
-location.reload();
-
-}
-
-});
-
+  /* ============================================================
+     [F12 모바일 에뮬레이터 및 DevTools 무력화 보안 엔진]
+     ============================================================ */
+
+  function getGpuRenderer() {
+    try {
+      var canvas = document.createElement('canvas');
+      var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) return '';
+      var debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : '';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function isRealMobileDevice() {
+    var ua = navigator.userAgent || '';
+    var mobileRegex = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+    var hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+    if (!mobileRegex.test(ua) || !hasTouch) return false;
+
+    var platform = navigator.platform || '';
+    if (['win32', 'win64', 'macintel'].indexOf(platform.toLowerCase()) !== -1) {
+      return false;
+    }
+
+    var gpu = getGpuRenderer().toLowerCase();
+
+    // 1순위: 모바일 고유 GPU 칩셋 우선 통과
+    var mobileGpuKeywords = ['mali', 'adreno', 'apple', 'powervr', 'xclipse'];
+    for (var m = 0; m < mobileGpuKeywords.length; m++) {
+      if (gpu.indexOf(mobileGpuKeywords[m]) !== -1) {
+        return true;
+      }
+    }
+
+    // 2순위: PC 전용 외장/내장 GPU 탐지
+    var pcGpuKeywords = [
+      'geforce', 'nvidia', 'radeon', 'intel', 
+      'direct3d', 'llvmpipe', 'mesa', 'swiftshader', 
+      'virtualbox', 'vmware', 'microsoft basic render'
+    ];
+    for (var i = 0; i < pcGpuKeywords.length; i++) {
+      if (gpu.indexOf(pcGpuKeywords[i]) !== -1) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  function triggerBlock() {
+    var pcOverlay = document.getElementById('pcBlockOverlay');
+    if (pcOverlay) pcOverlay.classList.add('show');
+  }
+
+  if (!isRealMobileDevice()) {
+    triggerBlock();
+    return;
+  }
+
+  setInterval(function() {
+    var start = performance.now();
+    debugger;
+    var end = performance.now();
+    if (end - start > 100) {
+      triggerBlock();
+    }
+  }, 1000);
+
+  /* ============================================================
+     [게임 메인 로직]
+     ============================================================ */
+  var GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwXeZ1OMPgMQb-JhW_uOAxQ-w1sTq5kb6XbTa6XF3BjzhVrax6uvPc8LBC0YfTSKiZKEQ/exec";
+  var GAME_NAME = "사과게임";
+
+  var COLS = 12, ROWS = 9, GAME_TIME = 110; // 1분 50초
+  var COMBO_WINDOW_MS = 3500; // 콤보 유지 시간 (3.5초)
+
+  var curLevel = 'medium (12x9)';
+  var board, cells, boardEl, selRect, sumTag;
+  var timeLeft, score, timerId, gameActive;
+  var gameStartTime = 0; // ⏱️ 절대 시간(Wall-clock) 동기화 타임스탬프
+  var dragging = false, startCell = null, curSel = [];
+  var currentSabun = "";
+  var currentTeam = "";
+
+  // 콤보 & 판 섞기 상태 관리 변수
+  var combo = 0;
+  var maxCombo = 0;
+  var comboTimeoutId = null;
+  var shufflesLeft = 1;
+
+  // 🎁 이스터에그 상태 변수
+  var easterEggTriggered = false;
+  var eePauseStart = 0;
+
+  boardEl = document.getElementById('board');
+  selRect = document.getElementById('selRect');
+  sumTag = document.getElementById('sumTag');
+  var boardWrap = document.getElementById('board-wrap');
+  var timeVal = document.getElementById('timeVal');
+  var timeStat = document.getElementById('timeStat');
+  var scoreVal = document.getElementById('scoreVal');
+  var comboVal = document.getElementById('comboVal');
+  var leftVal = document.getElementById('leftVal');
+
+  var overlay = document.getElementById('overlay');
+  var modalTitle = document.getElementById('modalTitle');
+  var modalScore = document.getElementById('modalScore');
+  var modalDesc = document.getElementById('modalDesc');
+  var ruleOverlay = document.getElementById('ruleOverlay');
+
+  var easterEggOverlay = document.getElementById('easterEggOverlay');
+  var eeIcon = document.getElementById('eeIcon');
+  var eeTitle = document.getElementById('eeTitle');
+  var eeBody = document.getElementById('eeBody');
+  var eeCloseBtn = document.getElementById('eeCloseBtn');
+
+  var adPopup = document.getElementById("adPopup");
+  var adRestartBtn = document.getElementById("adRestartBtn");
+  var shuffleBtn = document.getElementById("shuffleBtn");
+
+  var authOverlay = document.getElementById('authOverlay');
+  var teamSelect = document.getElementById('teamSelect');
+  var sabunInput = document.getElementById('sabunInput');
+  var authStartBtn = document.getElementById('authStartBtn');
+  var playerBadge = document.getElementById('playerBadge');
+  var authError = document.getElementById('authError');
+
+  function logEvent(eventType, extraData){
+    if(!GOOGLE_WEBHOOK_URL) return;
+    var payload = Object.assign({
+      game: GAME_NAME,
+      team: currentTeam,
+      sabun: currentSabun,
+      event: eventType,
+      level: curLevel
+    }, extraData || {});
+
+    fetch(GOOGLE_WEBHOOK_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }).catch(function(err){ console.warn("로깅 실패:", err); });
+  }
+
+  function fmtTime(s){
+    var m = Math.floor(s/60), ss = s%60;
+    return (m<10?'0':'')+m+':'+(ss<10?'0':'')+ss;
+  }
+
+  function buildBoard(){
+    boardEl.style.gridTemplateColumns = 'repeat('+COLS+', 1fr)';
+    boardEl.innerHTML = '';
+    board = []; cells = [];
+    for(var r=0;r<ROWS;r++){
+      board.push([]); cells.push([]);
+      for(var c=0;c<COLS;c++){
+        var n = 1 + Math.floor(Math.random()*9);
+        board[r].push(n);
+        var div = document.createElement('div');
+        div.className = 'cell'; div.textContent = n;
+        div.dataset.r = r; div.dataset.c = c;
+        boardEl.appendChild(div);
+        cells[r].push(div);
+      }
+    }
+  }
+
+  function remainingCount(){
+    var cnt=0;
+    for(var r=0;r<ROWS;r++) for(var c=0;c<COLS;c++) if(board[r][c]>0) cnt++;
+    return cnt;
+  }
+
+  function hasValidMove(){
+    var pre = [];
+    for(var r=0;r<=ROWS;r++){ pre.push(new Array(COLS+1).fill(0)); }
+    for(var r=1;r<=ROWS;r++){
+      for(var c=1;c<=COLS;c++){
+        var v = board[r-1][c-1] > 0 ? board[r-1][c-1] : 0;
+        pre[r][c] = v + pre[r-1][c] + pre[r][c-1] - pre[r-1][c-1];
+      }
+    }
+    function rectSum(r1,c1,r2,c2){
+      return pre[r2+1][c2+1] - pre[r1][c2+1] - pre[r2+1][c1] + pre[r1][c1];
+    }
+    for(var r1=0;r1<ROWS;r1++){
+      for(var r2=r1;r2<ROWS;r2++){
+        for(var c1=0;c1<COLS;c1++){
+          for(var c2=c1;c2<COLS;c2++){
+            if(rectSum(r1,c1,r2,c2) === 10) return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  function updateHud(){
+    timeVal.textContent = fmtTime(timeLeft);
+    timeStat.classList.toggle('low', timeLeft<=20);
+    scoreVal.textContent = score;
+    comboVal.textContent = combo > 0 ? (combo + 'x') : '0';
+    comboVal.style.color = combo >= 3 ? 'var(--gold)' : (combo >= 2 ? 'var(--accent)' : 'var(--paper)');
+    leftVal.textContent = remainingCount();
+  }
+
+  function updateShuffleBtn(){
+    if(!shuffleBtn) return;
+    if(shufflesLeft > 0){
+      shuffleBtn.textContent = '🎲 판 섞기 (1/1)';
+      shuffleBtn.disabled = false;
+      shuffleBtn.style.opacity = '1';
+      shuffleBtn.style.cursor = 'pointer';
+      shuffleBtn.classList.add('highlight');
+    } else {
+      shuffleBtn.textContent = '🎲 판 섞기 (0/1)';
+      shuffleBtn.disabled = true;
+      shuffleBtn.style.opacity = '0.4';
+      shuffleBtn.style.cursor = 'not-allowed';
+      shuffleBtn.classList.remove('highlight');
+    }
+  }
+
+  function shuffleBoard(){
+    if(!gameActive || shufflesLeft <= 0) return;
+
+    var activeCells = [];
+    var values = [];
+    for(var r=0; r<ROWS; r++){
+      for(var c=0; c<COLS; c++){
+        if(board[r][c] > 0){
+          activeCells.push({r: r, c: c});
+          values.push(board[r][c]);
+        }
+      }
+    }
+
+    if(values.length < 2) return;
+
+    for(var attempt=0; attempt<20; attempt++){
+      for(var i = values.length - 1; i > 0; i--){
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = values[i];
+        values[i] = values[j];
+        values[j] = tmp;
+      }
+      for(var k=0; k<activeCells.length; k++){
+        board[activeCells[k].r][activeCells[k].c] = values[k];
+      }
+      if(hasValidMove()) break;
+    }
+
+    for(var idx=0; idx<activeCells.length; idx++){
+      var pos = activeCells[idx];
+      var val = board[pos.r][pos.c];
+      var cellEl = cells[pos.r][pos.c];
+      cellEl.textContent = val;
+      cellEl.classList.remove('pop');
+      void cellEl.offsetWidth;
+      cellEl.classList.add('pop');
+    }
+
+    shufflesLeft--;
+    updateShuffleBtn();
+    if(navigator.vibrate) navigator.vibrate(25);
+
+    if(!hasValidMove()){
+      endGame('nomoves');
+    }
+  }
+
+  function getRectFromPoints(x1,y1,x2,y2){
+    return { left: Math.min(x1,x2), right: Math.max(x1,x2), top: Math.min(y1,y2), bottom: Math.max(y1,y2) };
+  }
+
+  function cellsInRect(rect){
+    var res = [];
+    var wrapRect = boardEl.getBoundingClientRect();
+    for(var r=0;r<ROWS;r++){
+      for(var c=0;c<COLS;c++){
+        if(board[r][c] <= 0) continue;
+        var el = cells[r][c];
+        var cr = el.getBoundingClientRect();
+        var cLeft = cr.left - wrapRect.left;
+        var cTop = cr.top - wrapRect.top;
+        var cRight = cLeft + cr.width;
+        var cBottom = cTop + cr.height;
+        var overlaps = !(cRight < rect.left || cLeft > rect.right || cBottom < rect.top || cTop > rect.bottom);
+        if(overlaps){ res.push({r:r,c:c, el:el, val: board[r][c]}); }
+      }
+    }
+    return res;
+  }
+
+  function clearSelectionVisual(){
+    curSel.forEach(function(item){ item.el.classList.remove('selected'); });
+  }
+
+  function getPointerPos(e){
+    var t = (e.touches && e.touches[0]) ? e.touches[0] : e;
+    var wrapRect = boardEl.getBoundingClientRect();
+    return { x: t.clientX - wrapRect.left, y: t.clientY - wrapRect.top };
+  }
+
+  // 🎁 이스터에그 모달 제어 함수
+  function showEasterEggModal(icon, title, html, showClose){
+    eeIcon.textContent = icon || "🍎📦";
+    eeTitle.innerHTML = title;
+    eeBody.innerHTML = html;
+    eeCloseBtn.style.display = showClose ? 'block' : 'none';
+    easterEggOverlay.classList.add('show');
+  }
+
+  eeCloseBtn.addEventListener('click', function(){
+    easterEggOverlay.classList.remove('show');
+    // 팝업 확인 후 타이머 보정 완료 (모달 읽는 동안 소모된 시간 복구)
+    if(eePauseStart > 0){
+      gameStartTime += (Date.now() - eePauseStart);
+      eePauseStart = 0;
+    }
+  });
+
+  // 🎁 [이스터에그: 싹쓸이 압류왕 (선착순 2인 검증 요청)]
+  function triggerEasterEgg(){
+    eePauseStart = Date.now(); // 타이머 일시 멈춤
+
+    showEasterEggModal(
+      "⏳",
+      "당첨 확인 중...",
+      "선착순 당첨 여부를 서버와 확인하고 있습니다.<br>잠시만 기다려주세요!",
+      false
+    );
+
+    var targetUrl = GOOGLE_WEBHOOK_URL + "?action=easterEgg&game=" + encodeURIComponent(GAME_NAME) + "&team=" + encodeURIComponent(currentTeam) + "&sabun=" + encodeURIComponent(currentSabun) + "&detail=" + encodeURIComponent("판 전체 싹쓸이 압류왕");
+
+    fetch(targetUrl, { method: "GET", redirect: "follow" })
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+        if(data && data.result === "win"){
+          var order = data.order || 1; // 1 or 2
+          var rewardTitle = data.reward || (order === 1 ? "상무님 식사비 지원" : "본부장님 식사권 지원");
+          var icon = (order === 1) ? "🍽️" : "🍎🍽️";
+
+          showEasterEggModal(
+            icon,
+            "🎉 " + rewardTitle + " 당첨! 🎉",
+            "축하합니다! 👏<br><br>사과를 10씩 예쁘게 포장하랬더니 판 전체를 통째로 쓸어가시나요?! 🍎📦<br><b style='color:var(--gold); font-size:15px;'>욕심쟁이 싹쓸이 압류왕 등극!</b><br><b style='color:var(--accent); font-size:16px;'>[사과게임 " + order + "번째 당첨] " + rewardTitle + " 확정!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 운영진 확인 후 개별 안내 예정입니다.</span>",
+            true
+          );
+        } else if(data && data.result === "already"){
+          showEasterEggModal(
+            "🎉",
+            "이미 당첨된 플레이어입니다!",
+            "이미 <b style='color:var(--gold);'>" + (data.game || "다른 종목") + "</b>에서 <b style='color:var(--accent);'>" + (data.reward || "식사 지원") + "</b>에 당첨 등록되었습니다!<br><br>더 많은 팀원들의 참여를 위해 1인 1회만 지급됩니다 🍽️",
+            true
+          );
+        } else if(data && data.result === "closed"){
+          showEasterEggModal(
+            "⏱️",
+            "아쉽습니다! 선착순 마감",
+            "싹쓸이 압류왕(판 전체 드래그)을 달성하셨으나,<br><b style='color:var(--danger);'>사과게임 식사 지원(선착순 2명)이 이미 마감</b>되었습니다 😢<br><br>다른 종목의 숨겨진 이스터 에그에 도전해 보세요!",
+            true
+          );
+        } else {
+          showEasterEggModal(
+            "🍎📦",
+            "🎉 식사 지원 이벤트 당첨! 🎉",
+            "축하합니다! 👏<br><br>판 전체를 통째로 쓸어간 욕심쟁이 싹쓸이 압류왕!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>통합 집계 시트에 정상 기록되었습니다.</span>",
+            true
+          );
+        }
+      })
+      .catch(function(err){
+        logEvent("이스터에그_식사", { detail: "사과게임 판 전체 싹쓸이 압류왕 달성" });
+        showEasterEggModal(
+          "🍎📦",
+          "🎉 식사 지원 이벤트 당첨! 🎉",
+          "축하합니다! 👏<br><br>판 전체를 통째로 쓸어간 욕심쟁이 싹쓸이 압류왕!<br><b style='color:var(--gold); font-size:16px;'>임원 식사 지원 이벤트 당첨!</b><br><br><span style='font-size:12px; color:var(--ice);'>※ 시트에 기록이 정상 접수되었습니다.</span>",
+          true
+        );
+      });
+  }
+
+  function onDown(e){
+    if(!gameActive || eePauseStart > 0) return;
+
+    if(gameStartTime > 0){
+      var actualElapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+      if(actualElapsed >= GAME_TIME){
+        timeLeft = 0;
+        updateHud();
+        endGame('timeout');
+        return;
+      }
+    }
+
+    e.preventDefault();
+    dragging = true;
+    var p = getPointerPos(e);
+    startCell = p;
+    selRect.style.display = 'block';
+    updateDrag(p);
+  }
+
+  function onMove(e){
+    if(!dragging || !gameActive || eePauseStart > 0) return;
+    e.preventDefault();
+    var p = getPointerPos(e);
+    updateDrag(p);
+  }
+
+  function updateDrag(p){
+    var rect = getRectFromPoints(startCell.x, startCell.y, p.x, p.y);
+    selRect.style.left = rect.left+'px'; selRect.style.top = rect.top+'px';
+    selRect.style.width = (rect.right-rect.left)+'px'; selRect.style.height = (rect.bottom-rect.top)+'px';
+    clearSelectionVisual();
+    curSel = cellsInRect(rect);
+    var sum = curSel.reduce(function(a,b){return a+b.val;},0);
+    curSel.forEach(function(item){ item.el.classList.add('selected'); });
+    if(curSel.length > 0){
+      sumTag.textContent = sum;
+      sumTag.classList.toggle('ok', sum===10);
+    } else { sumTag.textContent = ''; }
+  }
+
+  function onUp(e){
+    if(!dragging) return;
+    dragging = false;
+    selRect.style.display = 'none';
+
+    if(!gameActive || eePauseStart > 0){
+      clearSelectionVisual(); curSel = []; sumTag.textContent = '';
+      return;
+    }
+
+    // 🚀 [핵심 이스터에그 판정: 싹쓸이 압류왕]
+    // 사과를 단 한 개도 맞추지 않은 시작 상태(score === 0)에서 판 전체(108칸 중 102칸 이상)를 한 번에 쫙 긁은 경우!
+    var totalCellsCount = ROWS * COLS; // 108칸
+    if(score === 0 && !easterEggTriggered && curSel.length >= (totalCellsCount - 6)){
+      easterEggTriggered = true;
+      if(navigator.vibrate) navigator.vibrate([30, 40, 50]);
+      triggerEasterEgg();
+      clearSelectionVisual(); curSel = []; sumTag.textContent = '';
+      return;
+    }
+
+    var sum = curSel.reduce(function(a,b){return a+b.val;},0);
+    var madeMove = curSel.length > 0 && sum === 10;
+    if(madeMove){
+      curSel.forEach(function(item){
+        item.el.classList.add('pop');
+        board[item.r][item.c] = -1;
+        setTimeout((function(el){ return function(){ el.classList.add('gone'); }; })(item.el), 150);
+      });
+
+      clearTimeout(comboTimeoutId);
+      combo++;
+      if(combo > maxCombo) maxCombo = combo;
+      var comboBonus = (combo > 1) ? (combo - 1) : 0;
+      score += (curSel.length + comboBonus);
+
+      comboTimeoutId = setTimeout(function(){
+        combo = 0;
+        updateHud();
+      }, COMBO_WINDOW_MS);
+    }
+    clearSelectionVisual(); curSel = []; sumTag.textContent = '';
+    updateHud();
+    if(remainingCount() === 0 && gameActive){ endGame('cleared'); return; }
+    if(madeMove && gameActive && !hasValidMove()){ endGame('nomoves'); }
+  }
+
+  function startTimer(){
+    clearInterval(timerId);
+    timerId = setInterval(function(){
+      if(!gameActive || eePauseStart > 0) return;
+      var elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+      timeLeft = Math.max(0, GAME_TIME - elapsed);
+      updateHud();
+      if(timeLeft <= 0){
+        endGame('timeout');
+      }
+    }, 250);
+  }
+
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden && gameActive && gameStartTime > 0 && eePauseStart === 0) {
+      var elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+      timeLeft = Math.max(0, GAME_TIME - elapsed);
+      updateHud();
+      if (timeLeft <= 0) {
+        endGame('timeout');
+      }
+    }
+  });
+
+  function endGame(reason){
+    if(!gameActive) return;
+    gameActive = false;
+    dragging = false;
+    selRect.style.display = 'none';
+    clearSelectionVisual(); curSel = []; sumTag.textContent = '';
+
+    clearInterval(timerId);
+    clearTimeout(comboTimeoutId);
+    combo = 0;
+    var detailText = reason === 'cleared' ? '보드 올클리어' : (reason === 'nomoves' ? '가능한 조합 없음' : '시간 종료');
+    logEvent("종료", { score: score, detail: detailText + ` (사과 ${score}개 획득, 최대 콤보: ${maxCombo}x)` });
+
+    if(reason === 'cleared'){
+      modalTitle.textContent = '보드 클리어! 🎉';
+      modalDesc.textContent = '모든 사과를 없앴어요! 대단해요.';
+    } else if(reason === 'nomoves'){
+      modalTitle.textContent = '더 이상 조합이 없어요!';
+      modalDesc.textContent = '합이 10이 되는 조합을 더 만들 수 없어서 게임을 종료했어요.';
+    } else {
+      modalTitle.textContent = '시간 종료!';
+      modalDesc.textContent = '획득한 최종 점수입니다.';
+    }
+    modalScore.textContent = score;
+    overlay.classList.add('show');
+  }
+
+  function startGame(){
+    overlay.classList.remove('show');
+    easterEggOverlay.classList.remove('show');
+    adPopup.style.display = 'none';
+    clearTimeout(comboTimeoutId);
+    combo = 0;
+    maxCombo = 0;
+    shufflesLeft = 1;
+    score = 0; 
+    timeLeft = GAME_TIME; 
+    gameActive = true;
+    easterEggTriggered = false;
+    eePauseStart = 0;
+    gameStartTime = Date.now();
+
+    buildBoard();
+    var attempts = 0;
+    while(!hasValidMove() && attempts < 20){ buildBoard(); attempts++; }
+    updateShuffleBtn();
+    updateHud();
+    startTimer();
+    logEvent("시작", { score: 0 });
+  }
+
+  function showNoticePopup(){
+    clearInterval(timerId);
+    clearTimeout(comboTimeoutId);
+    adPopup.style.display = "flex";
+  }
+
+  adRestartBtn.addEventListener("click", startGame);
+  shuffleBtn.addEventListener("click", shuffleBoard);
+
+  /* ============================================================
+     [사용자 인증 및 모바일 키보드 상쇄 방어 로직]
+     ============================================================ */
+  var authActionLocked = false;
+  function handleAuth(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (authActionLocked) return;
+    authActionLocked = true;
+    setTimeout(function(){ authActionLocked = false; }, 400);
+
+    var teamVal = teamSelect.value;
+    var rawSabun = (sabunInput.value || '').replace(/[^0-9]/g, '').trim();
+
+    if (!teamVal) {
+      authError.textContent = "팀을 선택해 주세요.";
+      teamSelect.classList.add('error');
+      teamSelect.focus();
+      return;
+    }
+
+    if (rawSabun.length !== 8) {
+      authError.textContent = "사번은 숫자 8자리여야 합니다. (예: 22091019)";
+      sabunInput.classList.add('error');
+      sabunInput.focus();
+      return;
+    }
+
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+
+    try {
+      localStorage.setItem("sh_mini_team", teamVal);
+      localStorage.setItem("sh_mini_sabun", rawSabun);
+    } catch (err) {
+      console.warn("localStorage 저장 실패 (인앱브라우저 제한):", err);
+    }
+
+    currentTeam = teamVal;
+    currentSabun = rawSabun;
+
+    if (playerBadge) {
+      playerBadge.textContent = "플레이어: " + currentTeam + " · " + currentSabun;
+      playerBadge.style.display = "inline-block";
+    }
+
+    authOverlay.classList.remove('show');
+    startGame();
+  }
+
+  authStartBtn.addEventListener('click', handleAuth);
+  authStartBtn.addEventListener('touchend', handleAuth);
+
+  sabunInput.addEventListener('keydown', function(e){ 
+    if (e.key === 'Enter') handleAuth(e); 
+  });
+  
+  teamSelect.addEventListener('change', function(){
+    teamSelect.classList.remove('error'); 
+    authError.textContent = "";
+  });
+  
+  sabunInput.addEventListener('input', function() {
+    this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8);
+    if (this.value.length === 8) {
+      this.classList.remove('error'); 
+      authError.textContent = "";
+    }
+  });
+
+  boardWrap.addEventListener('mousedown', onDown);
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+  boardWrap.addEventListener('touchstart', onDown, {passive:false});
+  window.addEventListener('touchmove', onMove, {passive:false});
+  window.addEventListener('touchend', onUp);
+
+  document.getElementById('restartBtn').addEventListener('click', showNoticePopup);
+  document.getElementById('modalRestart').addEventListener('click', showNoticePopup);
+
+  document.getElementById('ruleBtn').addEventListener('click', function(){
+    ruleOverlay.classList.add('show');
+  });
+  document.getElementById('ruleCloseBtn').addEventListener('click', function(){
+    ruleOverlay.classList.remove('show');
+  });
+  ruleOverlay.addEventListener('click', function(e){
+    if(e.target === ruleOverlay) ruleOverlay.classList.remove('show');
+  });
+
+  var savedTeam = null;
+  var savedSabun = null;
+  try {
+    savedTeam = localStorage.getItem("sh_mini_team");
+    savedSabun = localStorage.getItem("sh_mini_sabun");
+  } catch(e) {}
+
+  if (savedTeam && savedSabun && /^\d{8}$/.test(savedSabun)) {
+    currentTeam = savedTeam;
+    currentSabun = savedSabun;
+    playerBadge.textContent = "플레이어: " + currentTeam + " · " + currentSabun;
+    playerBadge.style.display = "inline-block";
+    authOverlay.classList.remove('show');
+    startGame();
+  } else {
+    try {
+      localStorage.removeItem("sh_mini_team");
+      localStorage.removeItem("sh_mini_sabun");
+    } catch(e) {}
+    authOverlay.classList.add('show');
+    sabunInput.focus();
+  }
+
+  playerBadge.addEventListener("click", function(){
+    if(confirm("등록된 팀/사번 정보를 변경하시겠습니까?")){
+      try {
+        localStorage.removeItem("sh_mini_team");
+        localStorage.removeItem("sh_mini_sabun");
+      } catch(e) {}
+      location.reload();
+    }
+  });
 })();
-
 </script>
-
 </body>
-
 </html>
