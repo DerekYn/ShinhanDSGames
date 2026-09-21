@@ -736,22 +736,91 @@
     return s.slice(0, 3) + "*".repeat(s.length - 3);
   }
 
-  // 🎯 대회 기간 내 기록 여부 판별 유틸리티 (2026-09-14 00:00:00 ~ 2026-09-18 23:59:59)
+    // 🎯 대회 기간 내 기록 여부 판별 유틸리티 (안전한 예외 처리 적용)
   function isWithinPeriod(dateVal) {
     if (!dateVal) return true;
-    var d = new Date(dateVal);
-    if (isNaN(d.getTime())) {
-      d = new Date(String(dateVal).replace(/-/g, "/").replace("T", " "));
+    try {
+      // 모바일/Safari 브라우저 호환성 처리 ("2026-09-14 12:00:00" -> "2026/09/14 12:00:00")
+      var cleanStr = String(dateVal).replace(/-/g, "/").replace("T", " ").split(".")[0];
+      var d = new Date(cleanStr);
+
+      // 날짜 문자열 변환에 실패하면 데이터를 삭제하지 않고 안전하게 포함
+      if (isNaN(d.getTime())) return true;
+
+      // 2026년 9월 14일 00:00:00 ~ 9월 18일 23:59:59 (Month 8 = 9월)
+      var startTime = new Date(2026, 8, 14, 0, 0, 0, 0).getTime();
+      var endTime = new Date(2026, 8, 18, 23, 59, 59, 999).getTime();
+      var t = d.getTime();
+
+      return t >= startTime && t <= endTime;
+    } catch (e) {
+      return true; // 파싱 에러 발생 시 데이터 보존
     }
-    if (isNaN(d.getTime())) return true;
-
-    // Month 8 = 9월 (0부터 시작)
-    var startTime = new Date(2026, 8, 14, 0, 0, 0, 0).getTime();
-    var endTime = new Date(2026, 8, 18, 23, 59, 59, 999).getTime();
-
-    var t = d.getTime();
-    return t >= startTime && t <= endTime;
   }
+
+  function fetchRankings(){
+    if (!GOOGLE_WEBHOOK_URL) return;
+
+    fetch(GOOGLE_WEBHOOK_URL, { method: "GET", redirect: "follow" })
+      .then(function(res){
+        if (!res.ok) throw new Error("HTTP error " + res.status);
+        return res.json();
+      })
+      .then(function(data){
+        if (data && data.status === "success") {
+
+          // 🎯 [대회 기간 필터링] 9월 14일~18일 기록 유효 검증
+          if (data.games) {
+            for (var gName in data.games) {
+              if (Array.isArray(data.games[gName])) {
+                data.games[gName] = data.games[gName].filter(function(item) {
+                  return isWithinPeriod(item.date);
+                });
+                data.games[gName].forEach(function(item, idx) {
+                  item.rank = idx + 1;
+                });
+              }
+            }
+          }
+
+          data.overall = [];
+          cachedData = data;
+          isFirstLoadDone = true;
+
+          if (mySabun && cachedData.games) {
+            var latestDate = "";
+            var latestTeam = "";
+            for (var gName in cachedData.games) {
+              var gList = cachedData.games[gName] || [];
+              for (var i = 0; i < gList.length; i++) {
+                if (String(gList[i].sabun).trim() === String(mySabun).trim()) {
+                  var rDate = gList[i].date || "";
+                  if (!latestDate || rDate >= latestDate) {
+                    latestDate = rDate;
+                    latestTeam = gList[i].team;
+                  }
+                }
+              }
+            }
+            if (latestTeam && latestTeam !== "미선택" && latestTeam !== myTeam) {
+              myTeam = latestTeam;
+              try { localStorage.setItem("sh_mini_team", myTeam); } catch(e) {}
+            }
+          }
+
+          render();
+        }
+      })
+      .catch(function(err){
+        console.warn("순위 갱신 지연/오류:", err);
+        if (!isFirstLoadDone) {
+          initialLoadingBox.innerHTML = 
+            '<div style="font-size:28px; margin-bottom:8px;">⚠️</div>' +
+            '<div>순위 데이터를 불러오지 못했습니다.<br><span style="font-size:11px; opacity:0.7;">잠시 후 다시 새로고침 버튼을 눌러주세요.</span></div>';
+        }
+      });
+  }
+
 
   function computeOfficialTeamRankings(){
     var officialTeams = ["증권개발팀", "증권채널팀", "카드개발팀", "라이프개발팀"];
