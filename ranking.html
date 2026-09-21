@@ -466,7 +466,7 @@
     </div>
   </div>
 
-  <!-- 랭킹 메인 패널 -->
+  <!-- 랭킹 대시보드 메인 카드 -->
   <div class="rank-box">
     <div class="rank-header">
       <div class="live-badge">
@@ -631,33 +631,10 @@
   var btnManualRefresh = document.getElementById("btnManualRefresh");
   var eventCountdown = document.getElementById("eventCountdown");
 
-  // ⏱️ 공식 마감 시각 (2026년 9월 18일 23:59:59 고정)
+  // ⏱️ 대회 최종 마감 표시 (고정)
   (function setupEventCountdown() {
     if (!eventCountdown) return;
-    var deadline = new Date(2026, 8, 18, 23, 59, 59, 999).getTime();
-
-    function updateCountdown() {
-      var currentTime = new Date().getTime();
-      var diff = deadline - currentTime;
-
-      if (diff <= 0) {
-        eventCountdown.innerHTML = "<span>🏁 대회 공식 종료</span><span style='font-size:12px; font-weight:700; opacity:0.85;'>(최종 랭킹 확정)</span>";
-        return;
-      }
-
-      var hours = Math.floor(diff / (1000 * 60 * 60));
-      var mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      var secs = Math.floor((diff % (1000 * 60)) / 1000);
-
-      var hStr = (hours < 10 ? "0" : "") + hours;
-      var mStr = (mins < 10 ? "0" : "") + mins;
-      var sStr = (secs < 10 ? "0" : "") + secs;
-
-      eventCountdown.innerHTML = "<span>🔥 대회 최종 마감까지 " + hStr + ":" + mStr + ":" + sStr + "</span><span style='font-size:12px; font-weight:700; opacity:0.85;'>(오늘 23:59:59)</span>";
-    }
-
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
+    eventCountdown.innerHTML = "<span>🏁 대회 공식 종료</span><span style='font-size:12px; font-weight:700; opacity:0.85;'>(최종 랭킹 확정)</span>";
   })();
 
   var authOverlay = document.getElementById("authOverlay");
@@ -757,6 +734,23 @@
     var s = String(sabun || "");
     if (s.length <= 3) return s;
     return s.slice(0, 3) + "*".repeat(s.length - 3);
+  }
+
+  // 🎯 대회 기간 내 기록 여부 판별 유틸리티 (2026-09-14 00:00:00 ~ 2026-09-18 23:59:59)
+  function isWithinPeriod(dateVal) {
+    if (!dateVal) return true;
+    var d = new Date(dateVal);
+    if (isNaN(d.getTime())) {
+      d = new Date(String(dateVal).replace(/-/g, "/").replace("T", " "));
+    }
+    if (isNaN(d.getTime())) return true;
+
+    // Month 8 = 9월 (0부터 시작)
+    var startTime = new Date(2026, 8, 14, 0, 0, 0, 0).getTime();
+    var endTime = new Date(2026, 8, 18, 23, 59, 59, 999).getTime();
+
+    var t = d.getTime();
+    return t >= startTime && t <= endTime;
   }
 
   function computeOfficialTeamRankings(){
@@ -1188,6 +1182,25 @@
       })
       .then(function(data){
         if (data && data.status === "success") {
+
+          // 🎯 [대회 기간 필터링] 9월 14일 00:00:00 ~ 9월 18일 23:59:59 기록만 취합
+          if (data.games) {
+            for (var gName in data.games) {
+              if (Array.isArray(data.games[gName])) {
+                data.games[gName] = data.games[gName].filter(function(item) {
+                  return isWithinPeriod(item.date);
+                });
+                // 기간 내 유효 데이터 기준으로 순위 재정렬 및 랭크 재부여
+                data.games[gName].forEach(function(item, idx) {
+                  item.rank = idx + 1;
+                });
+              }
+            }
+          }
+
+          // 종합 순위도 대회 기간 필터링된 유효 데이터로 재계산하기 위해 초기화
+          data.overall = [];
+
           cachedData = data;
           isFirstLoadDone = true;
 
